@@ -16,9 +16,9 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
     <div className={cn("flex items-center justify-between px-4 py-3 sm:px-6", className)}>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm text-gray-700">
-            Page <span className="font-medium">{currentPage + 1}</span> of{' '}
-            <span className="font-medium">{totalPages}</span>
+          <p className="text-sm text-gray-700 dark:text-slate-300">
+            Page <span className="font-medium text-gray-900 dark:text-white">{currentPage + 1}</span> of{' '}
+            <span className="font-medium text-gray-900 dark:text-white">{totalPages}</span>
           </p>
         </div>
         <div>

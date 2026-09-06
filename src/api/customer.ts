@@ -1,5 +1,6 @@
 import { apiClient } from './axios';
 import type { RequestCustomerDTO, ResponseCustomerDTO } from '../types/customer';
+import type { ResponsePartyStatementDTO } from '../types/statement';
 
 export const getCustomers = async (): Promise<ResponseCustomerDTO[]> => {
   return apiClient.get('/customer/all');
@@ -28,3 +29,11 @@ export const deactivateCustomer = async (publicId: string): Promise<void> => {
 export const reactivateCustomer = async (publicId: string): Promise<void> => {
   return apiClient.patch(`/customer/${publicId}/reactivate`);
 };
+
+export const getCustomerStatement = async (
+  publicId: string,
+  params?: { fromDate?: string; toDate?: string }
+): Promise<ResponsePartyStatementDTO> => {
+  return apiClient.get(`/customer/${publicId}/statement`, { params });
+};
+

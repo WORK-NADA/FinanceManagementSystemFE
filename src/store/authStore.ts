@@ -7,8 +7,11 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  profilePicture: string | null;
   setAuth: (data: ResponseLoginDTO) => void;
   updateTokens: (accessToken: string, refreshToken?: string) => void;
+  updateUser: (updatedUser: Partial<Omit<ResponseLoginDTO, 'accessToken' | 'refreshToken'>>) => void;
+  setProfilePicture: (pic: string | null) => void;
   logout: () => void;
 }
 
@@ -19,6 +22,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      profilePicture: null,
 
       setAuth: (data) => {
         const { accessToken, refreshToken, ...user } = data;
@@ -32,8 +36,18 @@ export const useAuthStore = create<AuthState>()(
         }));
       },
 
+      updateUser: (updatedUser) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updatedUser } : null,
+        }));
+      },
+
+      setProfilePicture: (pic) => {
+        set({ profilePicture: pic });
+      },
+
       logout: () => {
-        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false, profilePicture: null });
       },
     }),
     {

@@ -28,7 +28,7 @@ export function KpiCard({ title, value, icon, trend, className }: KpiCardProps) 
             </p>
           </div>
           {icon && (
-            <div className="p-3 bg-gray-50 rounded-xl text-[var(--color-primary)]">
+            <div className="p-3 bg-gray-50 dark:bg-slate-800/80 rounded-xl text-[var(--color-primary)] dark:text-emerald-400">
               {icon}
             </div>
           )}
@@ -39,8 +39,8 @@ export function KpiCard({ title, value, icon, trend, className }: KpiCardProps) 
             <span
               className={cn(
                 "font-medium",
-                trend.isPositive ? "text-green-600" : "text-red-600",
-                trend.isPositive === undefined && "text-gray-600"
+                trend.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400",
+                trend.isPositive === undefined && "text-gray-600 dark:text-slate-400"
               )}
             >
               {trend.isPositive ? "+" : ""}

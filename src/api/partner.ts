@@ -2,9 +2,12 @@ import { apiClient } from './axios';
 import type { 
   RequestPartnerDTO, 
   ResponsePartnerDTO, 
-  RequestProfitDistributionDTO,
-  ResponseProfitDistributionDTO,
-  PartnerHistoryDTO
+  RequestProfitDistributionDTO, 
+  ResponseProfitDistributionDTO, 
+  PartnerHistoryDTO,
+  LiveProfitSharingOverviewDTO,
+  RequestProfitWithdrawalDTO,
+  ResponseProfitWithdrawalDTO
 } from '../types/partner';
 
 export const getPartners = async (): Promise<ResponsePartnerDTO[]> =>
@@ -30,6 +33,9 @@ export const getProfitDistributions = async (): Promise<ResponseProfitDistributi
 export const getLatestProfitDistribution = async (): Promise<ResponseProfitDistributionDTO> =>
   apiClient.get('/profit-distribution/latest');
 
+export const previewProfitDistribution = async (data: RequestProfitDistributionDTO): Promise<ResponseProfitDistributionDTO> =>
+  apiClient.post('/profit-distribution/preview', data);
+
 export const distributeProfit = async (data: RequestProfitDistributionDTO): Promise<ResponseProfitDistributionDTO> =>
   apiClient.post('/profit-distribution/distribute', data);
 
@@ -38,3 +44,12 @@ export const getPartnerHistory = async (partnerPublicId: string): Promise<Partne
 
 export const getLifetimeEarnings = async (partnerPublicId: string): Promise<number> =>
   apiClient.get(`/profit-distribution/partner/${partnerPublicId}/lifetime-earnings`);
+
+export const getLiveProfitOverview = async (): Promise<LiveProfitSharingOverviewDTO> =>
+  apiClient.get('/profit-distribution/live-overview');
+
+export const recordProfitWithdrawal = async (data: RequestProfitWithdrawalDTO): Promise<ResponseProfitWithdrawalDTO> =>
+  apiClient.post('/profit-distribution/withdraw', data);
+
+export const getProfitWithdrawals = async (params?: { fromDate?: string; toDate?: string }): Promise<ResponseProfitWithdrawalDTO[]> =>
+  apiClient.get('/profit-distribution/withdrawals', { params });

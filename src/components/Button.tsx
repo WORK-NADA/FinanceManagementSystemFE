@@ -11,8 +11,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary:     'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] shadow-sm focus-visible:ring-[var(--color-primary)]',
   secondary:   'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] shadow-sm focus-visible:ring-[var(--color-accent)]',
-  outline:     'border border-[var(--color-border)] bg-transparent hover:bg-gray-50 text-[var(--color-text-sub)] focus-visible:ring-[var(--color-primary)]',
-  ghost:       'bg-transparent hover:bg-gray-100 text-[var(--color-text-sub)] focus-visible:ring-[var(--color-primary)]',
+  outline:     'border border-[var(--color-border)] bg-transparent hover:bg-gray-50 dark:hover:bg-slate-800 text-[var(--color-text-sub)] dark:text-slate-200 focus-visible:ring-[var(--color-primary)]',
+  ghost:       'bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 text-[var(--color-text-sub)] dark:text-slate-200 focus-visible:ring-[var(--color-primary)]',
   destructive: 'bg-[var(--color-danger)] text-white hover:bg-red-600 shadow-sm focus-visible:ring-red-500',
 };
 
@@ -30,7 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled={disabled || isLoading}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900',
         'disabled:opacity-50 disabled:pointer-events-none',
         'cursor-pointer select-none',
         variantStyles[variant],

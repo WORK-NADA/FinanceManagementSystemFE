@@ -1,27 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit2, Ban, CheckCircle2, AlertTriangle, Search } from 'lucide-react';
+import { Plus, Edit2, AlertTriangle, Search, Boxes, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
-  getStocks, searchStock, createStock, updateStock, deactivateStock, activateStock, updateMinimumStockLevel
+  getStocks, searchStock, createStock, updateStock
 } from '../api/stock';
 import { 
-  stockSchema, minimumStockLevelSchema,
-  type RequestStockDTO, type ResponseStockDTO, type RequestMinimumStockLevelDTO
+  stockSchema,
+  type RequestStockDTO, type ResponseStockDTO
 } from '../types/stock';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Modal, Input, Badge, PageHeader, ErrorState, TableSkeleton, EmptyState } from '@/components';
+import { Button, Modal, Input, Badge, PageHeader, ErrorState, EmptyState } from '@/components';
 import { toast } from '../store/toastStore';
 
 export default function Stock() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isMinLevelModalOpen, setIsMinLevelModalOpen] = useState(false);
   
   const [editingStock, setEditingStock] = useState<ResponseStockDTO | null>(null);
-  const [selectedStock, setSelectedStock] = useState<ResponseStockDTO | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Custom debounce logic since we can't be sure useDebounce exists
@@ -31,7 +28,7 @@ export default function Stock() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data: stocks, isLoading, isError, error, refetch } = useQuery({
+  const { data: rawStocks, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['stocks', debouncedSearch],
     queryFn: () => debouncedSearch ? searchStock(debouncedSearch) : getStocks(),
   });
@@ -41,21 +38,16 @@ export default function Stock() {
     defaultValues: { unit: 'KG', minimumStockLevel: 0 }
   });
 
-  const { 
-    register: registerMinLevel, 
-    handleSubmit: handleMinLevelSubmit, 
-    reset: resetMinLevel,
-    formState: { errors: minLevelErrors } 
-  } = useForm<RequestMinimumStockLevelDTO>({
-    resolver: zodResolver(minimumStockLevelSchema),
-  });
-
   const mutation = useMutation({
     mutationFn: (data: RequestStockDTO) => 
       editingStock ? updateStock(editingStock.publicId, data) : createStock(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stocks'] });
       queryClient.invalidateQueries({ queryKey: ['lowStock'] });
+      queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
       handleCloseModal();
       toast.success(editingStock ? 'Stock item updated.' : 'Stock item added.');
     },
@@ -68,25 +60,6 @@ export default function Stock() {
         toast.error(error?.message || 'Failed to save stock item.');
       }
     }
-  });
-
-  const minLevelMutation = useMutation({
-    mutationFn: (data: RequestMinimumStockLevelDTO) => updateMinimumStockLevel(selectedStock!.publicId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stocks'] });
-      handleCloseMinLevelModal();
-    }
-  });
-
-  const toggleStatusMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string, isActive: boolean }) => 
-      isActive ? deactivateStock(id) : activateStock(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stocks'] });
-      queryClient.invalidateQueries({ queryKey: ['lowStock'] });
-      toast.success('Stock status updated.');
-    },
-    onError: () => toast.error('Failed to update stock status.'),
   });
 
   const handleOpenModal = (stock?: ResponseStockDTO) => {
@@ -106,187 +79,233 @@ export default function Stock() {
     setEditingStock(null);
   };
 
-  const handleOpenMinLevelModal = (stock: ResponseStockDTO) => {
-    setSelectedStock(stock);
-    resetMinLevel({ minimumStockLevel: stock.minimumStockLevel });
-    setIsMinLevelModalOpen(true);
-  };
+  const filteredStocks = useMemo(() => {
+    const list = rawStocks ?? [];
+    if (!searchTerm.trim()) return list;
+    const term = searchTerm.trim().toLowerCase();
+    return list.filter((s) => {
+      // 1. Raw Material Name matching (case-insensitive substring)
+      const nameMatch = s.rawMaterial?.toLowerCase().includes(term);
 
-  const handleCloseMinLevelModal = () => {
-    setIsMinLevelModalOpen(false);
-    resetMinLevel();
-    setSelectedStock(null);
-  };
+      // 2. Current Quantity matching (numeric substring or formatted with unit)
+      const qtyStr = s.currentQuantity != null ? String(s.currentQuantity).toLowerCase() : '';
+      const qtyWithUnit = `${qtyStr} ${s.unit ?? ''}`.toLowerCase();
+      const qtyMatch = qtyStr.includes(term) || qtyWithUnit.includes(term);
 
-  const filteredStocks = stocks?.filter(s => {
-    if (activeTab === 'active') return s.isActive;
-    if (activeTab === 'inactive') return !s.isActive;
-    return true;
-  }) ?? [];
+      return Boolean(nameMatch || qtyMatch);
+    });
+  }, [rawStocks, searchTerm]);
+
+  const { ref: stockMinLevelRegisterRef, ...stockMinLevelRegisterProps } = register('minimumStockLevel', { 
+    setValueAs: (v) => (v === '' || isNaN(Number(v)) ? 0 : Number(v)) 
+  });
+
+  const totalItems = rawStocks?.length ?? 0;
+  const lowStockCount = rawStocks?.filter(s => s.isLowStock).length ?? 0;
+  const healthyCount = totalItems - lowStockCount;
 
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Stock Master"
+        title="Stock & Inventory"
         action={
           <Button onClick={() => handleOpenModal()} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Item
+            <Plus className="h-4 w-4" /> Add Stock Item
           </Button>
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-lg">
-          {(['all', 'active', 'inactive'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                activeTab === tab 
-                  ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' 
-                  : 'text-gray-500 hover:text-gray-900'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+      {/* KPI Ribbon (Ledger Benchmark) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="bg-white dark:bg-[#141A24] p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:border-slate-300 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tracked Items</span>
+            <Boxes className="h-4 w-4 text-blue-500 dark:text-sky-400" />
+          </div>
+          <p className="text-xl sm:text-2xl font-serif font-bold text-blue-700 dark:text-sky-400 mt-1">
+            {totalItems} Items
+          </p>
+          <span className="text-[11px] text-slate-400 dark:text-slate-500">Total items tracked</span>
         </div>
 
-        <div className="w-full sm:w-72">
+        <div className="bg-white dark:bg-[#141A24] p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:border-slate-300 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sufficient Stock</span>
+            <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+          </div>
+          <p className="text-xl sm:text-2xl font-serif font-bold text-emerald-700 dark:text-emerald-400 mt-1">
+            {healthyCount} Items
+          </p>
+          <span className="text-[11px] text-slate-400 dark:text-slate-500">Above minimum safe quantity</span>
+        </div>
+
+        <div className={`p-4 rounded-xl border shadow-xs transition-all ${
+          lowStockCount > 0
+            ? 'bg-rose-50/50 dark:bg-rose-950/40 border-rose-200/80 dark:border-rose-900/40'
+            : 'bg-white dark:bg-[#141A24] border-gray-200/90 dark:border-[#1F2837]'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-semibold uppercase tracking-wider ${
+              lowStockCount > 0 ? 'text-rose-800 dark:text-rose-300' : 'text-slate-500 dark:text-slate-400'
+            }`}>Low Stock Warnings</span>
+            <ShieldAlert className={`h-4 w-4 ${
+              lowStockCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500'
+            }`} />
+          </div>
+          <p className={`text-xl sm:text-2xl font-serif font-bold mt-1 ${
+            lowStockCount > 0 ? 'text-rose-800 dark:text-rose-200' : 'text-slate-800 dark:text-slate-100'
+          }`}>
+            {lowStockCount} {lowStockCount === 1 ? 'Item' : 'Items'}
+          </p>
+          <span className={`text-[11px] ${
+            lowStockCount > 0 ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-slate-400 dark:text-slate-500'
+          }`}>
+            {lowStockCount > 0 ? 'Reorder recommended soon' : 'All stock levels healthy'}
+          </span>
+        </div>
+      </div>
+
+      {/* Search / Filter bar */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white dark:bg-[#141A24] p-5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
+        <div className="text-sm font-medium text-gray-500 dark:text-slate-400">
+          Showing: <strong className="text-gray-900 dark:text-slate-100 font-semibold tabular-nums">{filteredStocks.length}</strong> items
+        </div>
+
+        <div className="w-full sm:w-80">
           <Input 
-            placeholder="Search raw material via API..." 
+            placeholder="Search by item name or quantity..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            leftIcon={<Search className="h-4 w-4" />}
+            leftIcon={<Search className="h-4 w-4 text-gray-400 dark:text-slate-400" />}
           />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <TableSkeleton columns={5} rows={5} />
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-16 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/80 dark:border-[#1F2837] shadow-xs animate-pulse" />
+          ))}
         </div>
       ) : isError ? (
         <ErrorState message={(error as any)?.message || 'Failed to load stocks'} onRetry={() => refetch()} />
       ) : filteredStocks.length === 0 ? (
         <EmptyState
           title={searchTerm ? 'No items match your search' : 'No stock items yet'}
-          description={searchTerm ? 'Try a different search term.' : 'Add your first stock item to track raw materials.'}
+          description={searchTerm ? 'Try a different item name or quantity.' : 'Add your first item to track inventory.'}
           action={
             !searchTerm && (
               <Button onClick={() => handleOpenModal()} className="gap-2">
-                <Plus className="h-4 w-4" /> Add First Item
+                <Plus className="h-4 w-4" /> Add Stock Item
               </Button>
             )
           }
         />
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Raw Material</TableHead>
-                <TableHead>Current Quantity</TableHead>
-                <TableHead>Min. Level</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredStocks.map((s) => (
-                <TableRow key={s.publicId}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      {s.rawMaterial}
-                      {s.isLowStock && (
-                        <Badge variant="danger" className="ml-2 gap-1 text-[10px]">
-                          <AlertTriangle className="h-3 w-3" /> Low Stock
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-bold text-gray-900">{s.currentQuantity}</span> <span className="text-gray-500 text-xs ml-1">{s.unit}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span>{s.minimumStockLevel}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-blue-600" onClick={() => handleOpenMinLevelModal(s)} title="Update Min Level">
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={s.isActive ? 'success' : 'default'}>
-                      {s.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenModal(s)}>
-                      <Edit2 className="h-4 w-4 text-gray-500" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className={s.isActive ? "text-red-600 hover:text-red-700 hover:bg-red-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}
-                      onClick={() => toggleStatusMutation.mutate({ id: s.publicId, isActive: s.isActive })}
-                    >
-                      {s.isActive ? <Ban className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+        <div className="w-full space-y-3">
+          {/* Column Header Guide Bar */}
+          <div className="hidden md:grid grid-cols-[minmax(140px,2fr)_minmax(120px,1.2fr)_minmax(100px,1fr)_80px] items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider select-none guide-bar-offwhite mb-1">
+            <div className="min-w-0">Item / Material Name</div>
+            <div className="min-w-0">Current Quantity</div>
+            <div className="min-w-0">Minimum Safe Level</div>
+            <div className="min-w-0 text-right pr-2">Actions</div>
+          </div>
+
+          {/* List of Floating Cards */}
+          {filteredStocks.map((s) => (
+            <div
+              key={s.publicId}
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 md:grid-cols-[minmax(140px,2fr)_minmax(120px,1.2fr)_minmax(100px,1fr)_80px] items-center gap-3 px-5 py-3.5 w-full"
+            >
+              <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 flex items-center gap-2 truncate">
+                <span className="truncate">{s.rawMaterial}</span>
+                {s.isLowStock && (
+                  <Badge variant="danger" className="gap-1 text-[10px] shrink-0">
+                    <AlertTriangle className="h-3 w-3" /> Low Stock
+                  </Badge>
+                )}
+              </div>
+                <div className="text-sm">
+                  <span className={`font-bold tabular-nums ${s.isLowStock ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{s.currentQuantity}</span>{' '}
+                  <span className="text-gray-500 dark:text-slate-400 text-xs">{s.unit}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="tabular-nums font-medium text-gray-700 dark:text-slate-300">{s.minimumStockLevel}</span>
+                </div>
+                <div className="flex items-center justify-end gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                    onClick={() => handleOpenModal(s)}
+                    title="Edit Item"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
       {/* Add / Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingStock ? "Edit Stock Item" : "Add Stock Item"}>
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-4">
-          <Input label="Raw Material Name *" {...register('rawMaterial')} error={errors.rawMaterial?.message} />
+        <form onSubmit={handleSubmit((d) => mutation.mutate(editingStock ? { ...d, unit: editingStock.unit } : d))} className="space-y-4">
+          <Input label="Material / Item Name *" {...register('rawMaterial')} error={errors.rawMaterial?.message} />
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Unit *</label>
-            <select 
-              {...register('unit')} 
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            >
-              <option value="G">Grams (G)</option>
-              <option value="KG">Kilograms (KG)</option>
-              <option value="TON">Tons (TON)</option>
-            </select>
-          </div>
+          {editingStock ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Unit of Measurement (Locked)</label>
+              <input
+                type="text"
+                disabled
+                value={editingStock.unit}
+                className="flex h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 cursor-not-allowed select-none"
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Unit of Measurement *</label>
+              <select 
+                {...register('unit')} 
+                className="flex h-10 w-full rounded-lg border border-gray-200/90 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                <option value="KG">Kilograms (KG)</option>
+                <option value="G">Grams (G)</option>
+                <option value="TON">Tons (TON)</option>
+              </select>
+            </div>
+          )}
 
           <Input 
-            label="Minimum Stock Level *" 
-            type="number" step="0.01" 
-            {...register('minimumStockLevel', { valueAsNumber: true })} 
+            label="Alert Level (Minimum Safe Quantity) *" 
+            type="number" 
+            step="0.01" 
+            min="0" 
+            placeholder="0"
+            {...stockMinLevelRegisterProps}
+            ref={stockMinLevelRegisterRef}
+            onFocus={(e) => {
+              e.target.select();
+            }}
+            onClick={(e) => {
+              (e.target as HTMLInputElement).select();
+            }}
+            onKeyDown={(e) => {
+              const input = e.currentTarget;
+              if (input.value === '0' && e.key >= '0' && e.key <= '9') {
+                if (input.selectionStart === input.selectionEnd) {
+                  input.value = '';
+                }
+              }
+            }}
             error={errors.minimumStockLevel?.message} 
           />
           
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <Button type="button" variant="outline" onClick={handleCloseModal}>Cancel</Button>
             <Button type="submit" isLoading={mutation.isPending}>
-              {editingStock ? 'Update' : 'Save'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Update Minimum Level Modal */}
-      <Modal isOpen={isMinLevelModalOpen} onClose={handleCloseMinLevelModal} title={`Update Minimum Level: ${selectedStock?.rawMaterial}`}>
-        <form onSubmit={handleMinLevelSubmit((d) => minLevelMutation.mutate(d))} className="space-y-4">
-          <Input 
-            label={`New Minimum Level (${selectedStock?.unit}) *`}
-            type="number" step="0.01" 
-            {...registerMinLevel('minimumStockLevel', { valueAsNumber: true })} 
-            error={minLevelErrors.minimumStockLevel?.message} 
-          />
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <Button type="button" variant="outline" onClick={handleCloseMinLevelModal}>Cancel</Button>
-            <Button type="submit" isLoading={minLevelMutation.isPending}>
-              Update Level
+              {editingStock ? 'Save Changes' : 'Add Item'}
             </Button>
           </div>
         </form>

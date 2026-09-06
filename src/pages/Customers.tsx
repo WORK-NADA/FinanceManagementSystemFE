@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit2, Ban, CheckCircle2, Search, TrendingDown, UserPlus } from 'lucide-react';
+import { Plus, Edit2, Ban, CheckCircle2, Search, TrendingDown, UserSquare2, FileText } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getCustomers, getActiveCustomers, createCustomer, updateCustomer, deactivateCustomer, reactivateCustomer } from '../api/customer';
 import { customerSchema, type RequestCustomerDTO, type ResponseCustomerDTO } from '../types/customer';
 import { getDashboardSummary } from '../api/dashboard';
-import { Button, Input, Select, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Modal, Badge, PageHeader, ErrorState, TableSkeleton, EmptyState } from '@/components';
+import { Button, Input, Select, Modal, Badge, PageHeader, ErrorState, EmptyState, PartyStatementModal } from '@/components';
 import { formatCurrency } from '@/lib';
 import { toast } from '../store/toastStore';
 
@@ -14,6 +14,7 @@ export default function Customers() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<ResponseCustomerDTO | null>(null);
+  const [statementCustomer, setStatementCustomer] = useState<ResponseCustomerDTO | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active'>('all');
@@ -30,11 +31,25 @@ export default function Customers() {
 
   const { register, handleSubmit, reset, formState: { errors }, setError } = useForm<RequestCustomerDTO>({
     resolver: zodResolver(customerSchema),
+    mode: 'onTouched',
     defaultValues: {
-      address: { country: 'India' },
+      customerName: '',
+      mobileNumber: '',
+      contactPerson: '',
+      alternateMobileNumber: '',
+      email: '',
+      gstNumber: '',
       openingBalance: 0,
       paymentTerms: 30,
-    }
+      address: {
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        state: '',
+        country: 'India',
+        pincode: '',
+      },
+    },
   });
 
   const mutation = useMutation({
@@ -59,11 +74,34 @@ export default function Customers() {
       } else {
         toast.error(error?.message || 'Failed to save customer.');
       }
-    }
+    },
   });
 
+  const onSubmit = (data: RequestCustomerDTO) => {
+    const hasAddress = !!(data.address?.addressLine1 && data.address.addressLine1.trim().length > 0);
+    const cleanedAddress = hasAddress ? {
+      addressLine1: data.address!.addressLine1!.trim(),
+      addressLine2: data.address!.addressLine2?.trim() || undefined,
+      city: data.address!.city?.trim() || undefined,
+      state: data.address!.state?.trim() || undefined,
+      country: data.address!.country?.trim() || 'India',
+      pincode: data.address!.pincode?.trim() || undefined,
+    } : undefined;
+
+    const cleanedData: RequestCustomerDTO = {
+      ...data,
+      customerName: data.customerName.trim(),
+      contactPerson: data.contactPerson?.trim() || undefined,
+      alternateMobileNumber: data.alternateMobileNumber?.trim() || undefined,
+      email: data.email?.trim() || undefined,
+      gstNumber: data.gstNumber?.trim() ? data.gstNumber.trim().toUpperCase() : undefined,
+      address: cleanedAddress,
+    };
+    mutation.mutate(cleanedData);
+  };
+
   const toggleStatusMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string, isActive: boolean }) => 
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => 
       isActive ? deactivateCustomer(id) : reactivateCustomer(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
@@ -79,10 +117,42 @@ export default function Customers() {
         ...customer,
         alternateMobileNumber: customer.alternateMobileNumber || '',
         contactPerson: customer.contactPerson || '',
+        address: customer.address ? {
+          addressLine1: customer.address.addressLine1 || '',
+          addressLine2: customer.address.addressLine2 || '',
+          city: customer.address.city || '',
+          state: customer.address.state || '',
+          country: customer.address.country || 'India',
+          pincode: customer.address.pincode || '',
+        } : {
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          state: '',
+          country: 'India',
+          pincode: '',
+        },
       });
     } else {
       setEditingCustomer(null);
-      reset({ address: { country: 'India' }, openingBalance: 0, paymentTerms: 30 });
+      reset({
+        customerName: '',
+        mobileNumber: '',
+        contactPerson: '',
+        alternateMobileNumber: '',
+        email: '',
+        gstNumber: '',
+        openingBalance: 0,
+        paymentTerms: 30,
+        address: {
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          state: '',
+          country: 'India',
+          pincode: '',
+        },
+      });
     }
     setIsModalOpen(true);
   };
@@ -93,13 +163,36 @@ export default function Customers() {
     setEditingCustomer(null);
   };
 
-  const onSubmit = (data: RequestCustomerDTO) => {
-    mutation.mutate(data);
-  };
+  // Filter customers on the client side based on Customer Name or Contact Number
+  const filteredCustomers = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const termDigits = term.replace(/\D/g, '');
 
-  const filteredCustomers = customers?.filter(c => 
-    c.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  ) ?? [];
+    return (customers ?? []).filter((c) => {
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' && c.isActive);
+      if (!matchesStatus) return false;
+
+      // If search input is empty, return all matching status
+      if (!term) return true;
+
+      // 1. Match by Customer Name (case-insensitive substring)
+      const matchesName = c.customerName?.toLowerCase().includes(term);
+
+      // 2. Match by Customer Contact Number (mobileNumber or alternateMobileNumber)
+      const mobileRaw = c.mobileNumber?.toLowerCase() ?? '';
+      const altMobileRaw = c.alternateMobileNumber?.toLowerCase() ?? '';
+      const matchesContactString = mobileRaw.includes(term) || altMobileRaw.includes(term);
+
+      const mobileDigits = c.mobileNumber ? c.mobileNumber.replace(/\D/g, '') : '';
+      const altMobileDigits = c.alternateMobileNumber ? c.alternateMobileNumber.replace(/\D/g, '') : '';
+      const matchesContactDigits = termDigits.length > 0 && (
+        mobileDigits.includes(termDigits) || altMobileDigits.includes(termDigits)
+      );
+
+      return matchesName || matchesContactString || matchesContactDigits;
+    });
+  }, [customers, searchTerm, statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -113,24 +206,24 @@ export default function Customers() {
       />
 
       {/* Live Outstanding Receivables from Dashboard */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+      <div className="bg-white dark:bg-[#141A24] p-5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500 font-medium">Total Outstanding (Receivables)</p>
-          <p className="text-2xl font-serif font-bold text-gray-900 mt-1">{formatCurrency(dashboardData?.totalReceivable ?? 0)}</p>
+          <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-slate-400 font-semibold">Total Money to Collect (From Customers)</p>
+          <p className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 dark:text-slate-100 mt-1">{formatCurrency(dashboardData?.totalReceivable ?? 0)}</p>
         </div>
-        <div className="p-3 bg-red-50 text-red-600 rounded-lg">
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-primary)] dark:text-emerald-400 rounded-xl border border-emerald-100/80 dark:border-emerald-900/40">
           <TrendingDown className="h-6 w-6" />
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="flex-1 max-w-md">
           <Input 
-            placeholder="Search customers by name..." 
+            placeholder="Search by customer name or contact number..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             leftIcon={<Search className="h-4 w-4" />}
-            aria-label="Search customers"
+            aria-label="Search customers by name or contact number"
           />
         </div>
         <div className="w-full sm:w-48">
@@ -141,22 +234,23 @@ export default function Customers() {
               { label: 'All Customers', value: 'all' },
               { label: 'Active Only', value: 'active' }
             ]}
-            aria-label="Filter by status"
           />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <TableSkeleton columns={6} rows={5} />
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-16 bg-white dark:bg-[#141A24] rounded-xl border border-gray-200/80 dark:border-[#1F2837] shadow-xs animate-pulse" />
+          ))}
         </div>
       ) : isError ? (
         <ErrorState message={(error as any)?.message || 'Failed to load customers'} onRetry={() => refetch()} />
       ) : filteredCustomers.length === 0 ? (
         <EmptyState
-          icon={<UserPlus className="h-8 w-8" />}
+          icon={<UserSquare2 className="h-8 w-8" />}
           title={searchTerm ? 'No customers match your search' : 'No customers yet'}
-          description={searchTerm ? 'Try a different search term.' : 'Add your first customer to start tracking receivables.'}
+          description={searchTerm ? 'Try searching with a different customer name or contact number.' : 'Add your first customer to start managing sale invoices and customer balances.'}
           action={
             !searchTerm && (
               <Button onClick={() => handleOpenModal()} className="gap-2">
@@ -166,56 +260,75 @@ export default function Customers() {
           }
         />
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>GST Number</TableHead>
-                <TableHead>Opening Balance</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCustomers.map((c) => (
-                <TableRow key={c.publicId}>
-                  <TableCell className="font-medium">{c.customerName}</TableCell>
-                  <TableCell>
-                    <div className="text-sm">{c.mobileNumber}</div>
-                    <div className="text-xs text-gray-500">{c.email}</div>
-                  </TableCell>
-                  <TableCell>{c.gstNumber}</TableCell>
-                  <TableCell className="tabular-monetary font-medium">{formatCurrency(c.openingBalance)}</TableCell>
-                  <TableCell>
-                    <Badge variant={c.isActive ? 'success' : 'default'}>
-                      {c.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenModal(c)} aria-label={`Edit ${c.customerName}`}>
-                      <Edit2 className="h-4 w-4 text-gray-500" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className={c.isActive ? "text-red-600 hover:text-red-700 hover:bg-red-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}
-                      onClick={() => {
-                        if (window.confirm(`Are you sure you want to ${c.isActive ? 'deactivate' : 'reactivate'} this customer?`)) {
-                          toggleStatusMutation.mutate({ id: c.publicId, isActive: c.isActive });
-                        }
-                      }}
-                      title={c.isActive ? 'Deactivate' : 'Reactivate'}
-                      aria-label={c.isActive ? `Deactivate ${c.customerName}` : `Reactivate ${c.customerName}`}
-                    >
-                      {c.isActive ? <Ban className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="w-full space-y-3">
+          {/* Column Header Guide Bar */}
+          <div className="hidden md:grid grid-cols-[minmax(140px,1.5fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_minmax(90px,0.8fr)_80px_100px] items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider select-none guide-bar-offwhite mb-1">
+            <div className="min-w-0">Customer Name</div>
+            <div className="min-w-0">Contact</div>
+            <div className="min-w-0">GST Number</div>
+            <div className="min-w-0 text-right">Opening Balance</div>
+            <div className="min-w-0">Status</div>
+            <div className="min-w-0 text-right pr-2">Actions</div>
+          </div>
+
+          {/* List of Floating Cards */}
+          {filteredCustomers.map((c) => (
+            <div
+              key={c.publicId}
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 md:grid-cols-[minmax(140px,1.5fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_minmax(90px,0.8fr)_80px_100px] items-center gap-3 px-5 py-3.5 w-full"
+            >
+              <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={c.customerName}>{c.customerName}</div>
+              <div className="min-w-0">
+                <div className="text-sm text-gray-700 dark:text-slate-300 font-medium truncate">{c.mobileNumber}</div>
+                <div className="text-xs text-gray-500 dark:text-slate-400 truncate" title={c.email}>{c.email || '—'}</div>
+              </div>
+              <div className="min-w-0 font-mono text-xs text-gray-600 dark:text-slate-400 truncate">{c.gstNumber || '—'}</div>
+              <div className="min-w-0 text-left md:text-right text-sm tabular-nums font-semibold text-gray-900 dark:text-slate-100">
+                {formatCurrency(c.openingBalance)}
+              </div>
+              <div className="min-w-0">
+                <Badge variant={c.isActive ? 'success' : 'default'}>
+                  {c.isActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-end gap-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-blue-700 dark:text-sky-400 hover:text-blue-900 bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/80 dark:border-blue-800/50 rounded-lg transition-colors"
+                  onClick={() => setStatementCustomer(c)} 
+                  title="View Statement Ledger"
+                  aria-label={`View statement ledger for ${c.customerName}`}
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                  onClick={() => handleOpenModal(c)} 
+                  title="Edit Customer"
+                  aria-label={`Edit ${c.customerName}`}
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={`h-7 w-7 transition-colors ${c.isActive ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40" : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/40"}`}
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to ${c.isActive ? 'deactivate' : 'reactivate'} this customer?`)) {
+                      toggleStatusMutation.mutate({ id: c.publicId, isActive: c.isActive });
+                    }
+                  }}
+                  title={c.isActive ? 'Deactivate' : 'Activate'}
+                  aria-label={c.isActive ? `Deactivate ${c.customerName}` : `Reactivate ${c.customerName}`}
+                >
+                  {c.isActive ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -227,27 +340,43 @@ export default function Customers() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Customer Name *" {...register('customerName')} error={errors.customerName?.message} />
-            <Input label="Contact Person" {...register('contactPerson')} error={errors.contactPerson?.message} />
-            <Input label="Mobile Number *" {...register('mobileNumber')} error={errors.mobileNumber?.message} />
-            <Input label="Alternate Mobile" {...register('alternateMobileNumber')} error={errors.alternateMobileNumber?.message} />
-            <Input label="Email *" type="email" {...register('email')} error={errors.email?.message} />
-            <Input label="GST Number *" {...register('gstNumber')} error={errors.gstNumber?.message} />
-            <Input label="Opening Balance *" type="number" step="0.01" {...register('openingBalance', { valueAsNumber: true })} error={errors.openingBalance?.message} />
-            <Input label="Payment Terms (Days) *" type="number" {...register('paymentTerms', { valueAsNumber: true })} error={errors.paymentTerms?.message} />
+            <Input label="Customer Name *" placeholder="e.g. Acme Corporation" {...register('customerName')} error={errors.customerName?.message} />
+            <Input label="Contact Person (Optional)" placeholder="e.g. Ramesh Patel" {...register('contactPerson')} error={errors.contactPerson?.message} />
+            <Input label="Mobile Number *" placeholder="10-digit mobile" maxLength={10} {...register('mobileNumber')} error={errors.mobileNumber?.message} />
+            <Input label="Alternate Mobile (Optional)" placeholder="10-digit mobile (optional)" maxLength={10} {...register('alternateMobileNumber')} error={errors.alternateMobileNumber?.message} />
+            <Input label="Email (Optional)" type="email" placeholder="e.g. customer@example.com" {...register('email')} error={errors.email?.message} />
+            <Input 
+              label="GST Number (Optional)" 
+              placeholder="15-character GSTIN (optional)" 
+              maxLength={15} 
+              className="uppercase"
+              {...register('gstNumber', {
+                onChange: (e) => {
+                  e.target.value = e.target.value.toUpperCase();
+                }
+              })} 
+              error={errors.gstNumber?.message} 
+            />
+            <Input label="Opening Balance" type="number" step="0.01" {...register('openingBalance', { valueAsNumber: true })} error={errors.openingBalance?.message} />
+            <Input label="Payment Terms (Days)" type="number" {...register('paymentTerms', { valueAsNumber: true })} error={errors.paymentTerms?.message} />
           </div>
 
-          <h4 className="font-medium text-gray-900 border-b pb-2 mt-6 mb-4">Billing Address</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Address Line 1 *" {...register('address.addressLine1')} error={errors.address?.addressLine1?.message} />
-            <Input label="Address Line 2" {...register('address.addressLine2')} error={errors.address?.addressLine2?.message} />
-            <Input label="City *" {...register('address.city')} error={errors.address?.city?.message} />
-            <Input label="State *" {...register('address.state')} error={errors.address?.state?.message} />
-            <Input label="Pincode *" {...register('address.pincode')} error={errors.address?.pincode?.message} />
-            <Input label="Country *" {...register('address.country')} error={errors.address?.country?.message} />
+          <div className="border-t border-gray-100 dark:border-[#1F2837] pt-5 mt-2">
+            <div className="flex items-center justify-between pb-2 mb-4 border-b border-gray-100 dark:border-[#1F2837]">
+              <h4 className="font-serif font-bold text-base text-gray-900 dark:text-slate-100">Billing Address</h4>
+              <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">Optional</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label="Address Line 1 (Optional)" placeholder="Street address or building" {...register('address.addressLine1')} error={errors.address?.addressLine1?.message} />
+              <Input label="Address Line 2 (Optional)" placeholder="Area, landmark or floor" {...register('address.addressLine2')} error={errors.address?.addressLine2?.message} />
+              <Input label="City (Optional)" placeholder="City" {...register('address.city')} error={errors.address?.city?.message} />
+              <Input label="State (Optional)" placeholder="State" {...register('address.state')} error={errors.address?.state?.message} />
+              <Input label="Pincode (Optional)" placeholder="6-digit PIN" maxLength={6} {...register('address.pincode')} error={errors.address?.pincode?.message} />
+              <Input label="Country (Optional)" placeholder="India" {...register('address.country')} error={errors.address?.country?.message} />
+            </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
             <Button type="button" variant="outline" onClick={handleCloseModal}>Cancel</Button>
             <Button type="submit" isLoading={mutation.isPending}>
               {editingCustomer ? 'Update Customer' : 'Save Customer'}
@@ -255,6 +384,15 @@ export default function Customers() {
           </div>
         </form>
       </Modal>
+
+      {/* Party Statement Ledger Drawer */}
+      <PartyStatementModal
+        isOpen={!!statementCustomer}
+        onClose={() => setStatementCustomer(null)}
+        partyType="customer"
+        partyPublicId={statementCustomer?.publicId ?? null}
+        partyName={statementCustomer?.customerName ?? ''}
+      />
     </div>
   );
 }

@@ -9,7 +9,7 @@ export const stockSchema = z.object({
 export type RequestStockDTO = z.infer<typeof stockSchema>;
 
 export const minimumStockLevelSchema = z.object({
-  minimumStockLevel: z.number().min(0),
+  minimumStockLevel: z.number().min(0, 'Must be non-negative'),
 });
 export type RequestMinimumStockLevelDTO = z.infer<typeof minimumStockLevelSchema>;
 
@@ -28,9 +28,10 @@ export interface ResponseStockDTO {
 export const StockTransactionType = {
   PURCHASE_IN: 'PURCHASE_IN',
   SALE_OUT: 'SALE_OUT',
-  SALE_RETURN_IN: 'SALE_RETURN_IN',
   ADJUSTMENT_IN: 'ADJUSTMENT_IN',
   ADJUSTMENT_OUT: 'ADJUSTMENT_OUT',
+  CANCEL_PURCHASE_OUT: 'CANCEL_PURCHASE_OUT',
+  CANCEL_SALE_IN: 'CANCEL_SALE_IN',
 } as const;
 
 export type StockTransactionType = typeof StockTransactionType[keyof typeof StockTransactionType];

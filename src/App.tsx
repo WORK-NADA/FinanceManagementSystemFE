@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAuthStore } from './store/authStore';
 import { Toaster } from './components/Toaster';
+import { WelcomeOverlay } from './components/WelcomeOverlay';
 import Login from './pages/Login';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
@@ -21,7 +22,9 @@ import Reports from './pages/Reports';
 import StockTransactions from './pages/StockTransactions';
 import ClientList from './pages/ClientList';
 import ClientForm from './pages/ClientForm';
+import Profile from './pages/Profile';
 import Unauthorized from './pages/Unauthorized';
+import { setupFieldAutoSelect } from './lib/fieldAutoSelect';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -51,6 +54,12 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const { accessToken, refreshToken, logout, updateTokens } = useAuthStore();
+
+  // Standardize automatic field value selection on focus/click across all forms
+  useEffect(() => {
+    const cleanup = setupFieldAutoSelect();
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -118,6 +127,7 @@ function App() {
               <Route path="/dashboard/partners" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Partners /></ProtectedRoute>} />
               <Route path="/dashboard/profit-distribution" element={<ProtectedRoute allowedRoles={ALL_ROLES}><ProfitDistribution /></ProtectedRoute>} />
               <Route path="/dashboard/reports" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Reports /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Profile /></ProtectedRoute>} />
 
               {/* Admin only */}
               <Route path="/admin/clients" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><ClientList /></ProtectedRoute>} />
@@ -127,6 +137,7 @@ function App() {
             <Route path="/unauthorized" element={<Unauthorized />} />
           </Routes>
         </Router>
+        <WelcomeOverlay />
         <Toaster />
       </AppInitializer>
     </QueryClientProvider>

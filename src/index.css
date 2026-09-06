@@ -1,11 +1,14 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Poppins:wght@400;500;600;700;800&family=Noto+Serif+Devanagari:wght@500;600;700;800&family=Martel:wght@600;700;800&display=swap");
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* ── Typography ─────────────────────────────────────── */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: "Playfair Display", "Fraunces", Georgia, serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-devanagari: "Poppins", "Noto Serif Devanagari", "Martel", system-ui, sans-serif;
 
   /* ── Brand palette ──────────────────────────────────── */
   --color-primary:          #0F7B5C;   /* Emerald green */
@@ -14,26 +17,6 @@
   --color-accent:           #C9A227;   /* Warm gold */
   --color-accent-hover:     #b08e20;
   --color-accent-light:     #FBF3DE;
-
-  /* ── Surfaces ────────────────────────────────────────── */
-  --color-surface-bg:       #F9F8F6;   /* Off-white page bg */
-  --color-surface-card:     #FFFFFF;
-  --color-surface-raised:   #FFFFFF;
-  --color-sidebar-bg:       #0B1220;   /* Deep charcoal-navy */
-  --color-sidebar-hover:    #131E30;
-  --color-sidebar-active:   #1E2E45;
-  --color-sidebar-text:     #CBD5E1;
-  --color-sidebar-icon:     #94A3B8;
-
-  /* ── Text ────────────────────────────────────────────── */
-  --color-text-main:        #111827;
-  --color-text-sub:         #374151;
-  --color-text-muted:       #6B7280;
-  --color-text-placeholder: #9CA3AF;
-
-  /* ── Borders ─────────────────────────────────────────── */
-  --color-border:           #E5E7EB;
-  --color-border-focus:     #0F7B5C;
 
   /* ── Status palette ──────────────────────────────────── */
   --color-success:          #10B981;
@@ -45,14 +28,89 @@
   --color-info:             #3B82F6;
   --color-info-light:       #DBEAFE;
 
+  /* ── Supporting Off-White Palette (Refined Alabaster & Chalk) ── */
+  --color-offwhite-50:      #F8FAFC;   /* Pearl off-white */
+  --color-offwhite-100:     #F1F5F9;   /* Alabaster stone */
+  --color-offwhite-200:     #E8EDF2;   /* Ledger paper off-white strip */
+  --color-offwhite-300:     #CBD5E1;   /* Soft slate outline & icon tone */
+  --color-offwhite-dark:    #0F172A;   /* Deep obsidian slate for high contrast on off-white */
+
   /* ── Shadows ─────────────────────────────────────────── */
   --shadow-card:   0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
   --shadow-modal:  0 20px 60px -12px rgb(0 0 0 / 0.35);
   --shadow-sm:     0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-/* ── Google Fonts ─────────────────────────────────────────── */
+:root {
+  /* ── Light Mode Palette (Refined Alabaster Stone - High Legibility & Separation) ── */
+  --color-surface-bg:       #F4F6F9;   /* Clean, warm alabaster stone viewport canvas */
+  --color-surface-card:     #FFFFFF;   /* Crisp pure white for cards, panels, floating rows */
+  --color-surface-inset:    #F1F5F9;   /* Recessed well for search, filter bars & sub-panels */
+  --color-surface-raised:   #FFFFFF;
+  --color-surface-hover:    #F8FAFC;   /* Subtle 3% soft cool tint on card & row hover */
+  --color-sidebar-bg:       #0B1220;   /* Deep charcoal-navy */
+  --color-sidebar-hover:    #131E30;
+  --color-sidebar-active:   #1E2E45;
+  --color-sidebar-text:     #CBD5E1;
+  --color-sidebar-icon:     #94A3B8;
 
+  /* ── Text (Authoritative, High-Contrast Typography) ── */
+  --color-text-main:        #0F172A;   /* Slate-900 (Authoritative heading & primary text) */
+  --color-text-body:        #334155;   /* Slate-700 (High-contrast body text) */
+  --color-text-sub:         #475569;   /* Slate-600 (Field labels & secondary captions) */
+  --color-text-muted:       #64748B;   /* Slate-500 (Captions, helper text, timestamps) */
+  --color-text-placeholder: #94A3B8;   /* Slate-400 */
+
+  /* ── Borders & Separators (Crisp, Distinct Outlines) ── */
+  --color-border:           #E2E8F0;   /* Slate-200 (Clean perimeter definition) */
+  --color-border-subtle:    #EDF2F7;   /* Slate-100 (Internal row divider) */
+  --color-border-focus:     #0F7B5C;   /* Deep Emerald focus ring */
+
+  --color-header-bg:        rgba(244, 246, 249, 0.94);
+  --color-header-border:    rgba(226, 232, 240, 0.95);
+
+  color-scheme: light;
+}
+
+.dark {
+  /* ── Soft, Luxury Dark Enterprise System (Obsidian Navy Slate) ── */
+  /* Perfectly balanced, eye-friendly dark color hierarchy: avoids harsh pure black & glaring white */
+  --color-surface-bg:       #0A0E17;   /* Deep obsidian slate canvas (Level 0) */
+  --color-surface-card:     #121824;   /* Soft dark slate for cards & panels (Level 1) */
+  --color-surface-inset:    #0E141E;   /* Recessed well for inputs, filters & drawer sub-panels (Level -1) */
+  --color-surface-raised:   #161F2C;   /* Elevated surface for modals, popovers & dropdowns (Level 2) */
+  --color-surface-hover:    #182232;   /* Delicate card & row hover (5% subtle lift) */
+  --color-surface-active:   #1D283A;   /* Active selection / accordion expanded state */
+
+  /* ── Sidebar & Header ── */
+  --color-sidebar-bg:       #080C12;   /* Anchoring deeper slate for sidebar rail */
+  --color-sidebar-hover:    #121824;
+  --color-sidebar-active:   #192231;
+  --color-sidebar-text:     #CBD5E1;
+  --color-sidebar-icon:     #94A3B8;
+
+  --color-header-bg:        rgba(10, 14, 23, 0.92);
+  --color-header-border:    rgba(255, 255, 255, 0.08);
+
+  /* ── Typography (Soft Off-White & Slate, NO Harsh Blinding White) ── */
+  --color-text-main:        #F1F5F9;   /* Slate-100 (Soft off-white for headers & key data) */
+  --color-text-body:        #CBD5E1;   /* Slate-300 for comfortable, strain-free body text */
+  --color-text-sub:         #94A3B8;   /* Slate-400 for sub-headers and field labels */
+  --color-text-muted:       #64748B;   /* Slate-500 for captions, timestamps, placeholders */
+  --color-text-placeholder: #4B5563;
+
+  /* ── Borders & Focus (Subtle, Refined Separation) ── */
+  --color-border:           #1E293B;   /* Refined dark slate border */
+  --color-border-subtle:    #172030;   /* Secondary divider border */
+  --color-border-focus:     #10B981;   /* Emerald glowing focus ring */
+
+  /* ── Primary Accent in Dark Mode ── */
+  --color-primary:          #10B981;   /* Vibrant yet calm emerald */
+  --color-primary-hover:    #059669;
+  --color-primary-light:    rgba(16, 185, 129, 0.12);
+
+  color-scheme: dark;
+}
 
 @layer base {
   *, *::before, *::after {
@@ -69,6 +127,7 @@
     background-color: var(--color-surface-bg);
     color: var(--color-text-main);
     font-family: var(--font-sans);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -90,6 +149,9 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+  .dark ::-webkit-scrollbar-thumb { background: #263345; }
+  .dark ::-webkit-scrollbar-thumb:hover { background: #33445C; }
 
   /* Focus ring */
   :focus-visible {
@@ -116,18 +178,32 @@
 
   /* Form control base */
   .form-control {
-    @apply flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm transition-colors;
+    @apply flex h-10 w-full rounded-lg border px-3 py-2 text-sm transition-colors;
+    background-color: var(--color-surface-card);
+    border-color: #CBD5E1;
+    color: var(--color-text-main);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  }
+  .form-control:hover:not(:disabled) {
+    border-color: #94A3B8;
+  }
+  .dark .form-control {
+    background-color: var(--color-surface-inset);
     border-color: var(--color-border);
     color: var(--color-text-main);
+    box-shadow: none;
   }
   .form-control::placeholder { color: var(--color-text-placeholder); }
   .form-control:focus {
     outline: none;
     border-color: var(--color-border-focus);
-    box-shadow: 0 0 0 3px rgba(15,123,92,.12);
+    box-shadow: 0 0 0 3px rgba(15, 123, 92, 0.16);
+  }
+  .dark .form-control:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
   }
   .form-control:disabled {
-    background-color: #F9FAFB;
+    background-color: var(--color-surface-bg);
     cursor: not-allowed;
     opacity: 0.7;
   }
@@ -135,7 +211,11 @@
     border-color: var(--color-danger);
   }
   .form-control.error:focus {
-    box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
+  .form-control option {
+    background-color: var(--color-surface-card);
+    color: var(--color-text-main);
   }
 
   /* Card base */
@@ -143,6 +223,531 @@
     background: var(--color-surface-card);
     border: 1px solid var(--color-border);
     border-radius: 1rem;
-    box-shadow: var(--shadow-card);
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  }
+
+  /* Devanagari typography for 'व्यापार' branding */
+  .font-devanagari {
+    font-family: var(--font-devanagari);
+    font-feature-settings: "kern" 1, "liga" 1, "clig" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  .font-devanagari-serif {
+    font-family: "Noto Serif Devanagari", "Martel", "Playfair Display", serif;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+}
+
+/* ==========================================================================
+   MASTER GLOBAL DARK MODE COMPREHENSIVE UTILITY OVERRIDES
+   Placed outside @layer to guarantee cascade priority over all Tailwind v4 utilities.
+   This transforms every page (Purchases, Sales, Stock, Customers, Suppliers,
+   Payments, Reports, etc.) into the soft, luxurious, eye-friendly obsidian theme.
+   ========================================================================== */
+
+/* 1. Surfaces, Panels & Floating Cards */
+.dark .bg-white,
+.dark.bg-white {
+  background-color: var(--color-surface-card) !important;
+}
+
+/* 2. Subsurfaces, Filter Wells & Accordion Backgrounds */
+.dark .bg-gray-50,
+.dark .bg-gray-50\/50,
+.dark .bg-gray-50\/60,
+.dark .bg-gray-50\/70,
+.dark .bg-gray-50\/75,
+.dark .bg-slate-50,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/90 {
+  background-color: var(--color-surface-inset) !important;
+}
+
+.dark .bg-gray-100,
+.dark .bg-gray-100\/60,
+.dark .bg-gray-100\/80,
+.dark .bg-gray-100\/90,
+.dark .bg-slate-100 {
+  background-color: #171F2C !important;
+}
+
+/* 3. Surface Hovers */
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-50\/50:hover,
+.dark .hover\:bg-gray-50\/70:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50\/50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-gray-100\/60:hover {
+  background-color: var(--color-surface-hover) !important;
+}
+
+/* 4. Borders & Dividers */
+.dark .border-gray-200,
+.dark .border-gray-200\/90,
+.dark .border-gray-200\/80,
+.dark .border-gray-200\/60,
+.dark .border-gray-300,
+.dark .border-slate-200 {
+  border-color: var(--color-border) !important;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-100\/80,
+.dark .border-gray-100\/90,
+.dark .border-slate-100 {
+  border-color: var(--color-border-subtle) !important;
+}
+
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-border-subtle) !important;
+}
+
+.dark .hover\:border-gray-300:hover {
+  border-color: #2D394C !important;
+}
+
+/* 4b. Tables, Ledger Headers & Guide Bars (Refined High-Contrast Separation) */
+.guide-bar-offwhite,
+.header-bar-offwhite {
+  background-color: #EDF2F7; /* Distinct cool alabaster stone strip - clear separation from #F4F6F9 canvas and #FFFFFF cards */
+  border: 1px solid #CBD5E1; /* Crisp outline, never washed out */
+  color: #1E293B;            /* High-contrast Slate-800 typography */
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+}
+
+.guide-bar-offwhite > div,
+.header-bar-offwhite > div,
+.guide-bar-offwhite th,
+.header-bar-offwhite th,
+thead.header-bar-offwhite th,
+table thead.header-bar-offwhite th {
+  color: #1E293B;
+  font-weight: 700;
+}
+
+.dark .guide-bar-offwhite,
+.dark .header-bar-offwhite,
+.dark thead,
+.dark table thead {
+  background-color: #161F2E !important; /* Elevated slate-navy strip - perfectly balanced contrast, zero eye strain */
+  border-color: #243245 !important;
+  color: #E2E8F0 !important;             /* Soft off-white typography */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.dark .guide-bar-offwhite > div,
+.dark .header-bar-offwhite > div,
+.dark .guide-bar-offwhite th,
+.dark .header-bar-offwhite th,
+.dark thead th,
+.dark table thead th {
+  color: #CBD5E1 !important;            /* Soft off-white (Slate-300), no blinding white or pitch black */
+  font-weight: 600 !important;
+}
+
+.dark .guide-bar-offwhite [class*="text-"],
+.dark .header-bar-offwhite [class*="text-"],
+.dark thead [class*="text-"] {
+  color: #CBD5E1 !important;
+}
+
+.dark tfoot,
+.dark table tfoot {
+  background-color: var(--color-surface-inset) !important;
+  border-color: var(--color-border) !important;
+  color: #CBD5E1 !important;
+}
+
+.dark th {
+  border-color: var(--color-border) !important;
+}
+
+.dark tbody tr:hover {
+  background-color: var(--color-surface-hover) !important;
+}
+
+/* 4c. Supporting Off-White Utilities */
+.surface-offwhite {
+  background-color: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #1E293B;
+}
+.dark .surface-offwhite {
+  background-color: #161F2E !important;
+  border-color: #243245 !important;
+  color: #F1F5F9 !important;
+}
+
+.badge-offwhite {
+  background-color: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #334155;
+}
+.dark .badge-offwhite {
+  background-color: #182232 !important;
+  border-color: #243245 !important;
+  color: #CBD5E1 !important;
+}
+
+.text-offwhite {
+  color: #0F172A;
+}
+.dark .text-offwhite {
+  color: #F1F5F9 !important;
+}
+
+/* ── Premium ERP KPI Card & Callout Ribbon Design System (Ledger Benchmark) ── */
+.kpi-card {
+  background-color: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .kpi-card {
+  background-color: var(--color-surface-card) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.kpi-card:hover {
+  box-shadow: 0 4px 10px -2px rgba(15, 23, 42, 0.08);
+  border-color: #CBD5E1;
+}
+.dark .kpi-card:hover {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.45);
+  border-color: #334155 !important;
+}
+
+/* Callout cards matching Ledger Net Balance */
+.callout-card-emerald {
+  background-color: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(16, 185, 129, 0.04);
+  transition: all 0.2s ease;
+}
+.dark .callout-card-emerald {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.callout-card-blue {
+  background-color: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(59, 130, 246, 0.04);
+  transition: all 0.2s ease;
+}
+.dark .callout-card-blue {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+
+.callout-card-amber {
+  background-color: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(245, 158, 11, 0.04);
+  transition: all 0.2s ease;
+}
+.dark .callout-card-amber {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.callout-card-rose {
+  background-color: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(239, 68, 68, 0.04);
+  transition: all 0.2s ease;
+}
+.dark .callout-card-rose {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Prevent glaring pure white text from causing eye fatigue */
+.dark .text-white,
+.dark [class*="dark:text-white"] {
+  color: #F1F5F9 !important;
+}
+
+/* Ensure arbitrary dark background classes align with the layered surface tokens */
+.dark [class*="dark:bg-[#141A24]"],
+.dark [class*="dark:bg-[#131924]"] {
+  background-color: var(--color-surface-card) !important;
+}
+
+.dark [class*="dark:bg-[#0E131C]"] {
+  background-color: var(--color-surface-inset) !important;
+}
+
+.dark [class*="dark:border-[#1F2837]"],
+.dark [class*="dark:border-[#171F2B]"] {
+  border-color: var(--color-border) !important;
+}
+
+.dark [class*="dark:hover:bg-[#1A2331]"]:hover {
+  background-color: var(--color-surface-hover) !important;
+}
+
+/* 4d. Light Mode Form Controls Universal Outlines & Crisp Boundaries */
+:root select:not(.dark *),
+:root input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not(.dark *),
+:root textarea:not(.dark *) {
+  border-color: #CBD5E1;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+:root select:not(.dark *):hover:not(:disabled),
+:root input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not(.dark *):hover:not(:disabled),
+:root textarea:not(.dark *):hover:not(:disabled) {
+  border-color: #94A3B8;
+}
+:root select:not(.dark *):focus,
+:root input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not(.dark *):focus,
+:root textarea:not(.dark *):focus {
+  border-color: #0F7B5C;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(15, 123, 92, 0.16);
+}
+
+/* 5. Form Controls: Selects, Inputs, Textareas */
+.dark select,
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+.dark textarea {
+  background-color: var(--color-surface-inset) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-main) !important;
+  color-scheme: dark;
+}
+
+.dark select option {
+  background-color: var(--color-surface-card) !important;
+  color: var(--color-text-main) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+.dark select:focus,
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):focus,
+.dark textarea:focus {
+  border-color: var(--color-border-focus) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* 6. Typography & Text Hierarchy (Soft off-whites, no blinding stark white) */
+.dark .text-gray-900 {
+  color: #F1F5F9 !important; /* Soft off-white (Slate-100) */
+}
+
+.dark .text-gray-800 {
+  color: #E2E8F0 !important; /* Slate-200 */
+}
+
+.dark .text-gray-700 {
+  color: #CBD5E1 !important; /* Slate-300 */
+}
+
+.dark .text-gray-600 {
+  color: #94A3B8 !important; /* Slate-400 */
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: #64748B !important; /* Slate-500 */
+}
+
+.dark .text-gray-300 {
+  color: #475569 !important; /* Slate-600 */
+}
+
+/* 7. Gradients & Drawer Accents */
+.dark .from-slate-50\/90,
+.dark .from-slate-50 {
+  --tw-gradient-from: var(--color-surface-card) !important;
+}
+
+.dark .to-slate-50\/40,
+.dark .to-slate-50 {
+  --tw-gradient-to: var(--color-surface-inset) !important;
+}
+
+/* 8. Soft Alert & Status Badges (Avoid Harsh / Eye-straining tints) */
+.dark .bg-emerald-50,
+.dark .bg-emerald-50\/80,
+.dark .bg-emerald-50\/50 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+.dark .border-emerald-200,
+.dark .border-emerald-300 {
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+.dark .text-emerald-700,
+.dark .text-emerald-800 {
+  color: #34D399 !important;
+}
+
+.dark .bg-amber-50,
+.dark .bg-amber-50\/50,
+.dark .bg-amber-50\/80 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+.dark .border-amber-200,
+.dark .border-amber-200\/60,
+.dark .border-amber-300 {
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+.dark .text-amber-700,
+.dark .text-amber-800 {
+  color: #FBBF24 !important;
+}
+
+.dark .bg-rose-50,
+.dark .bg-red-50,
+.dark .bg-rose-50\/80 {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+.dark .border-rose-100,
+.dark .border-rose-100\/80,
+.dark .border-rose-200,
+.dark .border-red-200 {
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+.dark .text-rose-700,
+.dark .text-rose-800,
+.dark .text-red-700,
+.dark .text-red-800 {
+  color: #F87171 !important;
+}
+
+.dark .bg-blue-50,
+.dark .bg-blue-50\/50 {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+}
+.dark .border-blue-200,
+.dark .border-blue-300 {
+  border-color: rgba(59, 130, 246, 0.25) !important;
+}
+.dark .text-blue-700,
+.dark .text-blue-800,
+.dark .text-blue-900 {
+  color: #60A5FA !important;
+}
+
+.dark .bg-indigo-50,
+.dark .bg-indigo-50\/50,
+.dark .bg-indigo-50\/80 {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+}
+.dark .border-indigo-200,
+.dark .border-indigo-300 {
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
+.dark .text-indigo-700,
+.dark .text-indigo-800 {
+  color: #A5B4FC !important;
+}
+
+/* 9. Tax Invoice Modal Styling in Dark Mode vs Print Mode */
+.dark #printable-tax-invoice {
+  background-color: var(--color-surface-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-main) !important;
+}
+
+/* High-contrast guarantees for all text tiers inside Tax Invoice in Dark Mode */
+.dark #printable-tax-invoice .text-slate-900 {
+  color: #F1F5F9 !important;
+}
+.dark #printable-tax-invoice .text-slate-800 {
+  color: #E2E8F0 !important;
+}
+.dark #printable-tax-invoice .text-slate-700 {
+  color: #CBD5E1 !important;
+}
+.dark #printable-tax-invoice .text-slate-600 {
+  color: #94A3B8 !important;
+}
+.dark #printable-tax-invoice .text-slate-500 {
+  color: #94A3B8 !important;
+}
+
+@media print {
+  /* Complete print stylesheet: isolate the printable tax invoice and ensure crisp ink-friendly print */
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-tax-invoice,
+  #printable-tax-invoice * {
+    visibility: visible !important;
+  }
+  #printable-tax-invoice {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 24px !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  #printable-tax-invoice table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  #printable-tax-invoice th,
+  #printable-tax-invoice td {
+    border-color: #E2E8F0 !important;
+    color: #0f172a !important;
+  }
+  #printable-tax-invoice thead {
+    background-color: #F1F5F9 !important;
+  }
+  #printable-tax-invoice [class*="text-slate-"],
+  #printable-tax-invoice [class*="dark:text-"],
+  #printable-tax-invoice [class*="text-emerald-"],
+  #printable-tax-invoice [class*="text-amber-"] {
+    color: #0f172a !important;
+  }
+  #printable-tax-invoice .print\:text-black {
+    color: #000000 !important;
+  }
+  #printable-tax-invoice .print\:text-gray-600 {
+    color: #475569 !important;
+  }
+  #printable-tax-invoice .print\:text-gray-700 {
+    color: #334155 !important;
+  }
+  #printable-tax-invoice .print\:bg-gray-50 {
+    background-color: #F8FAFC !important;
+  }
+  #printable-tax-invoice .print\:bg-gray-100 {
+    background-color: #F1F5F9 !important;
   }
 }

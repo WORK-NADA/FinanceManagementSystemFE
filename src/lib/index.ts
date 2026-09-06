@@ -5,3 +5,4 @@
 export { cn } from './cn';
 export { formatCurrency, signedAmount } from './currency';
 export { formatDate, toApiDate, todayStr, firstOfMonthStr, DATE_FORMAT, DATE_FORMAT_INPUT } from './dates';
+export { setupFieldAutoSelect, selectInputText, isSelectableField } from './fieldAutoSelect';
