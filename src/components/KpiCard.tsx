@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Card, CardContent } from './Card';
 import { cn } from '@/lib/cn';
+import { formatNumber } from '@/lib';
 
 export interface KpiCardProps {
   title: string;
@@ -15,6 +16,8 @@ export interface KpiCardProps {
 }
 
 export function KpiCard({ title, value, icon, trend, className }: KpiCardProps) {
+  const displayValue = typeof value === 'number' ? formatNumber(value) : value;
+
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardContent className="p-6">
@@ -23,8 +26,8 @@ export function KpiCard({ title, value, icon, trend, className }: KpiCardProps) 
             <p className="text-sm font-medium text-[var(--color-text-sub)] truncate">
               {title}
             </p>
-            <p className="mt-2 text-3xl font-serif font-semibold text-[var(--color-text-main)]">
-              {value}
+            <p className="mt-2 text-3xl font-serif font-semibold text-[var(--color-text-main)] tabular-nums">
+              {displayValue}
             </p>
           </div>
           {icon && (
@@ -38,13 +41,13 @@ export function KpiCard({ title, value, icon, trend, className }: KpiCardProps) 
           <div className="mt-4 flex items-center text-sm">
             <span
               className={cn(
-                "font-medium",
+                "font-medium tabular-nums",
                 trend.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400",
                 trend.isPositive === undefined && "text-gray-600 dark:text-slate-400"
               )}
             >
               {trend.isPositive ? "+" : ""}
-              {trend.value}%
+              {formatNumber(trend.value)}%
             </span>
             <span className="ml-2 text-[var(--color-text-muted)] truncate">
               {trend.label}

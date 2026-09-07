@@ -42,8 +42,8 @@ export const customerSchema = z.object({
     })
     .optional().nullable().or(z.literal('')),
   email: z.string().trim()
-    .refine(val => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-      message: 'Invalid email format',
+    .refine(val => val === '' || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && val.length <= 150), {
+      message: 'Invalid email format (max 150 characters)',
     })
     .optional().nullable().or(z.literal('')),
   gstNumber: z.string().trim()
@@ -51,7 +51,10 @@ export const customerSchema = z.object({
       message: 'Invalid GST number',
     })
     .optional().nullable().or(z.literal('')),
-  openingBalance: z.number().min(0, 'Opening balance cannot be negative').default(0),
+  openingBalance: z.number()
+    .min(0, 'Opening balance cannot be negative')
+    .max(9999999999999.99, 'Opening balance is too large')
+    .default(0),
   paymentTerms: z.number().int().min(0).max(365).default(30),
   address: customerAddressSchema,
 });

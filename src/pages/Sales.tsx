@@ -24,7 +24,7 @@ import {
   Button, Modal, Input, Badge, PageHeader, ErrorState, EmptyState, Pagination,
   TaxInvoiceModal, CopyableSequence, CreateCustomerModal, Skeleton
 } from '@/components';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { toast } from '../store/toastStore';
 
 const PAYMENT_STATUS_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'default'> = {
@@ -234,7 +234,7 @@ function SalePaymentsDrawerSection({
                 Customer Payment History
               </h4>
               <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-200/70 dark:bg-[#1E293B] text-gray-700 dark:text-slate-300">
-                {payments.length} {payments.length === 1 ? 'record' : 'records'}
+                {formatNumber(payments.length)} {payments.length === 1 ? 'record' : 'records'}
               </span>
             </div>
             <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
@@ -648,7 +648,7 @@ export default function Sales() {
     );
 
     if (existingStock && maxAvailableStock > 0 && data.weight > maxAvailableStock) {
-      toast.error(`Quantity cannot exceed available stock (${maxAvailableStock} ${existingStock.unit}). Current stock is ${existingStock.currentQuantity} ${existingStock.unit}.`);
+      toast.error(`Quantity cannot exceed available stock (${formatNumber(maxAvailableStock)} ${existingStock.unit}). Current stock is ${formatNumber(existingStock.currentQuantity)} ${existingStock.unit}.`);
       return;
     }
 
@@ -1001,7 +1001,7 @@ export default function Sales() {
                           </div>
                           <div>
                             <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">Quantity / Weight</p>
-                            <p className="tabular-nums font-semibold text-sm text-gray-900 dark:text-slate-100">{s.weight} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{s.unit}</span></p>
+                            <p className="tabular-nums font-semibold text-sm text-gray-900 dark:text-slate-100">{formatNumber(s.weight)} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{s.unit}</span></p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">Selling Price per Unit</p>
@@ -1227,12 +1227,12 @@ export default function Sales() {
                 {isSaleWeightTooHigh ? (
                   <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-1 font-medium flex items-center gap-1">
                     <AlertCircle className="h-3 w-3 shrink-0" />
-                    Exceeds available stock ({maxAvailableStock} {matchedStock?.unit ?? 'KG'})
+                    Exceeds available stock ({formatNumber(maxAvailableStock)} {matchedStock?.unit ?? 'KG'})
                   </p>
                 ) : (
                   editingSale && maxAvailableStock > 0 && (
                     <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
-                      Max allowed: {maxAvailableStock} {matchedStock?.unit ?? 'KG'}
+                      Max allowed: {formatNumber(maxAvailableStock)} {matchedStock?.unit ?? 'KG'}
                     </p>
                   )
                 )}
@@ -1460,7 +1460,7 @@ export default function Sales() {
                   <div className="flex justify-between border-t border-gray-200 dark:border-[#1E293B] pt-2">
                     <span className="text-emerald-700 dark:text-emerald-400 font-medium">Stock Restored</span>
                     <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums">
-                      +{deletingSale.weight} {deletingSale.unit} of {deletingSale.rawMaterial}
+                      +{formatNumber(deletingSale.weight)} {deletingSale.unit} of {deletingSale.rawMaterial}
                     </span>
                   </div>
                   <div className="flex justify-between border-t border-gray-200 dark:border-[#1E293B] pt-2">

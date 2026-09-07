@@ -30,7 +30,7 @@ import {
 import {
   Button, Modal, Input, Badge, PageHeader, ErrorState, EmptyState, Pagination, Skeleton, CopyableSequence, CreateSupplierModal
 } from '@/components';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { toast } from '../store/toastStore';
 
 const PAYMENT_STATUS_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'default'> = {
@@ -239,7 +239,7 @@ function PurchasePaymentsDrawerSection({
                 Payment History
               </h4>
               <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-200/70 dark:bg-[#1E293B] text-gray-700 dark:text-slate-300">
-                {payments.length} {payments.length === 1 ? 'record' : 'records'}
+                {formatNumber(payments.length)} {payments.length === 1 ? 'record' : 'records'}
               </span>
             </div>
             <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
@@ -1006,7 +1006,7 @@ export default function Purchases() {
                           </div>
                           <div>
                             <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">Quantity / Weight</p>
-                            <p className="tabular-nums font-semibold text-sm text-gray-900 dark:text-slate-100">{p.weight} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{p.unit}</span></p>
+                            <p className="tabular-nums font-semibold text-sm text-gray-900 dark:text-slate-100">{formatNumber(p.weight)} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{p.unit}</span></p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-400 dark:text-slate-500 mb-0.5">Price per Unit</p>
@@ -1510,7 +1510,7 @@ export default function Purchases() {
                   size="xs"
                   badgeClassName="font-mono font-medium text-gray-900"
                 />{' '}
-                and revert <strong>{deletingPurchase?.weight} {deletingPurchase?.unit}</strong> of <strong>{deletingPurchase?.rawMaterial}</strong> from your stock inventory.
+                and revert <strong>{formatNumber(deletingPurchase?.weight)} {deletingPurchase?.unit}</strong> of <strong>{deletingPurchase?.rawMaterial}</strong> from your stock inventory.
               </p>
             </div>
 

@@ -42,8 +42,8 @@ export const supplierSchema = z.object({
     })
     .optional().nullable().or(z.literal('')),
   email: z.string().trim()
-    .refine(val => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
-      message: 'Invalid email format',
+    .refine(val => val === '' || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && val.length <= 150), {
+      message: 'Invalid email format (max 150 characters)',
     })
     .optional().nullable().or(z.literal('')),
   gstNumber: z.string().trim()
@@ -52,7 +52,7 @@ export const supplierSchema = z.object({
     })
     .optional().nullable().or(z.literal('')),
   openingBalance: z.number().min(0, 'Opening balance cannot be negative').default(0),
-  paymentTerms: z.number().int().min(0, 'Payment terms cannot be negative').default(30),
+  paymentTerms: z.number().int().min(0, 'Payment terms cannot be negative').max(365, 'Payment terms cannot exceed 365 days').default(30),
   address: supplierAddressSchema,
 });
 

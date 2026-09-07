@@ -1,4 +1,5 @@
 import { forwardRef, useRef, type InputHTMLAttributes } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { selectInputText } from '@/lib/fieldAutoSelect';
 
@@ -74,7 +75,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <p id={`${inputId}-hint`} className="text-xs text-[var(--color-text-muted)]">{hint}</p>
         )}
         {error && (
-          <p id={`${inputId}-error`} role="alert" className="text-xs text-[var(--color-danger)]">{error}</p>
+          <p id={`${inputId}-error`} role="alert" className="text-xs text-[var(--color-danger)] flex items-center gap-1.5 mt-1 font-medium">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <span>{error}</span>
+          </p>
         )}
       </div>
     );

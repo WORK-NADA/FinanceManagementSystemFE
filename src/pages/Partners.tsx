@@ -7,11 +7,12 @@ import {
   getPartners, createPartner, updatePartner, deactivatePartner, reactivatePartner,
   getPartnerHistory
 } from '../api/partner';
+import { z } from 'zod';
 import { partnerSchema, type RequestPartnerDTO, type ResponsePartnerDTO } from '../types/partner';
 import {
   Button, Modal, Input, Badge, PageHeader, ErrorState, EmptyState, Skeleton
 } from '@/components';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { toast } from '../store/toastStore';
 
 // ── Detail Row Component ───────────────────────────────────────────────────
@@ -50,7 +51,7 @@ function PartnerHistoryRow({ partnerPublicId, lifetimeEarnings }: { partnerPubli
               <div key={h.distributionPublicId ?? String(Math.random())} className="grid grid-cols-1 sm:grid-cols-[110px_minmax(130px,1.5fr)_85px_minmax(100px,1fr)] gap-3 px-4 py-2.5 text-sm items-center">
                 <div className="text-gray-700 dark:text-slate-300 font-medium min-w-0">{h.createdAt ? formatDate(h.createdAt) : '—'}</div>
                 <div className="text-gray-600 dark:text-slate-400 min-w-0 truncate">{h.fromDate && h.toDate ? `${formatDate(h.fromDate)} to ${formatDate(h.toDate)}` : '—'}</div>
-                <div className="font-semibold text-gray-900 dark:text-slate-100 min-w-0">{h.sharePercentageAtDistribution}%</div>
+                <div className="font-semibold text-gray-900 dark:text-slate-100 min-w-0">{formatNumber(h.sharePercentageAtDistribution, { maximumFractionDigits: 2 })}%</div>
                 <div className="sm:text-right font-bold text-emerald-700 dark:text-emerald-400 tabular-nums min-w-0">{formatCurrency(h.shareAmount)}</div>
               </div>
             ))}
@@ -98,8 +99,22 @@ export default function Partners() {
     return availableShare;
   }, [editingPartner, availableShare, totalActiveShare]);
 
+  const dynamicPartnerSchema = useMemo(() => {
+    return partnerSchema.extend({
+      sharePercentage: z.number({ invalid_type_error: 'Profit share is required' })
+        .min(0.01, 'Share percentage must be at least 0.01%')
+        .max(
+          maxAllowedShare,
+          !editingPartner
+            ? `Value must be less than or equal to ${maxAllowedShare}%. Total active share cannot exceed 100%.`
+            : `Value must be less than or equal to ${maxAllowedShare}%. Total active partner share cannot exceed 100%.`
+        ),
+    });
+  }, [maxAllowedShare, editingPartner]);
+
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<RequestPartnerDTO>({
-    resolver: zodResolver(partnerSchema),
+    resolver: zodResolver(dynamicPartnerSchema),
+    mode: 'onChange',
     defaultValues: { joiningDate: new Date().toISOString().split('T')[0] },
   });
 
@@ -233,12 +248,12 @@ export default function Partners() {
       ) : (
         <div className="bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-gray-600 dark:text-slate-300">
           <div className="flex items-center gap-2 flex-wrap">
-            <span>Total Active Partner Share: <strong className="text-gray-900 dark:text-slate-100 font-semibold">{totalActiveShare}%</strong></span>
+            <span>Total Active Partner Share: <strong className="text-gray-900 dark:text-slate-100 font-semibold">{formatNumber(totalActiveShare, { maximumFractionDigits: 2 })}%</strong></span>
             <span className="text-gray-400 dark:text-slate-500">•</span>
-            <span>Available for New Partners: <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">{availableShare}%</strong></span>
+            <span>Available for New Partners: <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">{formatNumber(availableShare, { maximumFractionDigits: 2 })}%</strong></span>
           </div>
           <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-xs">
-            {availableShare}% Unallocated
+            {formatNumber(availableShare, { maximumFractionDigits: 2 })}% Unallocated
           </span>
         </div>
       )}
@@ -323,7 +338,7 @@ export default function Partners() {
                     {p.email && <div className="text-xs text-gray-500 dark:text-slate-400 truncate" title={p.email}>{p.email}</div>}
                   </div>
                   <div className="lg:text-right font-semibold tabular-nums text-gray-900 dark:text-slate-100 min-w-0">
-                    {p.sharePercentage}%
+                    {formatNumber(p.sharePercentage, { maximumFractionDigits: 2 })}%
                   </div>
                   <div className="text-sm text-gray-600 dark:text-slate-300 whitespace-nowrap min-w-0">
                     {p.joiningDate ? formatDate(p.joiningDate) : '—'}
@@ -391,12 +406,12 @@ export default function Partners() {
 
       {/* Add / Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingPartner ? "Edit Partner Details" : "Add New Partner"}>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          <Input label="Partner Name *" {...register('partnerName')} error={errors.partnerName?.message} />
+        <form noValidate onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+          <Input label="Partner Name *" maxLength={150} placeholder="Enter full partner name" {...register('partnerName')} error={errors.partnerName?.message} />
           
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Mobile Number *" {...register('mobileNumber')} error={errors.mobileNumber?.message} />
-            <Input label="Email Address" type="email" {...register('email')} error={errors.email?.message} />
+            <Input label="Mobile Number *" type="tel" maxLength={10} placeholder="10-digit mobile (starts 6-9)" {...register('mobileNumber')} error={errors.mobileNumber?.message} />
+            <Input label="Email Address" type="email" maxLength={150} placeholder="partner@example.com" {...register('email')} error={errors.email?.message} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -404,17 +419,17 @@ export default function Partners() {
               <Input 
                 label="Profit Share (%) *" 
                 type="number" 
-                step="0.01" 
-                min="0.01" 
-                max={maxAllowedShare}
+                step="0.01"
+                min={0.01}
+                max={100}
                 {...register('sharePercentage', { valueAsNumber: true })} 
                 error={errors.sharePercentage?.message} 
               />
               <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1">
                 {editingPartner ? (
-                  <>Maximum allowed for this partner: <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">{maxAllowedShare}%</strong></>
+                  <>Maximum allowed for this partner: <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">{formatNumber(maxAllowedShare, { maximumFractionDigits: 2 })}%</strong></>
                 ) : (
-                  <>Available share: <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">{availableShare}%</strong></>
+                  <>Available share: <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">{formatNumber(availableShare, { maximumFractionDigits: 2 })}%</strong></>
                 )}
                 {' '}(Total active cannot exceed 100%)
               </p>
@@ -441,11 +456,11 @@ export default function Partners() {
             <div className="bg-gray-50 dark:bg-[#0E131C] p-3 rounded-lg border border-gray-200/60 dark:border-[#1F2837] text-xs space-y-1 text-gray-600 dark:text-slate-400">
               <div className="flex justify-between">
                 <span>Partner's Share:</span>
-                <strong className="text-gray-900 dark:text-slate-200">{editingPartner.sharePercentage}%</strong>
+                <strong className="text-gray-900 dark:text-slate-200">{formatNumber(editingPartner.sharePercentage, { maximumFractionDigits: 2 })}%</strong>
               </div>
               <div className="flex justify-between">
                 <span>Currently Available Share:</span>
-                <strong className="text-emerald-700 dark:text-emerald-400">{availableShare}%</strong>
+                <strong className="text-emerald-700 dark:text-emerald-400">{formatNumber(availableShare, { maximumFractionDigits: 2 })}%</strong>
               </div>
             </div>
           )}

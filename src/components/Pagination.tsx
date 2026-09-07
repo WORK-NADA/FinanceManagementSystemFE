@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './Button';
 import { cn } from '@/lib/cn';
+import { formatNumber } from '@/lib';
 
 interface PaginationProps {
   currentPage: number;
@@ -17,8 +18,8 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700 dark:text-slate-300">
-            Page <span className="font-medium text-gray-900 dark:text-white">{currentPage + 1}</span> of{' '}
-            <span className="font-medium text-gray-900 dark:text-white">{totalPages}</span>
+            Page <span className="font-medium text-gray-900 dark:text-white tabular-nums">{formatNumber(currentPage + 1)}</span> of{' '}
+            <span className="font-medium text-gray-900 dark:text-white tabular-nums">{formatNumber(totalPages)}</span>
           </p>
         </div>
         <div>

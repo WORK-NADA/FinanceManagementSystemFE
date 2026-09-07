@@ -49,4 +49,6 @@ export interface DashboardSummaryDTO {
   totalMoneyPaid?: number;
   totalExpenses?: number;
   totalBalance?: number;
+  totalWithdrawals?: number;
+  netProfit?: number;
 }

@@ -1,11 +1,20 @@
 import { z } from 'zod';
 
 export const partnerSchema = z.object({
-  partnerName: z.string().min(2, 'Min 2 characters').max(150),
-  mobileNumber: z.string().regex(/^[0-9]{10}$/, 'Valid 10-digit mobile number required'),
-  email: z.string().email('Invalid email').max(150).optional().or(z.literal('')),
-  sharePercentage: z.number().min(0.01).max(100, 'Must be between 0.01 and 100'),
-  joiningDate: z.string().min(1, 'Join date is required'),
+  partnerName: z.string().trim()
+    .min(2, 'Partner name must be between 2 and 150 characters')
+    .max(150, 'Partner name must be between 2 and 150 characters'),
+  mobileNumber: z.string().trim()
+    .regex(/^[6-9][0-9]{9}$/, 'Mobile number must be a valid 10-digit Indian mobile number starting with 6-9'),
+  email: z.string().trim()
+    .refine(val => val === '' || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && val.length <= 150), {
+      message: 'Invalid email address format (max 150 characters)',
+    })
+    .optional().or(z.literal('')),
+  sharePercentage: z.number()
+    .min(0.01, 'Share percentage must be at least 0.01')
+    .max(100, 'Share percentage cannot exceed 100'),
+  joiningDate: z.string().min(1, 'Joining date is required'),
 });
 
 export type RequestPartnerDTO = z.input<typeof partnerSchema>;

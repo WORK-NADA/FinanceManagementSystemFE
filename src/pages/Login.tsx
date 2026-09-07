@@ -36,7 +36,11 @@ export default function Login() {
       setAuth(data);
       const displayName = data.ownerName || data.userName || 'User';
       triggerWelcome(displayName);
-      navigate('/dashboard');
+      if (data.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     },
     onError: (error: any) => {
       if (error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
@@ -47,7 +51,7 @@ export default function Login() {
           });
         });
       } else {
-        setServerError(error.message || 'An unexpected error occurred during login.');
+        setServerError(error.message || 'Incorrect email or password. Please check your details and try again.');
       }
     },
   });
@@ -55,7 +59,10 @@ export default function Login() {
   const onSubmit = (data: RequestLoginDTO) => {
     setServerError('');
     typewriterAudio.prime();
-    mutation.mutate(data);
+    mutation.mutate({
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+    });
   };
 
   return (

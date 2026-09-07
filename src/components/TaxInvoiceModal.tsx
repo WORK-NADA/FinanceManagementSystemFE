@@ -4,7 +4,7 @@ import { Modal } from './Modal';
 import { Button } from './Button';
 import { Badge } from './Badge';
 import { CopyableSequence } from './CopyableSequence';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { getCustomer } from '../api/customer';
 import { useAuthStore } from '../store/authStore';
 import type { ResponseSaleDTO } from '../types/sale';
@@ -226,7 +226,7 @@ export function TaxInvoiceModal({ isOpen, onClose, sale }: TaxInvoiceModalProps)
                   </td>
                   <td className="py-3 px-3 font-mono text-slate-600 dark:text-slate-300 print:text-gray-700">3901 / 3902</td>
                   <td className="py-3 px-3 text-right font-mono font-medium text-slate-900 dark:text-slate-100 print:text-black">
-                    {sale.weight.toLocaleString('en-IN', { minimumFractionDigits: 2 })}{' '}
+                    {formatNumber(sale.weight, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
                     <span className="text-slate-500 dark:text-slate-400 font-normal">{sale.unit}</span>
                   </td>
                   <td className="py-3 px-3 text-right font-mono font-medium text-slate-900 dark:text-slate-100 print:text-black">

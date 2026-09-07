@@ -7,6 +7,7 @@ export const expenseSchema = z.object({
   paymentMode: z.enum(['CASH', 'BANK_TRANSFER', 'CHEQUE', 'UPI']),
   description: z.string().max(255, 'Description cannot exceed 255 characters').optional().or(z.literal('')),
   referenceNumber: z.string().max(100, 'Reference number cannot exceed 100 characters').optional().or(z.literal('')),
+  remarks: z.string().max(500, 'Remarks cannot exceed 500 characters').optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
   const isOther = data.category?.trim().toUpperCase() === 'OTHER';
   if (isOther) {
@@ -31,6 +32,7 @@ export interface ResponseExpenseDTO {
   paymentMode: string;
   description?: string;
   referenceNumber?: string;
+  remarks?: string;
   createdAt: string;
 }
 

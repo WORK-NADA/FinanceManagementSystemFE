@@ -53,3 +53,7 @@ export const recordProfitWithdrawal = async (data: RequestProfitWithdrawalDTO): 
 
 export const getProfitWithdrawals = async (params?: { fromDate?: string; toDate?: string }): Promise<ResponseProfitWithdrawalDTO[]> =>
   apiClient.get('/profit-distribution/withdrawals', { params });
+
+export const deleteProfitWithdrawal = async (publicId: string): Promise<void> =>
+  apiClient.delete(`/profit-distribution/withdrawals/${publicId}`);
+

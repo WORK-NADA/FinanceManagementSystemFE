@@ -8,7 +8,7 @@ export type WeightUnit = typeof WEIGHT_UNITS[number];
 export const purchaseSchema = z.object({
   supplierPublicId:      z.string().min(1, 'Supplier is required'),
   rawMaterial:           z.string().min(2, 'Raw material name is required (min 2 chars)').max(100),
-  weight:                z.number({ invalid_type_error: 'Weight is required' }).positive('Weight must be greater than zero'),
+  weight:                z.number({ invalid_type_error: 'Weight is required' }).min(0.001, 'Weight must be at least 0.001'),
   unit:                  z.enum(WEIGHT_UNITS, { required_error: 'Unit is required' }),
   ratePerUnit:           z.number({ invalid_type_error: 'Rate per unit is required' }).positive('Rate per unit must be greater than zero'),
   gstPercentage:         z.number({ invalid_type_error: 'GST % is required' }).min(0, 'GST cannot be negative').max(100, 'GST cannot exceed 100'),

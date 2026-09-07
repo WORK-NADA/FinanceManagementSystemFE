@@ -24,6 +24,15 @@ import ClientList from './pages/ClientList';
 import ClientForm from './pages/ClientForm';
 import Profile from './pages/Profile';
 import Unauthorized from './pages/Unauthorized';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ClientDetail from './pages/admin/ClientDetail';
+import GlobalSales from './pages/admin/GlobalSales';
+import GlobalPurchases from './pages/admin/GlobalPurchases';
+import GlobalPayments from './pages/admin/GlobalPayments';
+import GlobalInventory from './pages/admin/GlobalInventory';
+import GlobalExpenses from './pages/admin/GlobalExpenses';
+import AdminReports from './pages/admin/AdminReports';
+import SystemHealth from './pages/admin/SystemHealth';
 import { setupFieldAutoSelect } from './lib/fieldAutoSelect';
 import './index.css';
 
@@ -104,17 +113,37 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
 const ALL_ROLES = ['CLIENT', 'ADMIN'];
 const ADMIN_ONLY = ['ADMIN'];
 
+function RootRedirect() {
+  const { user, isAuthenticated } = useAuthStore();
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user.role === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+}
+
+function DashboardRoute() {
+  const { user } = useAuthStore();
+  if (user?.role === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return <Dashboard />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppInitializer>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
 
             <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Dashboard /></ProtectedRoute>} />
+              {/* Client & Shared Routes */}
+              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={ALL_ROLES}><DashboardRoute /></ProtectedRoute>} />
               <Route path="/dashboard/customers" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Customers /></ProtectedRoute>} />
               <Route path="/dashboard/suppliers" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Suppliers /></ProtectedRoute>} />
               <Route path="/dashboard/stock" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Stock /></ProtectedRoute>} />
@@ -126,15 +155,33 @@ function App() {
               <Route path="/dashboard/expenses" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Expenses /></ProtectedRoute>} />
               <Route path="/dashboard/partners" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Partners /></ProtectedRoute>} />
               <Route path="/dashboard/profit-distribution" element={<ProtectedRoute allowedRoles={ALL_ROLES}><ProfitDistribution /></ProtectedRoute>} />
+              <Route path="/dashboard/profit-sharing" element={<Navigate to="/dashboard/profit-distribution" replace />} />
+              <Route path="/dashboard/profit sharing" element={<Navigate to="/dashboard/profit-distribution" replace />} />
+              <Route path="/dashboard/profit%20sharing" element={<Navigate to="/dashboard/profit-distribution" replace />} />
+              <Route path="/dashboard/profit distribution" element={<Navigate to="/dashboard/profit-distribution" replace />} />
+              <Route path="/dashboard/profit%20distribution" element={<Navigate to="/dashboard/profit-distribution" replace />} />
               <Route path="/dashboard/reports" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Reports /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Profile /></ProtectedRoute>} />
 
-              {/* Admin only */}
+              {/* Dedicated Admin Platform Routes */}
+              <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/clients" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><ClientList /></ProtectedRoute>} />
               <Route path="/admin/clients/new" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><ClientForm /></ProtectedRoute>} />
+              <Route path="/admin/clients/:publicId" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><ClientDetail /></ProtectedRoute>} />
+              <Route path="/admin/sales" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><GlobalSales /></ProtectedRoute>} />
+              <Route path="/admin/purchases" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><GlobalPurchases /></ProtectedRoute>} />
+              <Route path="/admin/payments" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><GlobalPayments /></ProtectedRoute>} />
+              <Route path="/admin/inventory" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><GlobalInventory /></ProtectedRoute>} />
+              <Route path="/admin/expenses" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><GlobalExpenses /></ProtectedRoute>} />
+              <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><AdminReports /></ProtectedRoute>} />
+              <Route path="/admin/system" element={<ProtectedRoute allowedRoles={ADMIN_ONLY}><SystemHealth /></ProtectedRoute>} />
+
+              {/* Catch-all dashboard subroutes */}
+              <Route path="*" element={<RootRedirect />} />
             </Route>
 
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="*" element={<RootRedirect />} />
           </Routes>
         </Router>
         <WelcomeOverlay />

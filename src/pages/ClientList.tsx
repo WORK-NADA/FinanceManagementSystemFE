@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Search, Edit2, Ban, CheckCircle2, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit2, Ban, CheckCircle2, Loader2, Eye, Unlock } from 'lucide-react';
 import { 
   getAllClients, 
   getClientByPublicId,
@@ -11,6 +11,7 @@ import {
   deactivateClient, 
   reactivateClient 
 } from '../api/user';
+import { unlockClient } from '../api/admin';
 import { 
   requestUpdateUserSchema, 
   type RequestUpdateUserDTO, 
@@ -138,8 +139,26 @@ export default function ClientList() {
     editMutation.mutate({ publicId: editingClient.publicId, data });
   };
 
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'DISABLED'>('ALL');
+
+  const unlockMutation = useMutation({
+    mutationFn: (publicId: string) => unlockClient(publicId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      toast.success('Client account unlocked successfully.');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Failed to unlock client account.');
+    },
+  });
+
   const filteredClients = clients
     ?.filter((c) => c.role === 'CLIENT')
+    ?.filter((c) => {
+      if (statusFilter === 'ACTIVE') return c.enabled;
+      if (statusFilter === 'DISABLED') return !c.enabled;
+      return true;
+    })
     ?.filter((c) => {
       const term = searchTerm.trim().toLowerCase();
       if (!term) return true;
@@ -152,25 +171,70 @@ export default function ClientList() {
       );
     }) ?? [];
 
+  const totalCount = clients?.filter((c) => c.role === 'CLIENT').length || 0;
+  const activeCount = clients?.filter((c) => c.role === 'CLIENT' && c.enabled).length || 0;
+  const disabledCount = totalCount - activeCount;
+
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Clients"
+        title="Client Management"
         action={
           <Button onClick={() => navigate('/admin/clients/new')}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Client
+            Register New Client
           </Button>
         }
       />
 
-      <div className="mb-6 max-w-md">
-        <Input
-          placeholder="Search by name, username, email, or mobile..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          leftIcon={<Search className="h-4 w-4" />}
-        />
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-[#141A24] rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('ALL')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              statusFilter === 'ALL'
+                ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-xs'
+                : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            All Clients ({totalCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('ACTIVE')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              statusFilter === 'ACTIVE'
+                ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                : 'text-gray-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
+            }`}
+          >
+            Active ({activeCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('DISABLED')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              statusFilter === 'DISABLED'
+                ? 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 shadow-xs'
+                : 'text-gray-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400'
+            }`}
+          >
+            Disabled ({disabledCount})
+          </button>
+        </div>
+
+        {/* Search input */}
+        <div className="w-full sm:w-80">
+          <Input
+            placeholder="Search by name, username, email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            leftIcon={<Search className="h-4 w-4" />}
+          />
+        </div>
       </div>
 
       {isLoading ? (
@@ -184,12 +248,12 @@ export default function ClientList() {
       ) : filteredClients.length === 0 ? (
         <EmptyState
           title="No clients found"
-          description="Try adjusting your search or add a new client."
+          description="Try adjusting your search query or status filter."
         />
       ) : (
         <div className="w-full space-y-3">
           {/* Column Header Guide Bar */}
-          <div className="hidden lg:grid lg:grid-cols-[120px_minmax(130px,1.4fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_75px_75px_minmax(85px,0.9fr)_80px] items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider select-none guide-bar-offwhite mb-1">
+          <div className="hidden lg:grid lg:grid-cols-[120px_minmax(130px,1.4fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_75px_75px_minmax(85px,0.9fr)_110px] items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider select-none guide-bar-offwhite mb-1">
             <div>Public ID</div>
             <div>Name / Username</div>
             <div>Email</div>
@@ -204,7 +268,7 @@ export default function ClientList() {
           {filteredClients.map((client) => (
             <div
               key={client.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 lg:grid-cols-[120px_minmax(130px,1.4fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_75px_75px_minmax(85px,0.9fr)_80px] items-center gap-3 px-5 py-3.5"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 lg:grid-cols-[120px_minmax(130px,1.4fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_75px_75px_minmax(85px,0.9fr)_110px] items-center gap-3 px-5 py-3.5"
             >
               <div className="min-w-0">
                 <span className="font-mono text-xs text-gray-600 dark:text-slate-300 bg-gray-100/90 dark:bg-[#0E131C] px-2 py-0.5 rounded border border-gray-200/80 dark:border-[#1F2837] inline-block truncate max-w-[120px]" title={client.publicId}>
@@ -212,7 +276,14 @@ export default function ClientList() {
                 </span>
               </div>
               <div className="truncate min-w-0">
-                <div className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{client.ownerName || client.username}</div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/admin/clients/${client.publicId}`)}
+                  className="font-semibold text-sm text-gray-900 dark:text-slate-100 hover:text-[var(--color-primary)] truncate text-left cursor-pointer transition-colors block"
+                  title="Click to view 360° Profile"
+                >
+                  {client.ownerName || client.username}
+                </button>
                 {client.ownerName && <div className="text-xs text-gray-500 dark:text-slate-400 truncate">@{client.username}</div>}
               </div>
               <div className="text-sm text-gray-700 dark:text-slate-300 truncate min-w-0" title={client.email}>{client.email}</div>
@@ -230,14 +301,27 @@ export default function ClientList() {
               <div className="text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap min-w-0">
                 {formatDate(client.createdAt)}
               </div>
-              <div className="flex items-center justify-end gap-1.5 min-w-0">
+              <div className="flex items-center justify-end gap-1 min-w-0">
+                {/* 360 View Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                  onClick={() => navigate(`/admin/clients/${client.publicId}`)}
+                  title="Inspect Client 360° Profile"
+                  aria-label={`Inspect ${client.ownerName || client.username}`}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
+
+                {/* Edit Button */}
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-blue-50 dark:hover:bg-sky-950/30 transition-colors"
                   onClick={() => handleOpenEditModal(client)}
                   disabled={loadingEditId === client.publicId}
-                  title="Edit Client"
+                  title="Edit Client Details"
                   aria-label={`Edit ${client.ownerName || client.username}`}
                 >
                   {loadingEditId === client.publicId ? (
@@ -246,6 +330,8 @@ export default function ClientList() {
                     <Edit2 className="h-3.5 w-3.5" />
                   )}
                 </Button>
+
+                {/* Status Toggle Button */}
                 {client.role !== 'ADMIN' && (
                   <Button
                     variant="ghost"
@@ -264,6 +350,23 @@ export default function ClientList() {
                     {client.enabled ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                   </Button>
                 )}
+
+                {/* Unlock Account Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-gray-400 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                  onClick={() => {
+                    if (window.confirm(`Reset lock status and failed attempts for client (${client.ownerName || client.username})?`)) {
+                      unlockMutation.mutate(client.publicId);
+                    }
+                  }}
+                  disabled={unlockMutation.isPending}
+                  title="Unlock Client Account"
+                  aria-label={`Unlock ${client.ownerName || client.username}`}
+                >
+                  <Unlock className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
           ))}

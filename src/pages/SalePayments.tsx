@@ -294,7 +294,7 @@ export default function SalePayments() {
 
   const onSubmit = (data: RequestSalePaymentDTO) => {
     if (selectedSale && data.amountReceived > selectedSale.pendingAmount) {
-      toast.error(`Amount received cannot exceed pending balance of ₹${selectedSale.pendingAmount.toLocaleString('en-IN')}`);
+      toast.error(`Amount received cannot exceed pending balance of ${formatCurrency(selectedSale.pendingAmount)}`);
       return;
     }
     mutation.mutate(data);
@@ -730,7 +730,7 @@ export default function SalePayments() {
               <option value="">Select an unpaid invoice…</option>
               {pendingSales.map(s => (
                 <option key={s.publicId} value={s.publicId}>
-                  {s.saleNumber} — {s.customerName || 'Unknown Customer'} — Pending: ₹{s.pendingAmount?.toLocaleString('en-IN')} (Total: ₹{s.totalAmount?.toLocaleString('en-IN')})
+                  {s.saleNumber} — {s.customerName || 'Unknown Customer'} — Pending: {formatCurrency(s.pendingAmount)} (Total: {formatCurrency(s.totalAmount)})
                 </option>
               ))}
             </select>
@@ -743,7 +743,7 @@ export default function SalePayments() {
           <div className="grid grid-cols-2 gap-4">
             <Input label="Payment Date *" type="date" {...register('paymentDate')} error={errors.paymentDate?.message} />
             <Input
-              label={selectedSale ? `Amount Received * (Pending: ₹${selectedSale.pendingAmount.toLocaleString('en-IN')})` : 'Amount Received *'}
+              label={selectedSale ? `Amount Received * (Pending: ${formatCurrency(selectedSale.pendingAmount)})` : 'Amount Received *'}
               type="number"
               step="0.01"
               max={selectedSale?.pendingAmount}
@@ -751,7 +751,7 @@ export default function SalePayments() {
                 valueAsNumber: true,
                 validate: (val) => {
                   if (selectedSale && val > selectedSale.pendingAmount) {
-                    return `Amount cannot exceed pending balance of ₹${selectedSale.pendingAmount.toLocaleString('en-IN')}`;
+                    return `Amount cannot exceed pending balance of ${formatCurrency(selectedSale.pendingAmount)}`;
                   }
                   return true;
                 }

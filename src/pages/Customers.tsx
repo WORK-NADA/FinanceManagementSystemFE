@@ -340,11 +340,11 @@ export default function Customers() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Customer Name *" placeholder="e.g. Acme Corporation" {...register('customerName')} error={errors.customerName?.message} />
-            <Input label="Contact Person (Optional)" placeholder="e.g. Ramesh Patel" {...register('contactPerson')} error={errors.contactPerson?.message} />
+            <Input label="Customer Name *" placeholder="e.g. Acme Corporation" maxLength={150} {...register('customerName')} error={errors.customerName?.message} />
+            <Input label="Contact Person (Optional)" placeholder="e.g. Ramesh Patel" maxLength={100} {...register('contactPerson')} error={errors.contactPerson?.message} />
             <Input label="Mobile Number *" placeholder="10-digit mobile" maxLength={10} {...register('mobileNumber')} error={errors.mobileNumber?.message} />
             <Input label="Alternate Mobile (Optional)" placeholder="10-digit mobile (optional)" maxLength={10} {...register('alternateMobileNumber')} error={errors.alternateMobileNumber?.message} />
-            <Input label="Email (Optional)" type="email" placeholder="e.g. customer@example.com" {...register('email')} error={errors.email?.message} />
+            <Input label="Email (Optional)" type="email" placeholder="e.g. customer@example.com" maxLength={150} {...register('email')} error={errors.email?.message} />
             <Input 
               label="GST Number (Optional)" 
               placeholder="15-character GSTIN (optional)" 
@@ -357,8 +357,8 @@ export default function Customers() {
               })} 
               error={errors.gstNumber?.message} 
             />
-            <Input label="Opening Balance" type="number" step="0.01" {...register('openingBalance', { valueAsNumber: true })} error={errors.openingBalance?.message} />
-            <Input label="Payment Terms (Days)" type="number" {...register('paymentTerms', { valueAsNumber: true })} error={errors.paymentTerms?.message} />
+            <Input label="Opening Balance" type="number" step="0.01" min={0} {...register('openingBalance', { valueAsNumber: true })} error={errors.openingBalance?.message} />
+            <Input label="Payment Terms (Days)" type="number" min={0} max={365} {...register('paymentTerms', { valueAsNumber: true })} error={errors.paymentTerms?.message} />
           </div>
 
           <div className="border-t border-gray-100 dark:border-[#1F2837] pt-5 mt-2">
@@ -367,12 +367,12 @@ export default function Customers() {
               <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">Optional</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label="Address Line 1 (Optional)" placeholder="Street address or building" {...register('address.addressLine1')} error={errors.address?.addressLine1?.message} />
-              <Input label="Address Line 2 (Optional)" placeholder="Area, landmark or floor" {...register('address.addressLine2')} error={errors.address?.addressLine2?.message} />
-              <Input label="City (Optional)" placeholder="City" {...register('address.city')} error={errors.address?.city?.message} />
-              <Input label="State (Optional)" placeholder="State" {...register('address.state')} error={errors.address?.state?.message} />
+              <Input label="Address Line 1 (Optional)" placeholder="Street address or building" maxLength={150} {...register('address.addressLine1')} error={errors.address?.addressLine1?.message} />
+              <Input label="Address Line 2 (Optional)" placeholder="Area, landmark or floor" maxLength={150} {...register('address.addressLine2')} error={errors.address?.addressLine2?.message} />
+              <Input label="City (Optional)" placeholder="City" maxLength={100} {...register('address.city')} error={errors.address?.city?.message} />
+              <Input label="State (Optional)" placeholder="State" maxLength={100} {...register('address.state')} error={errors.address?.state?.message} />
               <Input label="Pincode (Optional)" placeholder="6-digit PIN" maxLength={6} {...register('address.pincode')} error={errors.address?.pincode?.message} />
-              <Input label="Country (Optional)" placeholder="India" {...register('address.country')} error={errors.address?.country?.message} />
+              <Input label="Country (Optional)" placeholder="India" maxLength={100} {...register('address.country')} error={errors.address?.country?.message} />
             </div>
           </div>
 

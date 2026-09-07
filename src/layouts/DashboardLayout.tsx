@@ -3,7 +3,6 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Users, 
   LayoutDashboard, 
-  Settings, 
   LogOut, 
   Menu,
   X,
@@ -22,6 +21,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Pin,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -85,7 +85,7 @@ export default function DashboardLayout() {
     navigate('/login');
   };
 
-  const commonNavigation = [
+  const clientNavigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Customers', href: '/dashboard/customers', icon: Users },
     { name: 'Suppliers', href: '/dashboard/suppliers', icon: UserSquare2 },
@@ -102,12 +102,19 @@ export default function DashboardLayout() {
   ];
 
   const adminNavigation = [
-    { name: 'Clients', href: '/admin/clients', icon: Settings },
+    { name: 'Platform Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Client Management', href: '/admin/clients', icon: Users },
+    { name: 'Global Sales', href: '/admin/sales', icon: Receipt },
+    { name: 'Global Purchases', href: '/admin/purchases', icon: ShoppingCart },
+    { name: 'Global Payments', href: '/admin/payments', icon: Wallet },
+    { name: 'Global Inventory', href: '/admin/inventory', icon: Package },
+    { name: 'Global Expenses', href: '/admin/expenses', icon: Landmark },
+    { name: 'Platform Reports', href: '/admin/reports', icon: PieChart },
+    { name: 'System Health', href: '/admin/system', icon: ShieldCheck },
   ];
 
-  const navigation = user?.role === 'ADMIN' 
-    ? [...commonNavigation, ...adminNavigation]
-    : commonNavigation;
+  const navigation = user?.role === 'ADMIN' ? adminNavigation : clientNavigation;
+  const defaultHome = user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
 
   return (
     <div className="min-h-screen bg-[var(--color-surface-bg)]">
@@ -123,7 +130,7 @@ export default function DashboardLayout() {
               showSubtitle
               onClick={() => {
                 setSidebarOpen(false);
-                navigate('/dashboard');
+                navigate(defaultHome);
               }}
             />
             <button
@@ -188,7 +195,7 @@ export default function DashboardLayout() {
               variant="on-dark"
               showText={isEffectiveExpanded}
               showSubtitle={isEffectiveExpanded}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(defaultHome)}
               className="transition-all duration-300 active:scale-[0.98]"
             />
           </div>
@@ -368,7 +375,7 @@ export default function DashboardLayout() {
                 variant={theme === 'dark' ? 'on-dark' : 'on-light'}
                 showText
                 className="lg:hidden"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate(defaultHome)}
               />
               <div className="hidden lg:flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
                 <button
@@ -386,7 +393,7 @@ export default function DashboardLayout() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate(defaultHome)}
                   className="font-devanagari font-bold text-gray-900 dark:text-slate-100 text-lg tracking-wide hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                   title="व्यापार Dashboard"
                 >
@@ -396,7 +403,29 @@ export default function DashboardLayout() {
                 <span className="font-medium text-gray-600 dark:text-slate-300 capitalize">
                   {location.pathname === '/profile' 
                     ? 'My Profile' 
-                    : location.pathname.replace('/dashboard/', '').replace('/dashboard', 'Dashboard').replace('/admin/', 'Admin / ').replace('-', ' ') || 'Overview'}
+                    : location.pathname === '/admin/dashboard'
+                    ? 'Admin / Platform Overview'
+                    : location.pathname === '/admin/clients'
+                    ? 'Admin / Client Management'
+                    : location.pathname === '/admin/clients/new'
+                    ? 'Admin / Register Client'
+                    : location.pathname.startsWith('/admin/clients/')
+                    ? 'Admin / Client 360° Profile'
+                    : location.pathname === '/admin/sales'
+                    ? 'Admin / Global Sales'
+                    : location.pathname === '/admin/purchases'
+                    ? 'Admin / Global Purchases'
+                    : location.pathname === '/admin/payments'
+                    ? 'Admin / Global Payments'
+                    : location.pathname === '/admin/inventory'
+                    ? 'Admin / Global Inventory'
+                    : location.pathname === '/admin/expenses'
+                    ? 'Admin / Global Expenses'
+                    : location.pathname === '/admin/reports'
+                    ? 'Admin / Platform Reports'
+                    : location.pathname === '/admin/system'
+                    ? 'Admin / System Health'
+                    : location.pathname.replace('/dashboard/', '').replace('/dashboard', 'Dashboard').replace('-', ' ') || 'Overview'}
                 </span>
               </div>
             </div>

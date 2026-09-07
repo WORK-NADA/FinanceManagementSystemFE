@@ -11,6 +11,7 @@ import {
   type RequestStockDTO, type ResponseStockDTO
 } from '../types/stock';
 import { Button, Modal, Input, Badge, PageHeader, ErrorState, EmptyState } from '@/components';
+import { formatNumber } from '@/lib';
 import { toast } from '../store/toastStore';
 
 export default function Stock() {
@@ -122,8 +123,8 @@ export default function Stock() {
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tracked Items</span>
             <Boxes className="h-4 w-4 text-blue-500 dark:text-sky-400" />
           </div>
-          <p className="text-xl sm:text-2xl font-serif font-bold text-blue-700 dark:text-sky-400 mt-1">
-            {totalItems} Items
+          <p className="text-xl sm:text-2xl font-serif font-bold text-blue-700 dark:text-sky-400 mt-1 tabular-nums">
+            {formatNumber(totalItems)} Items
           </p>
           <span className="text-[11px] text-slate-400 dark:text-slate-500">Total items tracked</span>
         </div>
@@ -133,8 +134,8 @@ export default function Stock() {
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sufficient Stock</span>
             <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
           </div>
-          <p className="text-xl sm:text-2xl font-serif font-bold text-emerald-700 dark:text-emerald-400 mt-1">
-            {healthyCount} Items
+          <p className="text-xl sm:text-2xl font-serif font-bold text-emerald-700 dark:text-emerald-400 mt-1 tabular-nums">
+            {formatNumber(healthyCount)} Items
           </p>
           <span className="text-[11px] text-slate-400 dark:text-slate-500">Above minimum safe quantity</span>
         </div>
@@ -152,10 +153,10 @@ export default function Stock() {
               lowStockCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500'
             }`} />
           </div>
-          <p className={`text-xl sm:text-2xl font-serif font-bold mt-1 ${
+          <p className={`text-xl sm:text-2xl font-serif font-bold mt-1 tabular-nums ${
             lowStockCount > 0 ? 'text-rose-800 dark:text-rose-200' : 'text-slate-800 dark:text-slate-100'
           }`}>
-            {lowStockCount} {lowStockCount === 1 ? 'Item' : 'Items'}
+            {formatNumber(lowStockCount)} {lowStockCount === 1 ? 'Item' : 'Items'}
           </p>
           <span className={`text-[11px] ${
             lowStockCount > 0 ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-slate-400 dark:text-slate-500'
@@ -168,7 +169,7 @@ export default function Stock() {
       {/* Search / Filter bar */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white dark:bg-[#141A24] p-5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
         <div className="text-sm font-medium text-gray-500 dark:text-slate-400">
-          Showing: <strong className="text-gray-900 dark:text-slate-100 font-semibold tabular-nums">{filteredStocks.length}</strong> items
+          Showing: <strong className="text-gray-900 dark:text-slate-100 font-semibold tabular-nums">{formatNumber(filteredStocks.length)}</strong> items
         </div>
 
         <div className="w-full sm:w-80">
@@ -226,11 +227,11 @@ export default function Stock() {
                 )}
               </div>
                 <div className="text-sm">
-                  <span className={`font-bold tabular-nums ${s.isLowStock ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{s.currentQuantity}</span>{' '}
+                  <span className={`font-bold tabular-nums ${s.isLowStock ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatNumber(s.currentQuantity)}</span>{' '}
                   <span className="text-gray-500 dark:text-slate-400 text-xs">{s.unit}</span>
                 </div>
                 <div className="text-sm">
-                  <span className="tabular-nums font-medium text-gray-700 dark:text-slate-300">{s.minimumStockLevel}</span>
+                  <span className="tabular-nums font-medium text-gray-700 dark:text-slate-300">{formatNumber(s.minimumStockLevel)}</span>
                 </div>
                 <div className="flex items-center justify-end gap-1.5">
                   <Button

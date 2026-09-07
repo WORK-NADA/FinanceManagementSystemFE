@@ -18,7 +18,7 @@ import {
   getSupplierOutstandingReport
 } from '../api/report';
 import { getPartners } from '../api/partner';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { Button, Badge } from '@/components';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
 import {
@@ -216,10 +216,10 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
           sectionTitle: 'Financial Executive Summary',
           headers: ['Financial Metric', 'Amount (INR)', 'Analysis & Notes'],
           rows: [
-            ['Total Sales Revenue', formatCsvNumber(totalRevenue), `${salesCount} Sales Invoices`],
-            ['Total Purchases Cost', formatCsvNumber(totalCost), `${purchasesCount} Purchase Bills`],
+            ['Total Sales Revenue', formatCsvNumber(totalRevenue), `${formatNumber(salesCount)} Sales Invoices`],
+            ['Total Purchases Cost', formatCsvNumber(totalCost), `${formatNumber(purchasesCount)} Purchase Bills`],
             ['Gross Profit / (Loss)', formatCsvNumber(grossProfit), 'Total Sales Revenue - Total Purchases Cost'],
-            ['Business Operating Expenses', formatCsvNumber(selectedCategory ? selectedCategoryTotal : totalExpenses), `${expensesCount} Expense Records${selectedCategory ? ` (Filtered by: ${selectedCategory.replace(/_/g, ' ')})` : ''}`],
+            ['Business Operating Expenses', formatCsvNumber(selectedCategory ? selectedCategoryTotal : totalExpenses), `${formatNumber(expensesCount)} Expense Records${selectedCategory ? ` (Filtered by: ${selectedCategory.replace(/_/g, ' ')})` : ''}`],
             ['Net Profit / (Loss)', formatCsvNumber(netProfit), 'Gross Profit - Operating Expenses'],
             ['Net Profit Margin (%)', `${profitMargin.toFixed(2)}%`, '(Net Profit / Total Sales Revenue) * 100'],
           ],
@@ -308,7 +308,7 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Sales Income</p>
-              <Badge variant="success" className="text-[10px]">{salesCount} Invoices</Badge>
+              <Badge variant="success" className="text-[10px] tabular-nums">{formatNumber(salesCount)} Invoices</Badge>
             </div>
             <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-emerald-700 dark:text-emerald-400">
               {isLoading ? '...' : formatCurrency(totalRevenue)}
@@ -320,7 +320,7 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Purchases Cost</p>
-              <Badge variant="danger" className="text-[10px]">{purchasesCount} Bills</Badge>
+              <Badge variant="danger" className="text-[10px] tabular-nums">{formatNumber(purchasesCount)} Bills</Badge>
             </div>
             <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-rose-700 dark:text-rose-400">
               {isLoading ? '...' : formatCurrency(totalCost)}
@@ -348,8 +348,8 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">
                 {selectedCategory ? `${selectedCategory.replace(/_/g, ' ')} Exp.` : 'Expenses'}
               </p>
-              <Badge variant="warning" className="text-[10px]">
-                {selectedCategory ? `${filteredCategoryBreakdown.length} Cat.` : `${expensesCount} Records`}
+              <Badge variant="warning" className="text-[10px] tabular-nums">
+                {selectedCategory ? `${formatNumber(filteredCategoryBreakdown.length)} Cat.` : `${formatNumber(expensesCount)} Records`}
               </Badge>
             </div>
             <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-amber-700 dark:text-amber-400">
@@ -530,7 +530,7 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
         { label: 'Reporting Period', value: `${startDate} to ${endDate}` },
         { label: 'Generated On', value: formatCsvTimestamp() },
         { label: 'Active Filters', value: filterDesc },
-        { label: 'Total Filtered Invoices', value: filteredSales.length },
+        { label: 'Total Filtered Invoices', value: formatNumber(filteredSales.length) },
         { label: 'Total Filtered Revenue (INR)', value: formatCsvNumber(totalFilteredValue) },
       ],
       sections: [
@@ -582,8 +582,8 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
       {/* Top Controls & Export */}
       <div className="flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
-          <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">{filteredSales.length}</span>
-          {filteredSales.length !== sales.length ? ` of ${sales.length} transactions (filtered)` : ` transactions in period`}
+          <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">{formatNumber(filteredSales.length)}</span>
+          {filteredSales.length !== sales.length ? ` of ${formatNumber(sales.length)} transactions (filtered)` : ` transactions in period`}
         </div>
         <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
           <Download className="h-4 w-4" /> Export Filtered CSV
@@ -679,7 +679,7 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={4} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Sales Value ({filteredSales.length} {filteredSales.length === 1 ? 'sale' : 'sales'})
+                  Total Sales Value ({formatNumber(filteredSales.length)} {filteredSales.length === 1 ? 'sale' : 'sales'})
                 </td>
                 <td className="px-4 py-3 tabular-nums text-emerald-700 dark:text-emerald-400 font-bold text-base">
                   {formatCurrency(totalFilteredValue)}
@@ -763,7 +763,7 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
         { label: 'Reporting Period', value: `${startDate} to ${endDate}` },
         { label: 'Generated On', value: formatCsvTimestamp() },
         { label: 'Active Filters', value: filterDesc },
-        { label: 'Total Filtered Bills', value: filteredPurchases.length },
+        { label: 'Total Filtered Bills', value: formatNumber(filteredPurchases.length) },
         { label: 'Total Filtered Cost (INR)', value: formatCsvNumber(totalFilteredCost) },
       ],
       sections: [
@@ -815,8 +815,8 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
       {/* Top Controls & Export */}
       <div className="flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
-          <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">{filteredPurchases.length}</span>
-          {filteredPurchases.length !== purchases.length ? ` of ${purchases.length} bills (filtered)` : ` purchase bills recorded`}
+          <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">{formatNumber(filteredPurchases.length)}</span>
+          {filteredPurchases.length !== purchases.length ? ` of ${formatNumber(purchases.length)} bills (filtered)` : ` purchase bills recorded`}
         </div>
         <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
           <Download className="h-4 w-4" /> Export Filtered CSV
@@ -912,7 +912,7 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={4} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Purchases Cost ({filteredPurchases.length} {filteredPurchases.length === 1 ? 'bill' : 'bills'})
+                  Total Purchases Cost ({formatNumber(filteredPurchases.length)} {filteredPurchases.length === 1 ? 'bill' : 'bills'})
                 </td>
                 <td className="px-4 py-3 tabular-nums text-rose-700 dark:text-rose-400 font-bold text-base">
                   {formatCurrency(totalFilteredCost)}
@@ -990,7 +990,7 @@ function ExpensesTab({ startDate, endDate }: { startDate: string; endDate: strin
         { label: 'Reporting Period', value: `${startDate} to ${endDate}` },
         { label: 'Generated On', value: formatCsvTimestamp() },
         { label: 'Active Filters', value: filterDesc },
-        { label: 'Total Filtered Records', value: filteredExpenses.length },
+        { label: 'Total Filtered Records', value: formatNumber(filteredExpenses.length) },
         { label: 'Total Filtered Expenses (INR)', value: formatCsvNumber(totalFilteredAmount) },
       ],
       sections: [
@@ -1030,8 +1030,8 @@ function ExpensesTab({ startDate, endDate }: { startDate: string; endDate: strin
       {/* Top Controls & Export */}
       <div className="flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
-          <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">{filteredExpenses.length}</span>
-          {filteredExpenses.length !== expenses.length ? ` of ${expenses.length} records (filtered)` : ` expense records`}
+          <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">{formatNumber(filteredExpenses.length)}</span>
+          {filteredExpenses.length !== expenses.length ? ` of ${formatNumber(expenses.length)} records (filtered)` : ` expense records`}
         </div>
         <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
           <Download className="h-4 w-4" /> Export Filtered CSV
@@ -1120,7 +1120,7 @@ function ExpensesTab({ startDate, endDate }: { startDate: string; endDate: strin
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={4} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Business Expenses ({filteredExpenses.length} {filteredExpenses.length === 1 ? 'record' : 'records'})
+                  Total Business Expenses ({formatNumber(filteredExpenses.length)} {filteredExpenses.length === 1 ? 'record' : 'records'})
                 </td>
                 <td className="px-4 py-3 tabular-nums text-rose-700 dark:text-rose-400 font-bold text-base">
                   {formatCurrency(totalFilteredAmount)}
@@ -1301,7 +1301,7 @@ function StockTab() {
               {isLoading ? '...' : formatCurrency(totalPortfolioValuation)}
             </p>
             <p className="text-[11px] text-blue-600 mt-1">
-              For {filteredStocks.length} {filteredStocks.length !== stocks.length ? `(of ${stocks.length})` : ''} items
+              For {formatNumber(filteredStocks.length)} {filteredStocks.length !== stocks.length ? `(of ${formatNumber(stocks.length)})` : ''} items
             </p>
           </CardContent>
         </Card>
@@ -1310,7 +1310,7 @@ function StockTab() {
           <CardContent className="pt-5 pb-4">
             <p className="text-xs font-semibold text-emerald-900 uppercase tracking-wide">Total Stock Quantity</p>
             <p className="text-2xl font-bold tabular-nums mt-1 text-emerald-800">
-              {isLoading ? '...' : `${totalPhysicalQuantity.toLocaleString()}`}
+              {isLoading ? '...' : `${formatNumber(totalPhysicalQuantity)}`}
             </p>
             <p className="text-[11px] text-emerald-600 mt-1">Physical count across filtered catalog</p>
           </CardContent>
@@ -1320,7 +1320,7 @@ function StockTab() {
           <CardContent className="pt-5 pb-4">
             <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Stock Health</p>
             <p className={`text-2xl font-bold tabular-nums mt-1 ${lowStockCount > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
-              {isLoading ? '...' : lowStockCount === 0 ? 'Optimal' : `${lowStockCount} Items Low`}
+              {isLoading ? '...' : lowStockCount === 0 ? 'Optimal' : `${formatNumber(lowStockCount)} Items Low`}
             </p>
             <p className="text-[11px] text-gray-500 mt-1">
               {lowStockCount > 0 ? 'Reordering recommended soon' : 'All stock levels healthy'}
@@ -1363,9 +1363,9 @@ function StockTab() {
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-slate-100">{s.rawMaterial}</td>
                     <td className="px-4 py-3 text-gray-500 font-mono text-xs">{s.unit}</td>
                     <td className={`px-4 py-3 tabular-nums font-semibold ${status !== 'HEALTHY' ? 'text-amber-700' : 'text-gray-900 dark:text-slate-100'}`}>
-                      {s.currentQuantity.toLocaleString()}
+                      {formatNumber(s.currentQuantity)}
                     </td>
-                    <td className="px-4 py-3 tabular-nums text-gray-400">{s.minimumStockLevel.toLocaleString()}</td>
+                    <td className="px-4 py-3 tabular-nums text-gray-400">{formatNumber(s.minimumStockLevel)}</td>
                     <td className="px-4 py-3 tabular-nums text-gray-700 dark:text-slate-300">
                       {s.valuationRate != null && s.valuationRate > 0 ? formatCurrency(s.valuationRate) : <span className="text-gray-400 text-xs">—</span>}
                     </td>
@@ -1396,9 +1396,9 @@ function StockTab() {
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={2} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Filtered Inventory Stock ({filteredStocks.length} items)
+                  Total Filtered Inventory Stock ({formatNumber(filteredStocks.length)} items)
                 </td>
-                <td className="px-4 py-3 tabular-nums text-gray-900 dark:text-slate-100 font-bold">{totalPhysicalQuantity.toLocaleString()}</td>
+                <td className="px-4 py-3 tabular-nums text-gray-900 dark:text-slate-100 font-bold">{formatNumber(totalPhysicalQuantity)}</td>
                 <td colSpan={2} />
                 <td className="px-4 py-3 tabular-nums text-blue-800 dark:text-sky-400 font-bold text-base">
                   {formatCurrency(totalPortfolioValuation)}
@@ -1471,7 +1471,7 @@ function CustomerOutstandingTab() {
   const handleExport = () => {
     const filterDesc = [
       selectedCity && `City: ${selectedCity}`,
-      balanceThreshold && `Threshold: > ₹${balanceThreshold}`,
+      balanceThreshold && `Threshold: > ${formatCurrency(Number(balanceThreshold))}`,
       searchQuery && `Search: "${searchQuery}"`
     ].filter(Boolean).join(' | ') || 'All Customers';
 
@@ -1485,7 +1485,7 @@ function CustomerOutstandingTab() {
         { label: 'As of Date', value: currentDateStr },
         { label: 'Generated On', value: formatCsvTimestamp() },
         { label: 'Active Filters', value: filterDesc },
-        { label: 'Total Debtors Count', value: filteredCustomers.length },
+        { label: 'Total Debtors Count', value: formatNumber(filteredCustomers.length) },
         { label: 'Total Unpaid Receivables (INR)', value: formatCsvNumber(totalOutstanding) },
       ],
       sections: [
@@ -1585,7 +1585,7 @@ function CustomerOutstandingTab() {
               {isLoading ? '...' : formatCurrency(totalOutstanding)}
             </p>
             <p className="text-[11px] text-red-600 mt-1">
-              Pending from {filteredCustomers.length} {filteredCustomers.length !== outstanding.length ? `(of ${outstanding.length})` : ''} customers
+              Pending from {formatNumber(filteredCustomers.length)} {filteredCustomers.length !== outstanding.length ? `(of ${formatNumber(outstanding.length)})` : ''} customers
             </p>
           </CardContent>
         </Card>
@@ -1656,7 +1656,7 @@ function CustomerOutstandingTab() {
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={2} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Filtered Unpaid Balance ({filteredCustomers.length} {filteredCustomers.length === 1 ? 'customer' : 'customers'})
+                  Total Filtered Unpaid Balance ({formatNumber(filteredCustomers.length)} {filteredCustomers.length === 1 ? 'customer' : 'customers'})
                 </td>
                 <td className="px-4 py-3 tabular-nums text-gray-600 dark:text-slate-400">{formatCurrency(totalInvoiced)}</td>
                 <td className="px-4 py-3 tabular-nums text-emerald-700 dark:text-emerald-400">{formatCurrency(totalReceived)}</td>
@@ -1729,7 +1729,7 @@ function SupplierOutstandingTab() {
   const handleExport = () => {
     const filterDesc = [
       selectedCity && `City: ${selectedCity}`,
-      balanceThreshold && `Threshold: > ₹${balanceThreshold}`,
+      balanceThreshold && `Threshold: > ${formatCurrency(Number(balanceThreshold))}`,
       searchQuery && `Search: "${searchQuery}"`
     ].filter(Boolean).join(' | ') || 'All Suppliers';
 
@@ -1743,7 +1743,7 @@ function SupplierOutstandingTab() {
         { label: 'As of Date', value: currentDateStr },
         { label: 'Generated On', value: formatCsvTimestamp() },
         { label: 'Active Filters', value: filterDesc },
-        { label: 'Total Creditors Count', value: filteredSuppliers.length },
+        { label: 'Total Creditors Count', value: formatNumber(filteredSuppliers.length) },
         { label: 'Total Unpaid Payables (INR)', value: formatCsvNumber(totalOutstanding) },
       ],
       sections: [
@@ -1843,7 +1843,7 @@ function SupplierOutstandingTab() {
               {isLoading ? '...' : formatCurrency(totalOutstanding)}
             </p>
             <p className="text-[11px] text-rose-600 mt-1">
-              Pending payments to {filteredSuppliers.length} {filteredSuppliers.length !== outstanding.length ? `(of ${outstanding.length})` : ''} suppliers
+              Pending payments to {formatNumber(filteredSuppliers.length)} {filteredSuppliers.length !== outstanding.length ? `(of ${formatNumber(outstanding.length)})` : ''} suppliers
             </p>
           </CardContent>
         </Card>
@@ -1914,7 +1914,7 @@ function SupplierOutstandingTab() {
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={2} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Filtered Unpaid Balance ({filteredSuppliers.length} {filteredSuppliers.length === 1 ? 'supplier' : 'suppliers'})
+                  Total Filtered Unpaid Balance ({formatNumber(filteredSuppliers.length)} {filteredSuppliers.length === 1 ? 'supplier' : 'suppliers'})
                 </td>
                 <td className="px-4 py-3 tabular-nums text-gray-600 dark:text-slate-400">{formatCurrency(totalBilled)}</td>
                 <td className="px-4 py-3 tabular-nums text-emerald-700 dark:text-emerald-400">{formatCurrency(totalPaid)}</td>
@@ -1940,6 +1940,11 @@ function PartnerEquityTab() {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const handleResetFilters = () => {
+    setSelectedStatus('');
+    setSearchQuery('');
+  };
+
   const filteredPartners = useMemo(() => {
     return partners.filter(p => {
       if (selectedStatus === 'ACTIVE' && !p.isActive) return false;
@@ -1956,11 +1961,6 @@ function PartnerEquityTab() {
   }, [partners, selectedStatus, searchQuery]);
 
   const hasSecondaryFilters = selectedStatus !== '' || searchQuery.trim() !== '';
-
-  const handleResetFilters = () => {
-    setSelectedStatus('');
-    setSearchQuery('');
-  };
 
   const totalAllocatedPercentage = useMemo(() => {
     return filteredPartners
@@ -2093,7 +2093,7 @@ function PartnerEquityTab() {
               <Users className="h-4 w-4 text-blue-600" />
             </div>
             <p className="text-2xl font-bold tabular-nums mt-1 text-blue-800">
-              {isLoading ? '...' : `${activeCount} Partners`}
+              {isLoading ? '...' : `${formatNumber(activeCount)} Partners`}
             </p>
             <p className="text-[11px] text-blue-600 mt-1">Eligible for profit sharing payouts</p>
           </CardContent>
@@ -2103,10 +2103,10 @@ function PartnerEquityTab() {
           <CardContent className="pt-5 pb-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-slate-300">Filtered Partners</p>
             <p className="text-2xl font-bold tabular-nums mt-1 text-gray-900 dark:text-slate-100">
-              {isLoading ? '...' : `${filteredPartners.length} Profiles`}
+              {isLoading ? '...' : `${formatNumber(filteredPartners.length)} Profiles`}
             </p>
             <p className="text-[11px] text-gray-500 mt-1">
-              {filteredPartners.length !== partners.length ? `Showing ${filteredPartners.length} of ${partners.length} total` : `Includes ${partners.length - activeCount} inactive partners`}
+              {filteredPartners.length !== partners.length ? `Showing ${formatNumber(filteredPartners.length)} of ${formatNumber(partners.length)} total` : `Includes ${formatNumber(partners.length - activeCount)} inactive partners`}
             </p>
           </CardContent>
         </Card>
@@ -2170,7 +2170,7 @@ function PartnerEquityTab() {
             <tfoot className="bg-gray-50 dark:bg-[#0E131C] border-t border-gray-200 dark:border-[#1F2837] font-semibold">
               <tr>
                 <td colSpan={3} className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">
-                  Total Allocated Profit Share ({filteredPartners.length} {filteredPartners.length === 1 ? 'partner' : 'partners'})
+                  Total Allocated Profit Share ({formatNumber(filteredPartners.length)} {filteredPartners.length === 1 ? 'partner' : 'partners'})
                 </td>
                 <td className={`px-4 py-3 tabular-nums font-bold ${isFullyAllocated ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'} text-base`}>
                   {totalAllocatedPercentage.toFixed(2)}%

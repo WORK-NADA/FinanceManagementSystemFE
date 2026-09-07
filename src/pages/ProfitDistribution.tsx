@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Calculator, History, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, 
-  RotateCcw, ArrowRight, Wallet, TrendingUp, Download, Calendar, DollarSign, 
-  Users, ArrowDownRight, RefreshCw, X
+  Calculator, History, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2,
+  RotateCcw, ArrowRight, Wallet, TrendingUp, TrendingDown, Download, Calendar, DollarSign, 
+  ArrowDownRight, RefreshCw, X, Trash2
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,8 @@ import {
   previewProfitDistribution,
   getLiveProfitOverview,
   recordProfitWithdrawal,
-  getProfitWithdrawals
+  getProfitWithdrawals,
+  deleteProfitWithdrawal
 } from '../api/partner';
 import { 
   profitDistributionSchema, 
@@ -26,7 +27,7 @@ import {
 import {
   Button, Modal, Input, PageHeader, ErrorState, EmptyState, Badge
 } from '@/components';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { toast } from '../store/toastStore';
 import { exportProfessionalCsv, formatCsvNumber, formatCsvDate, formatCsvTimestamp } from '../utils/csvExport';
 
@@ -110,6 +111,7 @@ export default function ProfitDistribution() {
       queryClient.invalidateQueries({ queryKey: ['live-profit-overview'] });
       queryClient.invalidateQueries({ queryKey: ['profit-withdrawals'] });
       queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
       setIsWithdrawModalOpen(false);
       resetWithdrawal();
       setSelectedPartner(null);
@@ -117,6 +119,20 @@ export default function ProfitDistribution() {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || err?.message || 'Failed to record withdrawal.');
+    },
+  });
+
+  const deleteWithdrawalMutation = useMutation({
+    mutationFn: deleteProfitWithdrawal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['live-profit-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['profit-withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
+      toast.success('Withdrawal record deleted successfully. Available balance restored.');
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to delete withdrawal record.');
     },
   });
 
@@ -225,7 +241,7 @@ export default function ProfitDistribution() {
       metadata: [
         { label: 'Date Filter Range', value: hasActiveDateFilter ? `${historyFromDate || 'Beginning'} to ${historyToDate || 'Today'}` : 'All Recorded Dates' },
         { label: 'Partner Filter', value: partnerFilter === 'ALL' ? 'All Partners' : (filteredWithdrawals[0]?.partnerName || partnerFilter) },
-        { label: 'Total Withdrawals Count', value: filteredWithdrawals.length },
+        { label: 'Total Withdrawals Count', value: formatNumber(filteredWithdrawals.length) },
         { label: 'Total Amount Withdrawn', value: `INR ${formatCsvNumber(totalWithdrawnAmount)}` },
         { label: 'Export Generated On', value: formatCsvTimestamp() },
       ],
@@ -235,8 +251,8 @@ export default function ProfitDistribution() {
           headers: [
             'Withdrawal Date',
             'Partner Name',
-            'Share %',
-            'Amount Withdrawn (INR)',
+            'Profit Share (%)',
+            'Withdrawn Amount (INR)',
             'Available Before (INR)',
             'Remaining After (INR)',
             'Payment Mode',
@@ -258,7 +274,7 @@ export default function ProfitDistribution() {
           ]),
           summaryRow: [
             'TOTAL',
-            `${filteredWithdrawals.length} Transactions`,
+            `${formatNumber(filteredWithdrawals.length)} Transactions`,
             '—',
             formatCsvNumber(totalWithdrawnAmount),
             '—',
@@ -313,28 +329,46 @@ export default function ProfitDistribution() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Card 1: Live Net Business Profit (Cash Basis) */}
-          <div className="bg-white dark:bg-[#141A24] p-5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs relative overflow-hidden flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">
-                Business Net Profit
-              </span>
-              <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-                <TrendingUp className="h-4 w-4" />
+          {(() => {
+            const netProfitVal = liveOverview?.netProfit ?? 0;
+            const isLoss = netProfitVal < 0;
+            return (
+              <div className={`bg-white dark:bg-[#141A24] p-5 rounded-2xl shadow-xs relative overflow-hidden flex flex-col justify-between border ${
+                isLoss
+                  ? 'border-rose-200 dark:border-rose-900/60'
+                  : 'border-gray-200/90 dark:border-[#1F2837]'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-semibold uppercase tracking-wider ${
+                    isLoss ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-slate-400'
+                  }`}>
+                    {isLoss ? 'Business Net Loss' : 'Business Net Profit'}
+                  </span>
+                  <div className={`p-2 rounded-xl ${
+                    isLoss
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
+                      : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                  }`}>
+                    {isLoss ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <p className={`text-2xl font-serif font-bold ${
+                    isLoss ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-slate-100'
+                  }`}>
+                    {formatCurrency(netProfitVal)}
+                  </p>
+                  <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span>Received: <strong className="text-emerald-700 dark:text-emerald-400">+{formatCurrency(liveOverview?.totalMoneyReceived ?? liveOverview?.totalSalesRevenue ?? 0)}</strong></span>
+                    <span>•</span>
+                    <span>Paid: <strong className="text-rose-700 dark:text-rose-400">-{formatCurrency(liveOverview?.totalMoneyPaid ?? liveOverview?.totalPurchasesCost ?? 0)}</strong></span>
+                    <span>•</span>
+                    <span>Expenses: <strong className="text-amber-700 dark:text-amber-400">-{formatCurrency(liveOverview?.totalExpenses ?? 0)}</strong></span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="mt-3">
-              <p className="text-2xl font-serif font-bold text-gray-900 dark:text-slate-100">
-                {formatCurrency(liveOverview?.netProfit ?? 0)}
-              </p>
-              <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                <span>Received: <strong className="text-emerald-700 dark:text-emerald-400">{formatCurrency(liveOverview?.totalMoneyReceived ?? liveOverview?.totalSalesRevenue ?? 0)}</strong></span>
-                <span>•</span>
-                <span>Paid: <strong className="text-rose-700 dark:text-rose-400">-{formatCurrency(liveOverview?.totalMoneyPaid ?? liveOverview?.totalPurchasesCost ?? 0)}</strong></span>
-                <span>•</span>
-                <span>Expenses: <strong className="text-rose-700 dark:text-rose-400">-{formatCurrency(liveOverview?.totalExpenses ?? 0)}</strong></span>
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Card 2: Total Profit Withdrawn */}
           <div className="bg-white dark:bg-[#141A24] p-5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs relative overflow-hidden flex flex-col justify-between">
@@ -404,21 +438,6 @@ export default function ProfitDistribution() {
           </span>
         </div>
 
-        {/* Informative Guidance Banner for Live Profit Sharing */}
-        <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 rounded-2xl p-4 text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
-          <p className="font-semibold flex items-center gap-1.5 text-sm text-emerald-950 dark:text-emerald-100">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            Live Continuous Profit Distribution Rules
-          </p>
-          <p>
-            Each partner's current profit share is calculated directly and continuously from current <strong>Business Net Profit</strong> (<span className="font-mono font-medium">Total Money Received − Total Money Paid − Total Expenses</span>) according to their assigned partner share percentage.
-          </p>
-          <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80 pt-0.5">
-            • Only actual money received from customers, actual money paid to suppliers, and active expenses count. Unpaid invoices or bills do not alter this calculation.<br/>
-            • <strong>Complete Independence:</strong> This live distribution operates completely independently from periodic distributions below and updates immediately as cash moves.
-          </p>
-        </div>
-
         {isLiveLoading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
@@ -458,7 +477,7 @@ export default function ProfitDistribution() {
                       </div>
                       <div className="text-right shrink-0">
                         <Badge variant={partner.active ? 'success' : 'default'} className="text-[11px] font-bold whitespace-nowrap">
-                          {partner.sharePercentage}% Share
+                          {formatNumber(partner.sharePercentage, { maximumFractionDigits: 2 })}% Share
                         </Badge>
                       </div>
                     </div>
@@ -467,7 +486,11 @@ export default function ProfitDistribution() {
                     <div className="py-4 space-y-2.5 text-xs flex-1 flex flex-col justify-center">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500 dark:text-slate-400">Total Profit Earned:</span>
-                        <span className="font-semibold text-gray-900 dark:text-slate-100 tabular-nums">
+                        <span className={`font-semibold tabular-nums ${
+                          partner.totalEarnedProfit < 0
+                            ? 'text-rose-600 dark:text-rose-400'
+                            : 'text-gray-900 dark:text-slate-100'
+                        }`}>
                           {formatCurrency(partner.totalEarnedProfit)}
                         </span>
                       </div>
@@ -479,9 +502,15 @@ export default function ProfitDistribution() {
                       </div>
                       <div className="pt-2.5 border-t border-gray-100 dark:border-[#1F2837] flex justify-between items-center">
                         <span className="font-semibold text-gray-800 dark:text-slate-200">
-                          Available to Withdraw:
+                          {partner.remainingProfitAvailable < 0 ? 'Net Loss Share:' : 'Available to Withdraw:'}
                         </span>
-                        <span className={`text-base font-serif font-bold tabular-nums ${hasAvailable ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-400 dark:text-slate-500'}`}>
+                        <span className={`text-base font-serif font-bold tabular-nums ${
+                          partner.remainingProfitAvailable < 0
+                            ? 'text-rose-600 dark:text-rose-400'
+                            : hasAvailable
+                              ? 'text-emerald-700 dark:text-emerald-400'
+                              : 'text-gray-400 dark:text-slate-500'
+                        }`}>
                           {formatCurrency(partner.remainingProfitAvailable)}
                         </span>
                       </div>
@@ -625,6 +654,7 @@ export default function ProfitDistribution() {
                     <th className="px-4 py-3 text-right">Remaining After</th>
                     <th className="px-4 py-3">Mode & Ref</th>
                     <th className="px-4 py-3">Notes</th>
+                    <th className="px-4 py-3 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-[#1F2837]">
@@ -635,7 +665,7 @@ export default function ProfitDistribution() {
                       </td>
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         <span className="font-semibold text-gray-900 dark:text-slate-100">{w.partnerName}</span>
-                        <span className="text-[11px] text-gray-400 dark:text-slate-500 ml-1.5">({w.partnerSharePercentage}%)</span>
+                        <span className="text-[11px] text-gray-400 dark:text-slate-500 ml-1.5">({formatNumber(w.partnerSharePercentage, { maximumFractionDigits: 2 })}%)</span>
                       </td>
                       <td className="px-4 py-3.5 text-right font-serif font-bold text-amber-600 dark:text-amber-400 tabular-nums whitespace-nowrap">
                         {formatCurrency(w.amount)}
@@ -654,6 +684,21 @@ export default function ProfitDistribution() {
                       </td>
                       <td className="px-4 py-3.5 text-gray-600 dark:text-slate-400 max-w-xs truncate" title={w.notes}>
                         {w.notes || '—'}
+                      </td>
+                      <td className="px-4 py-3.5 text-center whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete this withdrawal of ${formatCurrency(w.amount)} for ${w.partnerName}? This will restore the partner's available profit.`)) {
+                              deleteWithdrawalMutation.mutate(w.publicId);
+                            }
+                          }}
+                          disabled={deleteWithdrawalMutation.isPending}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                          title="Delete withdrawal record"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -692,21 +737,6 @@ export default function ProfitDistribution() {
           >
             <Calculator className="h-4 w-4" /> Calculate Period Profit
           </Button>
-        </div>
-
-        {/* Informative Guidance Banner for Periodic Distributions */}
-        <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/40 rounded-2xl p-4 text-xs text-blue-900 dark:text-blue-200 space-y-1">
-          <p className="font-semibold flex items-center gap-1.5 text-sm text-blue-950 dark:text-blue-100">
-            <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-            Independent Specific-Period Accounting Records
-          </p>
-          <p>
-            Calculate or recalculate profit distribution settlements for any past or custom date duration. Each calculation captures and records the actual financial figures for that specific timeframe.
-          </p>
-          <p className="text-[11px] text-blue-800/80 dark:text-blue-300/80 pt-0.5">
-            • Recalculating an existing period updates that historical record with the latest period numbers and keeps it at the top of the table.<br/>
-            • <strong>Complete Independence:</strong> Calculating or updating a period distribution will <strong>never</strong> modify, reduce, or alter the Live Partner Profit Sharing values above or existing partner withdrawals.
-          </p>
         </div>
 
         {isDistributionsLoading ? (
@@ -796,7 +826,7 @@ export default function ProfitDistribution() {
                             Partner Profit Shares ({formatDate(d.fromDate)} — {formatDate(d.toDate)})
                           </h4>
                           <Badge variant="success" className="text-[10px]">
-                            {d.shares?.length ?? 0} Partners
+                            {formatNumber(d.shares?.length ?? 0)} Partners
                           </Badge>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -805,7 +835,7 @@ export default function ProfitDistribution() {
                               <div key={s.partnerPublicId} className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-[#141A24] border border-gray-100 dark:border-[#1F2837]">
                                 <div>
                                   <p className="text-xs font-semibold text-gray-900 dark:text-slate-100">{s.partnerName}</p>
-                                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Share: {s.sharePercentageAtDistribution}%</p>
+                                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Share: {formatNumber(s.sharePercentageAtDistribution, { maximumFractionDigits: 2 })}%</p>
                                 </div>
                                 <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">{formatCurrency(s.shareAmount)}</p>
                               </div>
@@ -842,7 +872,7 @@ export default function ProfitDistribution() {
                 Current Remaining Profit Available:
               </span>
               <Badge variant="success" className="text-xs font-bold">
-                {selectedPartner?.sharePercentage}% Share
+                {formatNumber(selectedPartner?.sharePercentage ?? 0, { maximumFractionDigits: 2 })}% Share
               </Badge>
             </div>
             <p className="text-2xl font-serif font-bold text-emerald-800 dark:text-emerald-300">
@@ -1032,7 +1062,7 @@ export default function ProfitDistribution() {
                   <div key={s.partnerPublicId} className="flex justify-between items-center p-2.5 rounded-lg bg-gray-50 dark:bg-[#141A24] border border-gray-200 dark:border-[#1F2837]">
                     <div>
                       <p className="text-xs font-semibold text-gray-900 dark:text-slate-100">{s.partnerName}</p>
-                      <p className="text-[11px] text-gray-400 dark:text-slate-400">Profit Share: {s.sharePercentageAtDistribution}%</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-400">Profit Share: {formatNumber(s.sharePercentageAtDistribution, { maximumFractionDigits: 2 })}%</p>
                     </div>
                     <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">{formatCurrency(s.shareAmount)}</p>
                   </div>

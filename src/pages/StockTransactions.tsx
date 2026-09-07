@@ -13,7 +13,7 @@ import {
 import { 
   Button, Modal, Input, Select, Badge, PageHeader, ErrorState, Skeleton, Pagination, CopyableSequence
 } from '@/components';
-import { formatDate } from '@/lib';
+import { formatDate, formatNumber } from '@/lib';
 
 const MOVEMENT_TYPE_CONFIG: Record<
   string,
@@ -203,7 +203,7 @@ export default function StockTransactions() {
                     </Badge>
                   </div>
                   <div className={`text-right text-sm font-bold tabular-nums ${isIn ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
-                    {isIn ? '+' : '-'}{t.quantity} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{t.unit}</span>
+                    {isIn ? '+' : '-'}{formatNumber(t.quantity)} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{t.unit}</span>
                   </div>
                   <div className="text-sm text-gray-500 dark:text-slate-400 truncate" title={t.remarks}>
                     {t.remarks || '—'}

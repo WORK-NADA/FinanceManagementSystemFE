@@ -40,7 +40,7 @@ export const stockTransactionSchema = z.object({
   stockPublicId: z.string().uuid(),
   transactionType: z.enum(['ADJUSTMENT_IN', 'ADJUSTMENT_OUT']),
   quantity: z.number().positive('Quantity must be greater than zero'),
-  remarks: z.string().max(255).optional(),
+  remarks: z.string().max(500, 'Remarks cannot exceed 500 characters').optional(),
 });
 export type RequestStockTransactionDTO = z.infer<typeof stockTransactionSchema>;
 

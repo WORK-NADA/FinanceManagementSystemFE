@@ -29,3 +29,37 @@ export function signedAmount(amount: number): string {
   const formatted = formatCurrency(Math.abs(amount));
   return amount >= 0 ? `+${formatted}` : `-${formatted}`;
 }
+
+/**
+ * Formats a plain numeric value using the Indian numbering system (en-IN).
+ * Examples:
+ *   1000 -> 1,000
+ *   10000 -> 10,000
+ *   100000 -> 1,00,000
+ *   1000000 -> 10,00,000
+ */
+export function formatNumber(
+  value: number | string | null | undefined,
+  options?: {
+    decimals?: number;
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+    fallback?: string;
+  }
+): string {
+  if (value === null || value === undefined || value === '') {
+    return options?.fallback ?? '0';
+  }
+
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return options?.fallback ?? '0';
+
+  const minDec = options?.minimumFractionDigits ?? (options?.decimals !== undefined ? options.decimals : 0);
+  const maxDec = options?.maximumFractionDigits ?? (options?.decimals !== undefined ? options.decimals : (Number.isInteger(num) ? 0 : 3));
+
+  return new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: minDec,
+    maximumFractionDigits: maxDec,
+  }).format(num);
+}
+

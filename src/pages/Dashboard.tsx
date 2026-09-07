@@ -5,7 +5,7 @@ import {
   ArrowDownRight, ArrowUpRight, PackageMinus, Receipt,
   TrendingUp, AlertTriangle, ChevronRight, PlusCircle,
   ShoppingCart, Truck, Wallet, Activity, FileText,
-  Calculator, CheckCircle2, Landmark, Sliders
+  Calculator, CheckCircle2, Landmark, Sliders, Users
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -13,16 +13,18 @@ import {
 } from 'recharts';
 import { getDashboardSummary, updateOpeningBalance } from '../api/dashboard';
 import { getLowStockItems } from '../api/stock';
-import { formatCurrency, formatDate } from '@/lib';
+import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
-import { Badge, CopyableSequence, Button, Modal, Input } from '@/components';
+import { Badge, CopyableSequence, Button, Modal } from '@/components';
 import { toast } from '../store/toastStore';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function KpiTile({
   label, value, sub, icon, href
 }: { label: string; value: React.ReactNode; sub: string; icon: React.ReactNode; color?: string; href?: string }) {
+  const displayValue = typeof value === 'number' ? formatNumber(value) : value;
+
   const inner = (
     <div className="bg-white dark:bg-[#131924] rounded-2xl border border-slate-200/90 dark:border-[#1F2837] dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all p-5 flex flex-col justify-between group">
       <div className="flex items-center justify-between mb-3">
@@ -32,7 +34,7 @@ function KpiTile({
         </div>
       </div>
       <div>
-        <div className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 dark:text-slate-100 tabular-nums">{value}</div>
+        <div className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 dark:text-slate-100 tabular-nums">{displayValue}</div>
         <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 flex items-center justify-between">
           <span>{sub}</span>
           {href && <ChevronRight className="h-3.5 w-3.5 text-gray-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />}
@@ -243,7 +245,8 @@ export default function Dashboard() {
   const totalMoneyReceived = data?.totalMoneyReceived ?? 0;
   const totalMoneyPaid = data?.totalMoneyPaid ?? 0;
   const totalExpenses = data?.totalExpenses ?? 0;
-  const totalBalance = data?.totalBalance ?? (openingBalance + totalMoneyReceived - totalMoneyPaid - totalExpenses);
+  const totalWithdrawals = data?.totalWithdrawals ?? 0;
+  const totalBalance = data?.totalBalance ?? (openingBalance + totalMoneyReceived - totalMoneyPaid - totalExpenses - totalWithdrawals);
 
   return (
     <div className="space-y-6">
@@ -293,7 +296,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-xs text-gray-300 max-w-xl">
-              Live actual cash funds available with the company based on invested capital, recorded customer receipts, supplier payments, and active operating expenses.
+              Live actual cash funds available with the company based on invested capital, recorded customer receipts, supplier payments, active operating expenses, and partner withdrawals.
             </p>
           </div>
 
@@ -307,8 +310,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 4-Pill Formula Breakdown */}
-        <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        {/* 5-Pill Formula Breakdown */}
+        <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
           <div 
             onClick={handleOpenOpeningBalanceModal}
             className="group cursor-pointer bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
@@ -368,6 +371,20 @@ export default function Dashboard() {
               −{formatCurrency(totalExpenses)}
             </div>
             <span className="text-[10px] text-gray-400 mt-1">Operational business expenses</span>
+          </Link>
+
+          <Link 
+            to="/dashboard/profit-distribution"
+            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-indigo-400/40 transition-all duration-200 flex flex-col justify-between col-span-2 sm:col-span-1"
+          >
+            <div className="flex items-center justify-between text-[11px] text-gray-300">
+              <span className="font-semibold uppercase tracking-wider">− Withdrawals</span>
+              <Users className="h-3.5 w-3.5 text-indigo-400" />
+            </div>
+            <div className="mt-1.5 text-lg font-bold text-indigo-300 tabular-nums">
+              −{formatCurrency(totalWithdrawals)}
+            </div>
+            <span className="text-[10px] text-gray-400 mt-1">Withdrawn partner profit</span>
           </Link>
         </div>
       </div>
@@ -483,8 +500,8 @@ export default function Dashboard() {
                     <p className="text-xs text-gray-500 dark:text-slate-400 font-mono">{item.unit}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300 tabular-nums">{item.currentQuantity}</p>
-                    <p className="text-xs text-gray-400 dark:text-slate-500 tabular-nums">Min safe: {item.minimumStockLevel}</p>
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300 tabular-nums">{formatNumber(item.currentQuantity)}</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500 tabular-nums">Min safe: {formatNumber(item.minimumStockLevel)}</p>
                   </div>
                 </div>
               ))}
@@ -635,7 +652,7 @@ export default function Dashboard() {
               <div className="flex flex-wrap gap-3">
                 {lpd.shares.map(s => (
                   <div key={s.partnerPublicId} className="bg-white/10 backdrop-blur-xs rounded-xl px-3.5 py-2 border border-white/15">
-                    <p className="text-xs text-gray-300">{s.partnerName} ({s.sharePercentageAtDistribution}%)</p>
+                    <p className="text-xs text-gray-300">{s.partnerName} ({formatNumber(s.sharePercentageAtDistribution, { maximumFractionDigits: 2 })}%)</p>
                     <p className="text-sm font-bold text-amber-300 mt-0.5">{formatCurrency(s.shareAmount)}</p>
                   </div>
                 ))}

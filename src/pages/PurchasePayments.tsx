@@ -281,7 +281,7 @@ export default function PurchasePayments() {
     }
     const maxPending = selectedSummary?.pendingAmount ?? selectedPurchase?.pendingAmount;
     if (maxPending !== undefined && data.amountPaid > maxPending) {
-      toast.error(`Payment amount cannot exceed pending balance of ₹${maxPending.toLocaleString('en-IN')}`);
+      toast.error(`Payment amount cannot exceed pending balance of ${formatCurrency(maxPending)}`);
       return;
     }
     mutation.mutate(data);
@@ -710,7 +710,7 @@ export default function PurchasePayments() {
                 const isFullyPaid = isPurchaseFullyPaid(p.paymentStatus, p.pendingAmount);
                 return (
                   <option key={p.publicId} value={p.publicId} disabled={isFullyPaid}>
-                    {p.purchaseNumber} — {p.supplierName || 'Unknown Supplier'} — {isFullyPaid ? 'Fully Paid' : `Pending: ₹${p.pendingAmount?.toLocaleString('en-IN')}`} (Total: ₹{p.totalAmount?.toLocaleString('en-IN')})
+                    {p.purchaseNumber} — {p.supplierName || 'Unknown Supplier'} — {isFullyPaid ? 'Fully Paid' : `Pending: ${formatCurrency(p.pendingAmount)}`} (Total: {formatCurrency(p.totalAmount)})
                   </option>
                 );
               })}
@@ -739,7 +739,7 @@ export default function PurchasePayments() {
             <Input
               label={
                 selectedPurchase
-                  ? `Amount to Pay * (Pending: ₹${(selectedSummary?.pendingAmount ?? selectedPurchase.pendingAmount).toLocaleString('en-IN')})`
+                  ? `Amount to Pay * (Pending: ${formatCurrency(selectedSummary?.pendingAmount ?? selectedPurchase.pendingAmount)})`
                   : 'Amount to Pay *'
               }
               type="number"
@@ -754,7 +754,7 @@ export default function PurchasePayments() {
                   }
                   const maxDue = selectedSummary?.pendingAmount ?? selectedPurchase?.pendingAmount;
                   if (maxDue !== undefined && val > maxDue) {
-                    return `Payment amount cannot exceed pending balance of ₹${maxDue.toLocaleString('en-IN')}`;
+                    return `Payment amount cannot exceed pending balance of ${formatCurrency(maxDue)}`;
                   }
                   return true;
                 }
