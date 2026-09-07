@@ -8,14 +8,18 @@ export interface ExpenseFilters {
   category?: string;
   startDate?: string;
   endDate?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export const getExpenses = async (filters: ExpenseFilters = {}): Promise<Page<ResponseExpenseDTO>> => {
-  const { page = 0, size = 15, category, startDate, endDate } = filters;
+  const { page = 0, size = 15, category, startDate, endDate, fromDate, toDate } = filters;
   const params = new URLSearchParams({ page: String(page), size: String(size) });
   if (category) params.append('category', category);
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
+  const resolvedFrom = fromDate || startDate;
+  if (resolvedFrom) params.append('fromDate', resolvedFrom);
+  const resolvedTo = toDate || endDate;
+  if (resolvedTo) params.append('toDate', resolvedTo);
   
   return apiClient.get(`/expense/all?${params}`);
 };
@@ -33,7 +37,10 @@ export const getCategoryBreakdown = async (startDate?: string, endDate?: string)
   const params = new URLSearchParams();
   if (startDate) params.append('fromDate', startDate);
   if (endDate) params.append('toDate', endDate);
-  return apiClient.get(`/expense/dashboard/category-breakdown?${params}`);
+  // Backend returns Map<ExpenseCategory, BigDecimal> serialized as a plain JS object (Record<string, number>).
+  // Transform it to the array shape the pie chart expects.
+  const raw: Record<string, number> = await apiClient.get(`/expense/dashboard/category-breakdown?${params}`);
+  return Object.entries(raw).map(([category, totalAmount]) => ({ category, totalAmount }));
 };
 
 export const getTotalExpenses = async (startDate?: string, endDate?: string): Promise<number> => {

@@ -16,17 +16,19 @@ export interface PurchaseFilters {
   supplierPublicId?: string;
   startDate?: string;
   endDate?: string;
+  fromDate?: string;
+  toDate?: string;
   status?: string;
 }
 
 export const getPurchases = async (filters: PurchaseFilters = {}): Promise<Page<ResponsePurchaseDTO>> => {
-  const { page = 0, size = 15, supplierPublicId, startDate, endDate, status } = filters;
-  if (supplierPublicId) {
-    return apiClient.get(`/purchase/supplier/${supplierPublicId}?page=${page}&size=${size}`);
-  }
+  const { page = 0, size = 15, supplierPublicId, startDate, endDate, fromDate, toDate, status } = filters;
   const params = new URLSearchParams({ page: String(page), size: String(size) });
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
+  if (supplierPublicId) params.append('supplierPublicId', supplierPublicId);
+  const resolvedFrom = fromDate || startDate;
+  if (resolvedFrom) params.append('fromDate', resolvedFrom);
+  const resolvedTo = toDate || endDate;
+  if (resolvedTo) params.append('toDate', resolvedTo);
   if (status) params.append('status', status);
   return apiClient.get(`/purchase/all?${params}`);
 };
@@ -37,12 +39,21 @@ export const getPurchase = async (id: string): Promise<ResponsePurchaseDTO> =>
 export const createPurchase = async (data: RequestPurchaseDTO): Promise<ResponsePurchaseDTO> =>
   apiClient.post('/purchase/add', data);
 
+export const updatePurchase = async (publicId: string, data: RequestPurchaseDTO): Promise<ResponsePurchaseDTO> =>
+  apiClient.put(`/purchase/${publicId}`, data);
+
+export const deletePurchase = async (publicId: string): Promise<void> =>
+  apiClient.delete(`/purchase/${publicId}`);
+
 // ── Purchase Payments ──────────────────────────────────────────────────────
 export const getPurchasePayments = async (page = 0, size = 15): Promise<Page<ResponsePurchasePaymentDTO>> =>
   apiClient.get(`/purchase-payment/all?page=${page}&size=${size}`);
 
 export const getPurchasePaymentSummary = async (purchaseId: string): Promise<PurchasePaymentSummaryDTO> =>
   apiClient.get(`/purchase-payment/purchase/${purchaseId}/summary`);
+
+export const getPaymentsByPurchase = async (purchaseId: string): Promise<ResponsePurchasePaymentDTO[]> =>
+  apiClient.get(`/purchase-payment/purchase/${purchaseId}`);
 
 export const getPendingPurchasePayments = async (): Promise<PendingPurchaseDTO[]> =>
   apiClient.get('/purchase-payment/pending');

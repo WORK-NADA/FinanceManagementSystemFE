@@ -1,16 +1,59 @@
 import { z } from 'zod';
-import { addressSchema } from './customer';
+
+export const supplierAddressSchema = z.object({
+  addressLine1: z.string().trim()
+    .refine(val => val === '' || (val.length >= 3 && val.length <= 150), {
+      message: 'Address line 1 must be between 3 and 150 characters',
+    })
+    .optional().nullable().or(z.literal('')),
+  addressLine2: z.string().trim()
+    .refine(val => val === '' || val.length <= 150, {
+      message: 'Address line 2 cannot exceed 150 characters',
+    })
+    .optional().nullable().or(z.literal('')),
+  city: z.string().trim()
+    .refine(val => val === '' || (val.length >= 2 && val.length <= 100), {
+      message: 'City must be between 2 and 100 characters',
+    })
+    .optional().nullable().or(z.literal('')),
+  state: z.string().trim()
+    .refine(val => val === '' || (val.length >= 2 && val.length <= 100), {
+      message: 'State must be between 2 and 100 characters',
+    })
+    .optional().nullable().or(z.literal('')),
+  country: z.string().trim().max(100).default('India').optional().nullable().or(z.literal('')),
+  pincode: z.string().trim()
+    .refine(val => val === '' || /^[0-9]{6}$/.test(val), {
+      message: 'Pincode must contain exactly 6 digits',
+    })
+    .optional().nullable().or(z.literal('')),
+}).optional().nullable();
 
 export const supplierSchema = z.object({
-  supplierName: z.string().min(2, 'Min 2 characters').max(150),
-  mobileNumber: z.string().regex(/^[0-9]{10}$/, 'Valid 10-digit mobile number required'),
-  contactPerson: z.string().max(100).optional().nullable(),
-  alternateMobileNumber: z.string().regex(/^[0-9]{10}$/, 'Must be 10 digits').optional().or(z.literal('')),
-  email: z.string().email('Invalid email').max(150).optional().or(z.literal('')),
-  gstNumber: z.string().regex(/^[0-9A-Z]{15}$/, 'Invalid GSTIN format').optional().or(z.literal('')),
-  openingBalance: z.number().min(0, 'Must be positive').default(0),
-  paymentTerms: z.number().int().min(0).default(30),
-  address: addressSchema.optional(),
+  supplierName: z.string().trim()
+    .min(2, 'Supplier name must be between 2 and 150 characters')
+    .max(150, 'Supplier name must be between 2 and 150 characters'),
+  mobileNumber: z.string().trim()
+    .regex(/^[6-9][0-9]{9}$/, 'Mobile number must be a valid 10-digit Indian mobile number'),
+  contactPerson: z.string().trim().max(100, 'Contact person cannot exceed 100 characters').optional().nullable().or(z.literal('')),
+  alternateMobileNumber: z.string().trim()
+    .refine(val => val === '' || /^[6-9][0-9]{9}$/.test(val), {
+      message: 'Alternate mobile number must be a valid 10-digit Indian mobile number',
+    })
+    .optional().nullable().or(z.literal('')),
+  email: z.string().trim()
+    .refine(val => val === '' || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) && val.length <= 150), {
+      message: 'Invalid email format (max 150 characters)',
+    })
+    .optional().nullable().or(z.literal('')),
+  gstNumber: z.string().trim()
+    .refine(val => val === '' || /^[0-9A-Za-z]{15}$/.test(val), {
+      message: 'Invalid GST number',
+    })
+    .optional().nullable().or(z.literal('')),
+  openingBalance: z.number().min(0, 'Opening balance cannot be negative').default(0),
+  paymentTerms: z.number().int().min(0, 'Payment terms cannot be negative').max(365, 'Payment terms cannot exceed 365 days').default(30),
+  address: supplierAddressSchema,
 });
 
 export type RequestSupplierDTO = z.input<typeof supplierSchema>;
@@ -26,13 +69,13 @@ export interface ResponseSupplierDTO {
   openingBalance: number;
   paymentTerms: number;
   address?: {
-    addressLine1: string;
+    addressLine1?: string;
     addressLine2?: string;
-    city: string;
-    state: string;
-    country: string;
-    pincode: string;
-  };
+    city?: string;
+    state?: string;
+    country?: string;
+    pincode?: string;
+  } | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

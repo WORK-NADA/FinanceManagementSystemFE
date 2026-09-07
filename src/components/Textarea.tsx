@@ -1,16 +1,35 @@
-import { forwardRef, type TextareaHTMLAttributes } from 'react';
+import { forwardRef, useRef, type TextareaHTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
+import { selectInputText } from '@/lib/fieldAutoSelect';
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   hint?: string;
   wrapperClassName?: string;
+  autoSelectOnFocus?: boolean;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ label, error, hint, wrapperClassName, className, id, ...props }, ref) => {
+  ({ label, error, hint, wrapperClassName, className, id, autoSelectOnFocus = true, onFocus, onMouseUp, ...props }, ref) => {
     const textareaId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
+    const justFocusedRef = useRef(false);
+
+    const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      if (autoSelectOnFocus && !props.readOnly && !props.disabled) {
+        justFocusedRef.current = true;
+        selectInputText(e.currentTarget);
+      }
+      onFocus?.(e);
+    };
+
+    const handleMouseUp = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+      if (justFocusedRef.current) {
+        justFocusedRef.current = false;
+        selectInputText(e.currentTarget);
+      }
+      onMouseUp?.(e);
+    };
 
     return (
       <div className={cn('flex flex-col gap-1', wrapperClassName)}>
@@ -29,6 +48,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             className
           )}
           aria-invalid={!!error}
+          onFocus={handleFocus}
+          onMouseUp={handleMouseUp}
           {...props}
         />
         {hint && !error && <p className="text-xs text-[var(--color-text-muted)]">{hint}</p>}

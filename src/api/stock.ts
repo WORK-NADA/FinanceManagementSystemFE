@@ -43,8 +43,8 @@ export const activateStock = async (publicId: string): Promise<void> => {
   return apiClient.patch(`/stock/${publicId}/activate`);
 };
 
-export const searchStock = async (rawMaterial: string): Promise<ResponseStockDTO[]> => {
-  return apiClient.get(`/stock/search?rawMaterial=${encodeURIComponent(rawMaterial)}`);
+export const searchStock = async (query: string): Promise<ResponseStockDTO[]> => {
+  return apiClient.get(`/stock/search?query=${encodeURIComponent(query)}&rawMaterial=${encodeURIComponent(query)}`);
 };
 
 // Stock Transactions
@@ -52,20 +52,28 @@ export interface StockTransactionFilters {
   page?: number;
   size?: number;
   stockId?: string;
+  stockPublicId?: string;
   type?: string;
   startDate?: string;
   endDate?: string;
+  fromDate?: string;
+  toDate?: string;
   referenceNumber?: string;
 }
 
 export const getStockTransactions = async (filters: StockTransactionFilters = {}): Promise<Page<ResponseStockTransactionDTO>> => {
-  const { page = 0, size = 20, ...rest } = filters;
+  const { page = 0, size = 20, stockId, stockPublicId, type, startDate, endDate, fromDate, toDate, referenceNumber } = filters;
   const query = new URLSearchParams({ page: page.toString(), size: size.toString() });
-  
-  Object.entries(rest).forEach(([key, value]) => {
-    if (value) query.append(key, value);
-  });
-  
+
+  const resolvedStock = stockPublicId || stockId;
+  if (resolvedStock) query.append('stockPublicId', resolvedStock);
+  if (type) query.append('type', type);
+  if (referenceNumber) query.append('referenceNumber', referenceNumber);
+  const resolvedFrom = fromDate || startDate;
+  if (resolvedFrom) query.append('fromDate', resolvedFrom);
+  const resolvedTo = toDate || endDate;
+  if (resolvedTo) query.append('toDate', resolvedTo);
+
   return apiClient.get(`/stock-transaction/all?${query.toString()}`);
 };
 

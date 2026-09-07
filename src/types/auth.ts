@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string()
-    .regex(
-      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,20}$/,
-      'Password must be 8-20 characters long, containing at least one digit, one lowercase letter, one uppercase letter, one special character (@#$%^&+=!), and no whitespace'
-    ),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+  password: z
+    .string()
+    .min(1, 'Password is required'),
 });
 
 export type RequestLoginDTO = z.infer<typeof loginSchema>;
