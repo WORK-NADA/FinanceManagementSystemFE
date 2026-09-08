@@ -43,6 +43,14 @@ export const requestUpdateUserSchema = z.object({
   userAddress: requestUserAddressSchema,
   currentPassword: z.string().optional().or(z.literal('')),
   newPassword: z.string().optional().or(z.literal('')),
+}).refine((data) => {
+  if (data.newPassword && data.newPassword.trim().length > 0) {
+    return /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{8,20}$/.test(data.newPassword.trim());
+  }
+  return true;
+}, {
+  message: 'Password must be 8-20 characters with 1 uppercase, 1 lowercase, 1 digit, and 1 special character (@#$%^&+=!)',
+  path: ['newPassword'],
 });
 
 export const profileEditSchema = z.object({
@@ -107,4 +115,5 @@ export interface ResponseUserDTO {
   enabled: boolean;
   createdAt: string;
   userAddress?: ResponseUserAddressDTO;
+  viewablePassword?: string;
 }
