@@ -18,7 +18,11 @@ import {
   Users, 
   Package, 
   CreditCard,
-  Percent
+  Percent,
+  Eye,
+  EyeOff,
+  Copy,
+  KeyRound
 } from 'lucide-react';
 import { getClient360, unlockClient } from '../../api/admin';
 import { deactivateClient, reactivateClient } from '../../api/user';
@@ -39,6 +43,7 @@ export default function ClientDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'overview' | 'sales' | 'purchases' | 'payments' | 'security'>('overview');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { data: client, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['client360', publicId],
@@ -167,6 +172,48 @@ export default function ClientDetail() {
                   </span>
                 </div>
               )}
+
+              {/* Account Credentials / Password Bar */}
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-semibold text-gray-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <KeyRound className="h-3.5 w-3.5 text-amber-500" />
+                  Client Password:
+                </span>
+                <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-[#0E131C] px-2.5 py-1 rounded-lg border border-gray-200 dark:border-[#1F2837]">
+                  <span className="font-mono font-medium text-gray-800 dark:text-slate-200 select-all">
+                    {client.viewablePassword ? (
+                      showPassword ? client.viewablePassword : '••••••••'
+                    ) : (
+                      <span className="text-gray-400 dark:text-slate-500 italic text-[11px]">Not Available</span>
+                    )}
+                  </span>
+                  {client.viewablePassword && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors rounded cursor-pointer"
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(client.viewablePassword || '');
+                          toast.success('Password copied to clipboard!');
+                        }}
+                        className="p-1 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded cursor-pointer"
+                        title="Copy password"
+                        aria-label="Copy password"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -533,6 +580,50 @@ export default function ClientDetail() {
                 <span className="text-xs text-gray-500 dark:text-slate-400">Registered On:</span>
                 <p className="font-semibold text-gray-900 dark:text-slate-100 mt-0.5">
                   {formatDate(client.createdAt)}
+                </p>
+              </div>
+
+              {/* Password Detail Row */}
+              <div className="md:col-span-2 pt-3 border-t border-gray-200/80 dark:border-slate-800">
+                <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Client Account Password (Admin Master Access):</span>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="font-mono text-xs px-3 py-1.5 rounded-lg bg-white dark:bg-[#141A24] border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 select-all">
+                    {client.viewablePassword ? (
+                      showPassword ? client.viewablePassword : '••••••••'
+                    ) : (
+                      <span className="text-gray-400 dark:text-slate-500 italic">Not Available</span>
+                    )}
+                  </div>
+                  {client.viewablePassword && (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2.5 text-xs"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
+                        {showPassword ? 'Hide' : 'Show'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2.5 text-xs"
+                        onClick={() => {
+                          navigator.clipboard.writeText(client.viewablePassword || '');
+                          toast.success('Password copied to clipboard!');
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-1" />
+                        Copy
+                      </Button>
+                    </>
+                  )}
+                </div>
+                <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
+                  Synchronized in real-time if the client updates their password via Profile or if modified by an Admin.
                 </p>
               </div>
             </div>

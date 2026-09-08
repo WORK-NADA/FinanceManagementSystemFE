@@ -93,6 +93,7 @@ export interface Client360Data {
   lockTime?: string | null;
   createdAt: string;
   address?: ResponseUserAddressDTO;
+  viewablePassword?: string;
 
   openingBalance: number;
   totalGrossSales: number;

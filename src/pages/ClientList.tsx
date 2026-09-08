@@ -3,7 +3,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Search, Edit2, Ban, CheckCircle2, Loader2, Eye, Unlock } from 'lucide-react';
+import { 
+  Plus, 
+  Search, 
+  Edit2, 
+  Ban, 
+  CheckCircle2, 
+  Loader2, 
+  Eye, 
+  EyeOff, 
+  Unlock, 
+  Copy, 
+  KeyRound 
+} from 'lucide-react';
 import { 
   getAllClients, 
   getClientByPublicId,
@@ -36,6 +48,22 @@ export default function ClientList() {
   const [editingClient, setEditingClient] = useState<ResponseUserDTO | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loadingEditId, setLoadingEditId] = useState<string | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+  const [showModalCurrentPassword, setShowModalCurrentPassword] = useState(false);
+  const [showModalNewPassword, setShowModalNewPassword] = useState(false);
+
+  const togglePasswordVisibility = (publicId: string) => {
+    setVisiblePasswords((prev) => ({ ...prev, [publicId]: !prev[publicId] }));
+  };
+
+  const handleCopyPassword = (pwd?: string) => {
+    if (!pwd) {
+      toast.error('No password available to copy');
+      return;
+    }
+    navigator.clipboard.writeText(pwd);
+    toast.success('Password copied to clipboard!');
+  };
 
   const { data: clients, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['clients'],
@@ -111,10 +139,13 @@ export default function ClientList() {
     }
 
     setEditingClient(clientToEdit);
+    setShowModalCurrentPassword(false);
+    setShowModalNewPassword(false);
     reset({
       ownerName: clientToEdit.ownerName || clientToEdit.username || '',
       email: clientToEdit.email || '',
       mobileNumber: clientToEdit.mobileNumber || '',
+      newPassword: '',
       userAddress: {
         houseNo: clientToEdit.userAddress?.houseNo || '',
         societyName: clientToEdit.userAddress?.societyName || '',
@@ -131,6 +162,8 @@ export default function ClientList() {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingClient(null);
+    setShowModalCurrentPassword(false);
+    setShowModalNewPassword(false);
     reset();
   };
 
@@ -253,11 +286,12 @@ export default function ClientList() {
       ) : (
         <div className="w-full space-y-3">
           {/* Column Header Guide Bar */}
-          <div className="hidden lg:grid lg:grid-cols-[120px_minmax(130px,1.4fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_75px_75px_minmax(85px,0.9fr)_110px] items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider select-none guide-bar-offwhite mb-1">
+          <div className="hidden lg:grid lg:grid-cols-[110px_minmax(130px,1.3fr)_minmax(130px,1.1fr)_105px_minmax(120px,1fr)_70px_70px_85px_110px] items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider select-none guide-bar-offwhite mb-1">
             <div>Public ID</div>
             <div>Name / Username</div>
             <div>Email</div>
             <div>Mobile</div>
+            <div>Password</div>
             <div>Role</div>
             <div>Status</div>
             <div>Created At</div>
@@ -268,10 +302,10 @@ export default function ClientList() {
           {filteredClients.map((client) => (
             <div
               key={client.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 lg:grid-cols-[120px_minmax(130px,1.4fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_75px_75px_minmax(85px,0.9fr)_110px] items-center gap-3 px-5 py-3.5"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 lg:grid-cols-[110px_minmax(130px,1.3fr)_minmax(130px,1.1fr)_105px_minmax(120px,1fr)_70px_70px_85px_110px] items-center gap-3 px-5 py-3.5"
             >
               <div className="min-w-0">
-                <span className="font-mono text-xs text-gray-600 dark:text-slate-300 bg-gray-100/90 dark:bg-[#0E131C] px-2 py-0.5 rounded border border-gray-200/80 dark:border-[#1F2837] inline-block truncate max-w-[120px]" title={client.publicId}>
+                <span className="font-mono text-xs text-gray-600 dark:text-slate-300 bg-gray-100/90 dark:bg-[#0E131C] px-2 py-0.5 rounded border border-gray-200/80 dark:border-[#1F2837] inline-block truncate max-w-[110px]" title={client.publicId}>
                   {client.publicId}
                 </span>
               </div>
@@ -288,6 +322,48 @@ export default function ClientList() {
               </div>
               <div className="text-sm text-gray-700 dark:text-slate-300 truncate min-w-0" title={client.email}>{client.email}</div>
               <div className="text-sm text-gray-700 dark:text-slate-200 font-medium truncate min-w-0">{client.mobileNumber}</div>
+              
+              {/* Client Password Column */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-mono text-xs px-2 py-0.5 rounded bg-gray-100/90 dark:bg-[#0E131C] border border-gray-200/80 dark:border-[#1F2837] text-gray-800 dark:text-slate-200 select-all truncate max-w-[85px]">
+                  {client.viewablePassword ? (
+                    visiblePasswords[client.publicId] ? (
+                      client.viewablePassword
+                    ) : (
+                      '••••••••'
+                    )
+                  ) : (
+                    <span className="text-gray-400 dark:text-slate-500 italic text-[11px]">Not Set</span>
+                  )}
+                </span>
+                {client.viewablePassword && (
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility(client.publicId)}
+                      className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors rounded cursor-pointer"
+                      title={visiblePasswords[client.publicId] ? 'Hide password' : 'Show password'}
+                      aria-label={visiblePasswords[client.publicId] ? 'Hide password' : 'Show password'}
+                    >
+                      {visiblePasswords[client.publicId] ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyPassword(client.viewablePassword)}
+                      className="p-1 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded cursor-pointer"
+                      title="Copy password"
+                      aria-label="Copy password"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="min-w-0">
                 <Badge variant="info">
                   {client.role}
@@ -417,6 +493,78 @@ export default function ClientList() {
                   {...register('mobileNumber')}
                   error={errors.mobileNumber?.message}
                 />
+              </div>
+
+              {/* Password Management Section */}
+              <h4 className="font-medium text-gray-900 dark:text-slate-100 border-b border-gray-200 dark:border-[#1F2837] pb-2 pt-2 flex items-center gap-2">
+                <KeyRound className="h-4 w-4 text-amber-500" />
+                Account Credentials & Password
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-amber-50/40 dark:bg-amber-950/10 p-4 rounded-xl border border-amber-200/60 dark:border-amber-900/30">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
+                    Current Password (Admin View)
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex-1 font-mono text-xs px-3 py-2 rounded-lg bg-white dark:bg-[#0E131C] border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-200 select-all truncate">
+                      {editingClient.viewablePassword ? (
+                        showModalCurrentPassword ? editingClient.viewablePassword : '••••••••'
+                      ) : (
+                        <span className="text-gray-400 dark:text-slate-500 italic">Not set (legacy account)</span>
+                      )}
+                    </div>
+                    {editingClient.viewablePassword && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2"
+                          onClick={() => setShowModalCurrentPassword(!showModalCurrentPassword)}
+                          title={showModalCurrentPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showModalCurrentPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2"
+                          onClick={() => handleCopyPassword(editingClient.viewablePassword)}
+                          title="Copy password"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1">
+                    Live password kept in sync when updated by client or admin.
+                  </p>
+                </div>
+
+                <div>
+                  <Input
+                    label="Reset Password (Optional)"
+                    type={showModalNewPassword ? 'text' : 'password'}
+                    placeholder="Leave blank to keep unchanged"
+                    {...register('newPassword')}
+                    error={errors.newPassword?.message}
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowModalNewPassword(!showModalNewPassword)}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 focus:outline-hidden"
+                        tabIndex={-1}
+                      >
+                        {showModalNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    }
+                  />
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1">
+                    Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special symbol.
+                  </p>
+                </div>
               </div>
 
               <h4 className="font-medium text-gray-900 dark:text-slate-100 border-b border-gray-200 dark:border-[#1F2837] pb-2 pt-2">Address Details</h4>
