@@ -22,6 +22,7 @@ import {
   PanelLeft,
   Pin,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -98,6 +99,7 @@ export default function DashboardLayout() {
     { name: 'Expenses', href: '/dashboard/expenses', icon: Landmark },
     { name: 'Reports', href: '/dashboard/reports', icon: PieChart },
     { name: 'Partners', href: '/dashboard/partners', icon: UserPlus },
+    { name: 'Investments', href: '/dashboard/investments', icon: TrendingUp },
     { name: 'Profit Sharing', href: '/dashboard/profit-distribution', icon: Wallet },
   ];
 
