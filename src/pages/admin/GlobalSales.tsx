@@ -177,63 +177,132 @@ export default function GlobalSales() {
           {filteredSales.map((sale) => (
             <div
               key={sale.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all grid grid-cols-1 lg:grid-cols-[130px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_100px_110px_90px_60px] items-center gap-3 px-5 py-3.5"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all overflow-hidden"
             >
-              <div className="min-w-0">
-                <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-700">
-                  {sale.saleNumber}
-                </span>
-                <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">{formatDate(sale.saleDate)}</p>
+              {/* Desktop view (hidden on < lg) */}
+              <div className="hidden lg:grid lg:grid-cols-[130px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_100px_110px_90px_60px] items-center gap-3 px-5 py-3.5">
+                <div className="min-w-0">
+                  <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-700">
+                    {sale.saleNumber}
+                  </span>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">{formatDate(sale.saleDate)}</p>
+                </div>
+
+                <div className="truncate min-w-0">
+                  <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">
+                    {sale.customer?.customerName || 'Customer'}
+                  </p>
+                  {sale.customer?.mobileNumber && (
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{sale.customer.mobileNumber}</p>
+                  )}
+                </div>
+
+                <div className="text-sm text-gray-700 dark:text-slate-300 truncate min-w-0">
+                  {sale.rawMaterial || '—'}
+                </div>
+
+                <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
+                  <span className="font-medium text-gray-800 dark:text-slate-200">{sale.weight} {sale.unit}</span>
+                  <p className="text-[10px] text-gray-400">@{formatCurrency(sale.ratePerUnit || 0)}</p>
+                </div>
+
+                <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
+                  <p>{formatCurrency(sale.amount || 0)}</p>
+                  <p className="text-[10px] text-gray-400">+GST {formatCurrency(sale.gstAmount || 0)}</p>
+                </div>
+
+                <div className="min-w-0">
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(sale.totalAmount)}
+                  </span>
+                </div>
+
+                <div className="min-w-0">
+                  <Badge 
+                    variant={sale.paymentStatus === 'PAID' ? 'success' : sale.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'default'}
+                    className="text-[10px]"
+                  >
+                    {sale.paymentStatus}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-end min-w-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400"
+                    onClick={() => setSelectedSale(sale)}
+                    title="View Invoice Details"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
 
-              <div className="truncate min-w-0">
-                <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">
-                  {sale.customer?.customerName || 'Customer'}
-                </p>
-                {sale.customer?.mobileNumber && (
-                  <p className="text-xs text-gray-400 dark:text-slate-500">{sale.customer.mobileNumber}</p>
-                )}
-              </div>
+              {/* Mobile & Tablet Card View (hidden on lg+) */}
+              <div className="lg:hidden p-3.5 sm:p-4 space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-700">
+                      {sale.saleNumber}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-slate-500">
+                      {formatDate(sale.saleDate)}
+                    </span>
+                  </div>
+                  <Badge 
+                    variant={sale.paymentStatus === 'PAID' ? 'success' : sale.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'default'}
+                    className="text-[10px]"
+                  >
+                    {sale.paymentStatus}
+                  </Badge>
+                </div>
 
-              <div className="text-sm text-gray-700 dark:text-slate-300 truncate min-w-0">
-                {sale.rawMaterial || '—'}
-              </div>
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-slate-100">
+                    {sale.customer?.customerName || 'Customer'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
+                    {sale.rawMaterial ? `Material: ${sale.rawMaterial}` : ''}
+                    {sale.customer?.mobileNumber ? ` • ${sale.customer.mobileNumber}` : ''}
+                  </p>
+                </div>
 
-              <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
-                <span className="font-medium text-gray-800 dark:text-slate-200">{sale.weight} {sale.unit}</span>
-                <p className="text-[10px] text-gray-400">@{formatCurrency(sale.ratePerUnit || 0)}</p>
-              </div>
+                {/* 3-Col metric strip */}
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg text-center">
+                    <span className="text-[10px] text-gray-400 block">Qty & Rate</span>
+                    <span className="text-xs font-semibold text-gray-800 dark:text-slate-200 tabular-nums">
+                      {sale.weight} {sale.unit}
+                    </span>
+                    <span className="text-[10px] text-gray-400 block">@{formatCurrency(sale.ratePerUnit || 0)}</span>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg text-center">
+                    <span className="text-[10px] text-gray-400 block">Taxable</span>
+                    <span className="text-xs font-semibold text-gray-800 dark:text-slate-200 tabular-nums">
+                      {formatCurrency(sale.amount || 0)}
+                    </span>
+                    <span className="text-[10px] text-gray-400 block">+GST {formatCurrency(sale.gstAmount || 0)}</span>
+                  </div>
+                  <div className="bg-emerald-50/60 dark:bg-emerald-950/30 p-2 rounded-lg text-center border border-emerald-100 dark:border-emerald-900/30">
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-medium">Total Invoiced</span>
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">
+                      {formatCurrency(sale.totalAmount)}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
-                <p>{formatCurrency(sale.amount || 0)}</p>
-                <p className="text-[10px] text-gray-400">+GST {formatCurrency(sale.gstAmount || 0)}</p>
-              </div>
-
-              <div className="min-w-0">
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatCurrency(sale.totalAmount)}
-                </span>
-              </div>
-
-              <div className="min-w-0">
-                <Badge 
-                  variant={sale.paymentStatus === 'PAID' ? 'success' : sale.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'default'}
-                  className="text-[10px]"
-                >
-                  {sale.paymentStatus}
-                </Badge>
-              </div>
-
-              <div className="flex items-center justify-end min-w-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400"
-                  onClick={() => setSelectedSale(sale)}
-                  title="View Invoice Details"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                </Button>
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5 h-8 text-blue-600 dark:text-sky-400 border-blue-200 dark:border-blue-900/50"
+                    onClick={() => setSelectedSale(sale)}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    View Details
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

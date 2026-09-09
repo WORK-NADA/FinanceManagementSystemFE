@@ -190,27 +190,57 @@ export default function GlobalPayments() {
             {filteredSalePayments.map((payment) => (
               <div
                 key={payment.publicId}
-                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all grid grid-cols-1 lg:grid-cols-[140px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_110px_100px] items-center gap-3 px-5 py-3.5 text-sm"
+                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all overflow-hidden"
               >
-                <div className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200">
-                  {payment.referenceNumber || 'Cash/Auto'}
+                {/* Desktop view (hidden on < lg) */}
+                <div className="hidden lg:grid lg:grid-cols-[140px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_110px_100px] items-center gap-3 px-5 py-3.5 text-sm">
+                  <div className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200">
+                    {payment.referenceNumber || 'Cash/Auto'}
+                  </div>
+                  <div className="truncate font-medium text-gray-900 dark:text-slate-100">
+                    {payment.sale?.customerName || 'Customer'}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 font-mono">
+                    {payment.sale?.saleNumber || 'Direct'}
+                  </div>
+                  <div>
+                    <Badge variant="info" className="text-[10px]">
+                      {payment.paymentMode}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
+                    {formatDate(payment.paymentDate)}
+                  </div>
+                  <div className="text-right font-bold text-emerald-600 dark:text-emerald-400 pr-2">
+                    +{formatCurrency(payment.amountReceived)}
+                  </div>
                 </div>
-                <div className="truncate font-medium text-gray-900 dark:text-slate-100">
-                  {payment.sale?.customerName || 'Customer'}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400 font-mono">
-                  {payment.sale?.saleNumber || 'Direct'}
-                </div>
-                <div>
-                  <Badge variant="info" className="text-[10px]">
-                    {payment.paymentMode}
-                  </Badge>
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400">
-                  {formatDate(payment.paymentDate)}
-                </div>
-                <div className="text-right font-bold text-emerald-600 dark:text-emerald-400 pr-2">
-                  +{formatCurrency(payment.amountReceived)}
+
+                {/* Mobile & Tablet Card View (hidden on lg+) */}
+                <div className="lg:hidden p-3.5 sm:p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                      {payment.referenceNumber || 'Cash/Auto'}
+                    </span>
+                    <Badge variant="info" className="text-[10px]">
+                      {payment.paymentMode}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-sm text-gray-900 dark:text-slate-100">
+                        {payment.sale?.customerName || 'Customer'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 font-mono">
+                        Invoice: {payment.sale?.saleNumber || 'Direct'} • {formatDate(payment.paymentDate)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                        +{formatCurrency(payment.amountReceived)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -236,27 +266,57 @@ export default function GlobalPayments() {
             {filteredPurchasePayments.map((payment) => (
               <div
                 key={payment.publicId}
-                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all grid grid-cols-1 lg:grid-cols-[140px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_110px_100px] items-center gap-3 px-5 py-3.5 text-sm"
+                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all overflow-hidden"
               >
-                <div className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200">
-                  {payment.referenceNumber || 'Cash/Auto'}
+                {/* Desktop view (hidden on < lg) */}
+                <div className="hidden lg:grid lg:grid-cols-[140px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_110px_100px] items-center gap-3 px-5 py-3.5 text-sm">
+                  <div className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200">
+                    {payment.referenceNumber || 'Cash/Auto'}
+                  </div>
+                  <div className="truncate font-medium text-gray-900 dark:text-slate-100">
+                    {payment.purchase?.supplierName || 'Supplier'}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 font-mono">
+                    {payment.purchase?.purchaseNumber || 'Direct'}
+                  </div>
+                  <div>
+                    <Badge variant="info" className="text-[10px]">
+                      {payment.paymentMode}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
+                    {formatDate(payment.paymentDate)}
+                  </div>
+                  <div className="text-right font-bold text-rose-600 dark:text-rose-400 pr-2">
+                    -{formatCurrency(payment.amountPaid)}
+                  </div>
                 </div>
-                <div className="truncate font-medium text-gray-900 dark:text-slate-100">
-                  {payment.purchase?.supplierName || 'Supplier'}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400 font-mono">
-                  {payment.purchase?.purchaseNumber || 'Direct'}
-                </div>
-                <div>
-                  <Badge variant="info" className="text-[10px]">
-                    {payment.paymentMode}
-                  </Badge>
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400">
-                  {formatDate(payment.paymentDate)}
-                </div>
-                <div className="text-right font-bold text-rose-600 dark:text-rose-400 pr-2">
-                  -{formatCurrency(payment.amountPaid)}
+
+                {/* Mobile & Tablet Card View (hidden on lg+) */}
+                <div className="lg:hidden p-3.5 sm:p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                      {payment.referenceNumber || 'Cash/Auto'}
+                    </span>
+                    <Badge variant="info" className="text-[10px]">
+                      {payment.paymentMode}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-sm text-gray-900 dark:text-slate-100">
+                        {payment.purchase?.supplierName || 'Supplier'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 font-mono">
+                        Bill: {payment.purchase?.purchaseNumber || 'Direct'} • {formatDate(payment.paymentDate)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-rose-600 dark:text-rose-400">
+                        -{formatCurrency(payment.amountPaid)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

@@ -115,7 +115,7 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: CreateCustom
       zIndex={60}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <Input
             label="Customer Name *"
             placeholder="e.g. Acme Corporation"
@@ -181,7 +181,7 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: CreateCustom
             <h4 className="font-serif font-bold text-base text-gray-900 dark:text-slate-100">Billing Address</h4>
             <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">Optional</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input
               label="Address Line 1 (Optional)"
               placeholder="Street address or building"
@@ -222,11 +222,11 @@ export function CreateCustomerModal({ isOpen, onClose, onSuccess }: CreateCustom
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
-          <Button type="button" variant="outline" onClick={handleModalClose}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
+          <Button type="button" variant="outline" onClick={handleModalClose} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" isLoading={mutation.isPending}>
+          <Button type="submit" isLoading={mutation.isPending} className="w-full sm:w-auto">
             Save Customer
           </Button>
         </div>

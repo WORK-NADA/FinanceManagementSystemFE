@@ -172,16 +172,42 @@ function PendingPaymentsPanel({
       {filtered.map(p => (
         <div
           key={p.publicId}
-          className="bg-white rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-md hover:border-gray-300 transition-all grid grid-cols-1 md:grid-cols-[minmax(160px,1.2fr)_minmax(120px,1.5fr)_100px_minmax(85px,1fr)_minmax(85px,1fr)_minmax(90px,1fr)] items-center gap-3 px-5 py-3.5"
+          className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all w-full overflow-hidden"
         >
-          <div className="min-w-0">
-            <CopyableSequence value={p.purchaseNumber} />
+          {/* Desktop View (md:grid) */}
+          <div className="hidden md:grid grid-cols-[minmax(160px,1.2fr)_minmax(120px,1.5fr)_100px_minmax(85px,1fr)_minmax(85px,1fr)_minmax(90px,1fr)] items-center gap-3 px-5 py-3.5 w-full">
+            <div className="min-w-0">
+              <CopyableSequence value={p.purchaseNumber} />
+            </div>
+            <div className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate min-w-0" title={p.supplierName}>{p.supplierName}</div>
+            <div className="text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap min-w-0">{formatDate(p.purchaseDate)}</div>
+            <div className="text-right text-sm tabular-nums text-gray-700 dark:text-slate-300 font-medium min-w-0">{formatCurrency(p.totalAmount)}</div>
+            <div className="text-right text-sm tabular-nums text-emerald-700 dark:text-emerald-400 font-medium min-w-0">{formatCurrency(p.paidAmount)}</div>
+            <div className="text-right text-sm tabular-nums font-bold text-rose-700 dark:text-rose-400 min-w-0">{formatCurrency(p.pendingAmount)}</div>
           </div>
-          <div className="font-semibold text-sm text-gray-900 truncate min-w-0" title={p.supplierName}>{p.supplierName}</div>
-          <div className="text-sm text-gray-600 whitespace-nowrap min-w-0">{formatDate(p.purchaseDate)}</div>
-          <div className="md:text-right text-sm tabular-nums text-gray-700 font-medium min-w-0">{formatCurrency(p.totalAmount)}</div>
-          <div className="md:text-right text-sm tabular-nums text-emerald-700 font-medium min-w-0">{formatCurrency(p.paidAmount)}</div>
-          <div className="md:text-right text-sm tabular-nums font-bold text-rose-700 min-w-0">{formatCurrency(p.pendingAmount)}</div>
+
+          {/* Mobile View (md:hidden) */}
+          <div className="md:hidden p-3.5 space-y-2.5 w-full">
+            <div className="flex items-center justify-between gap-2">
+              <CopyableSequence value={p.purchaseNumber} />
+              <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">{formatDate(p.purchaseDate)}</span>
+            </div>
+            <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={p.supplierName}>{p.supplierName}</p>
+            <div className="grid grid-cols-3 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Total</span>
+                <span className="font-medium text-gray-700 dark:text-slate-300 tabular-nums break-words">{formatCurrency(p.totalAmount)}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Paid</span>
+                <span className="font-medium text-emerald-700 dark:text-emerald-400 tabular-nums break-words">{formatCurrency(p.paidAmount)}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Pending</span>
+                <span className="font-bold text-rose-700 dark:text-rose-400 tabular-nums break-words">{formatCurrency(p.pendingAmount)}</span>
+              </div>
+            </div>
+          </div>
         </div>
       ))}
     </div>
@@ -658,30 +684,72 @@ export default function PurchasePayments() {
           {paginatedPayments.map(p => (
             <div
               key={p.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 lg:grid-cols-[95px_minmax(160px,1.2fr)_minmax(160px,1.2fr)_minmax(120px,1.4fr)_minmax(95px,1fr)_minmax(80px,0.8fr)_minmax(80px,0.9fr)_minmax(80px,1fr)] items-center gap-3 px-5 py-3.5"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all w-full overflow-hidden"
             >
-              <div className="text-sm font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap min-w-0">{formatDate(p.paymentDate)}</div>
-              <div className="min-w-0">
-                <CopyableSequence
-                  value={p.paymentNumber}
-                  badgeClassName="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40"
-                />
+              {/* Desktop View (lg:grid) */}
+              <div className="hidden lg:grid lg:grid-cols-[95px_minmax(160px,1.2fr)_minmax(160px,1.2fr)_minmax(120px,1.4fr)_minmax(95px,1fr)_minmax(80px,0.8fr)_minmax(80px,0.9fr)_minmax(80px,1fr)] items-center gap-3 px-5 py-3.5 w-full">
+                <div className="text-sm font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap min-w-0">{formatDate(p.paymentDate)}</div>
+                <div className="min-w-0">
+                  <CopyableSequence
+                    value={p.paymentNumber}
+                    badgeClassName="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <CopyableSequence
+                    value={p.purchase?.purchaseNumber ?? '—'}
+                    badgeClassName="font-mono text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100/90 dark:bg-[#161F2E] px-2 py-0.5 rounded border border-slate-200/90 dark:border-[#243245] inline-flex items-center"
+                  />
+                </div>
+                <div className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate min-w-0" title={p.purchase?.supplierName}>{p.purchase?.supplierName ?? '—'}</div>
+                <div className="text-right text-sm tabular-nums font-bold text-gray-900 dark:text-slate-100 min-w-0">{formatCurrency(p.amountPaid)}</div>
+                <div className="min-w-0">
+                  <Badge variant="default" className="text-xs bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-none">
+                    {p.paymentMode?.replace(/_/g, ' ')}
+                  </Badge>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-slate-400 font-mono truncate min-w-0" title={p.referenceNumber}>{p.referenceNumber || '—'}</div>
+                <div className="text-xs text-gray-400 dark:text-slate-500 truncate min-w-0" title={p.remarks}>{p.remarks || '—'}</div>
               </div>
-              <div className="min-w-0">
-                <CopyableSequence
-                  value={p.purchase?.purchaseNumber ?? '—'}
-                  badgeClassName="font-mono text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100/90 dark:bg-[#161F2E] px-2 py-0.5 rounded border border-slate-200/90 dark:border-[#243245] inline-flex items-center"
-                />
+
+              {/* Mobile View (lg:hidden) */}
+              <div className="lg:hidden p-3.5 space-y-2.5 w-full">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CopyableSequence
+                      value={p.paymentNumber}
+                      badgeClassName="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40"
+                    />
+                    <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">{formatDate(p.paymentDate)}</span>
+                  </div>
+                  <Badge variant="default" className="text-xs bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-none">
+                    {p.paymentMode?.replace(/_/g, ' ')}
+                  </Badge>
+                </div>
+
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={p.purchase?.supplierName}>{p.purchase?.supplierName ?? '—'}</p>
+                    <div className="mt-1">
+                      <CopyableSequence
+                        value={p.purchase?.purchaseNumber ?? '—'}
+                        badgeClassName="font-mono text-[11px] font-medium text-slate-700 dark:text-slate-300 bg-slate-100/90 dark:bg-[#161F2E] px-1.5 py-0.5 rounded border border-slate-200/90 dark:border-[#243245]"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Paid</span>
+                    <span className="text-base font-bold tabular-nums text-gray-900 dark:text-slate-100">{formatCurrency(p.amountPaid)}</span>
+                  </div>
+                </div>
+
+                {(p.referenceNumber || p.remarks) && (
+                  <div className="pt-2 border-t border-gray-100 dark:border-[#1E293B] flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
+                    {p.referenceNumber && <span className="font-mono text-[11px]">Ref: {p.referenceNumber}</span>}
+                    {p.remarks && <span className="italic truncate">{p.remarks}</span>}
+                  </div>
+                )}
               </div>
-              <div className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate min-w-0" title={p.purchase?.supplierName}>{p.purchase?.supplierName ?? '—'}</div>
-              <div className="text-left lg:text-right text-sm tabular-nums font-bold text-gray-900 dark:text-slate-100 min-w-0">{formatCurrency(p.amountPaid)}</div>
-              <div className="min-w-0">
-                <Badge variant="default" className="text-xs bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-none">
-                  {p.paymentMode?.replace(/_/g, ' ')}
-                </Badge>
-              </div>
-              <div className="text-xs text-gray-500 dark:text-slate-400 font-mono truncate min-w-0" title={p.referenceNumber}>{p.referenceNumber || '—'}</div>
-              <div className="text-xs text-gray-400 dark:text-slate-500 truncate min-w-0" title={p.remarks}>{p.remarks || '—'}</div>
             </div>
           ))}
 

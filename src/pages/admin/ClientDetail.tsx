@@ -261,11 +261,11 @@ export default function ClientDetail() {
       </div>
 
       {/* Financial Health Rollup Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* Opening Balance */}
         <div className="p-4 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
           <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Opening Capital</p>
-          <p className="text-base font-bold text-gray-900 dark:text-slate-100 mt-1">
+          <p className="text-base font-bold text-gray-900 dark:text-slate-100 mt-1 break-words tabular-nums">
             {formatCurrency(client.openingBalance || 0)}
           </p>
         </div>
@@ -273,7 +273,7 @@ export default function ClientDetail() {
         {/* Gross Sales */}
         <div className="p-4 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
           <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Sales Invoiced</p>
-          <p className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+          <p className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-1 break-words tabular-nums">
             {formatCurrency(client.totalGrossSales || 0)}
           </p>
           <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{client.totalSalesCount || 0} invoices</p>
@@ -282,7 +282,7 @@ export default function ClientDetail() {
         {/* Gross Purchases */}
         <div className="p-4 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
           <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Purchases Billed</p>
-          <p className="text-base font-bold text-purple-600 dark:text-purple-400 mt-1">
+          <p className="text-base font-bold text-purple-600 dark:text-purple-400 mt-1 break-words tabular-nums">
             {formatCurrency(client.totalGrossPurchases || 0)}
           </p>
           <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{client.totalPurchasesCount || 0} bills</p>
@@ -291,7 +291,7 @@ export default function ClientDetail() {
         {/* Net Profit */}
         <div className="p-4 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
           <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Net Cash Profit</p>
-          <p className={`text-base font-bold mt-1 ${
+          <p className={`text-base font-bold mt-1 break-words tabular-nums ${
             (client.netProfit || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
           }`}>
             {formatCurrency(client.netProfit || 0)}
@@ -302,7 +302,7 @@ export default function ClientDetail() {
         {/* Receivables */}
         <div className="p-4 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
           <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Receivables Due</p>
-          <p className="text-base font-bold text-blue-600 dark:text-sky-400 mt-1">
+          <p className="text-base font-bold text-blue-600 dark:text-sky-400 mt-1 break-words tabular-nums">
             {formatCurrency(client.totalReceivables || 0)}
           </p>
           <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">Customer market credit</p>
@@ -311,7 +311,7 @@ export default function ClientDetail() {
         {/* Current Balance */}
         <div className="p-4 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
           <p className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Available Balance</p>
-          <p className="text-base font-bold text-gray-900 dark:text-slate-100 mt-1">
+          <p className="text-base font-bold text-gray-900 dark:text-slate-100 mt-1 break-words tabular-nums">
             {formatCurrency(client.totalBalance || 0)}
           </p>
           <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">Continuous cash ledger</p>
@@ -320,7 +320,7 @@ export default function ClientDetail() {
 
       {/* Tabs Navigation */}
       <div className="border-b border-gray-200 dark:border-slate-800">
-        <nav className="flex space-x-6 overflow-x-auto text-sm font-semibold">
+        <nav className="flex space-x-6 overflow-x-auto no-scrollbar touch-pan-x text-sm font-semibold whitespace-nowrap">
           {[
             { id: 'overview', label: 'Overview & Partners' },
             { id: 'sales', label: `Sales Invoices (${client.recentSales?.length || 0})` },
@@ -332,7 +332,7 @@ export default function ClientDetail() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-3 px-1 border-b-2 font-medium transition-colors cursor-pointer whitespace-nowrap ${
+              className={`pb-3 px-1 border-b-2 font-medium transition-colors cursor-pointer shrink-0 ${
                 activeTab === tab.id
                   ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
                   : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'

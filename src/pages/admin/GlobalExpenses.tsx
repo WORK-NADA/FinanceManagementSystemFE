@@ -190,32 +190,65 @@ export default function GlobalExpenses() {
           {filteredExpenses.map((expense) => (
             <div
               key={expense.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all grid grid-cols-1 lg:grid-cols-[130px_minmax(140px,1.5fr)_minmax(160px,2fr)_100px_100px_110px] items-center gap-3 px-5 py-3.5 text-sm"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all overflow-hidden"
             >
-              <div className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200">
-                {expense.expenseNumber}
+              {/* Desktop Row */}
+              <div className="hidden lg:grid lg:grid-cols-[130px_minmax(140px,1.5fr)_minmax(160px,2fr)_100px_100px_110px] items-center gap-3 px-5 py-3.5 text-sm">
+                <div className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200">
+                  {expense.expenseNumber}
+                </div>
+
+                <div>
+                  <Badge variant="info" className="text-[10px]">
+                    {expense.category?.replace(/_/g, ' ')}
+                  </Badge>
+                </div>
+
+                <div className="truncate text-xs text-gray-600 dark:text-slate-300">
+                  {expense.description || expense.remarks || '—'}
+                </div>
+
+                <div className="text-xs text-gray-500 dark:text-slate-400">
+                  {expense.paymentMode}
+                </div>
+
+                <div className="text-xs text-gray-500 dark:text-slate-400">
+                  {formatDate(expense.expenseDate)}
+                </div>
+
+                <div className="text-right font-bold text-amber-600 dark:text-amber-400 pr-2">
+                  {formatCurrency(expense.amount)}
+                </div>
               </div>
 
-              <div>
-                <Badge variant="info" className="text-[10px]">
-                  {expense.category?.replace(/_/g, ' ')}
-                </Badge>
-              </div>
+              {/* Mobile / Tablet Card */}
+              <div className="lg:hidden p-3.5 sm:p-4 space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-gray-900 dark:text-slate-100">
+                      {expense.expenseNumber}
+                    </span>
+                    <Badge variant="info" className="text-[10px]">
+                      {expense.category?.replace(/_/g, ' ')}
+                    </Badge>
+                  </div>
+                  <span className="font-bold text-sm text-amber-600 dark:text-amber-400 shrink-0 tabular-nums">
+                    {formatCurrency(expense.amount)}
+                  </span>
+                </div>
 
-              <div className="truncate text-xs text-gray-600 dark:text-slate-300">
-                {expense.description || expense.remarks || '—'}
-              </div>
+                {expense.description || expense.remarks ? (
+                  <p className="text-xs text-gray-600 dark:text-slate-300 line-clamp-2">
+                    {expense.description || expense.remarks}
+                  </p>
+                ) : null}
 
-              <div className="text-xs text-gray-500 dark:text-slate-400">
-                {expense.paymentMode}
-              </div>
-
-              <div className="text-xs text-gray-500 dark:text-slate-400">
-                {formatDate(expense.expenseDate)}
-              </div>
-
-              <div className="text-right font-bold text-amber-600 dark:text-amber-400 pr-2">
-                {formatCurrency(expense.amount)}
+                <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-slate-400 border-t border-gray-100 dark:border-slate-800/80 pt-2">
+                  <span>
+                    Mode: <strong className="font-semibold text-gray-700 dark:text-slate-300">{expense.paymentMode}</strong>
+                  </span>
+                  <span>{formatDate(expense.expenseDate)}</span>
+                </div>
               </div>
             </div>
           ))}

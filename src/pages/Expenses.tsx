@@ -203,10 +203,10 @@ export default function Expenses() {
 
       {/* Filters bar */}
       <div className="bg-white dark:bg-[#141A24] p-5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs flex flex-col gap-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="overflow-x-auto no-scrollbar touch-pan-x flex items-center gap-2 pb-1 sm:flex-wrap">
           <button
             onClick={() => { setFilters(f => ({ ...f, category: '' })); setPage(0); }}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
               filters.category === '' ? 'bg-[var(--color-primary)] text-white shadow-xs' : 'bg-gray-100 dark:bg-[#0E131C] text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-[#1A2331] border border-gray-200/60 dark:border-[#1F2837]'
             }`}
           >
@@ -216,7 +216,7 @@ export default function Expenses() {
             <button
               key={cat}
               onClick={() => { setFilters(f => ({ ...f, category: cat })); setPage(0); }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                 filters.category === cat ? 'bg-[var(--color-primary)] text-white shadow-xs' : 'bg-gray-100 dark:bg-[#0E131C] text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-[#1A2331] border border-gray-200/60 dark:border-[#1F2837]'
               }`}
             >
@@ -282,11 +282,13 @@ export default function Expenses() {
           {expenses.map((e) => (
             <div
               key={e.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[90px_minmax(150px,1.2fr)_minmax(95px,1fr)_minmax(85px,1fr)_80px_minmax(85px,1fr)_minmax(100px,1.4fr)_80px] items-center gap-3 px-5 py-3.5 w-full"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all w-full overflow-hidden"
             >
-              <div className="min-w-0 text-sm font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">
-                {formatDate(e.expenseDate)}
-              </div>
+              {/* Desktop View (lg:grid) */}
+              <div className="hidden lg:grid grid-cols-[90px_minmax(150px,1.2fr)_minmax(95px,1fr)_minmax(85px,1fr)_80px_minmax(85px,1fr)_minmax(100px,1.4fr)_80px] items-center gap-3 px-5 py-3.5 w-full">
+                <div className="min-w-0 text-sm font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">
+                  {formatDate(e.expenseDate)}
+                </div>
                 <div className="min-w-0">
                   <CopyableSequence
                     value={e.expenseNumber}
@@ -331,7 +333,62 @@ export default function Expenses() {
                   </Button>
                 </div>
               </div>
-            ))}
+
+              {/* Mobile View (lg:hidden) */}
+              <div className="lg:hidden p-3.5 space-y-2.5 w-full">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CopyableSequence
+                      value={e.expenseNumber}
+                      badgeClassName="font-mono text-xs font-semibold text-blue-700 dark:text-sky-300 bg-blue-50 dark:bg-sky-950/40 px-2 py-0.5 rounded border border-blue-200/60 dark:border-sky-900/50 inline-flex items-center"
+                    />
+                    <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+                      {formatDate(e.expenseDate)}
+                    </span>
+                  </div>
+                  <Badge variant="default" className="text-[10px]">
+                    {e.category.replace(/_/g, ' ')}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold tabular-nums text-red-700 dark:text-rose-400">
+                      {formatCurrency(e.amount)}
+                    </span>
+                    <Badge variant="info" className="text-[10px]">{e.paymentMode.replace(/_/g, ' ')}</Badge>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-blue-50 dark:hover:bg-sky-950/30 transition-colors"
+                      onClick={() => handleOpenModal(e)}
+                      title="Edit Expense"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 dark:text-slate-400 hover:text-red-600 dark:hover:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-950/30 transition-colors"
+                      onClick={() => handleOpenDeleteModal(e)}
+                      title="Delete Expense"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {(e.referenceNumber || e.description) && (
+                  <div className="pt-2 border-t border-gray-100 dark:border-[#1E293B] flex flex-wrap items-center justify-between gap-1 text-xs text-gray-500 dark:text-slate-400">
+                    {e.referenceNumber && <span className="font-mono text-[11px]">Ref: {e.referenceNumber}</span>}
+                    {e.description && <span className="italic truncate">{e.description}</span>}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
           </div>
 
           {/* Pagination */}

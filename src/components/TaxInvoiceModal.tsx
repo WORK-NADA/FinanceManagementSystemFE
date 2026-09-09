@@ -203,8 +203,8 @@ export function TaxInvoiceModal({ isOpen, onClose, sale }: TaxInvoiceModalProps)
           </div>
 
           {/* Line Items Table */}
-          <div className="border border-gray-200 dark:border-[#222E42] rounded-lg overflow-hidden mb-5 print:border-gray-400">
-            <table className="w-full text-left border-collapse">
+          <div className="border border-gray-200 dark:border-[#222E42] rounded-lg overflow-x-auto touch-pan-x mb-5 print:border-gray-400">
+            <table className="w-full text-left border-collapse min-w-[540px]">
               <thead className="bg-slate-100 dark:bg-[#161F2E] border-b border-gray-200 dark:border-[#222E42] print:bg-gray-100 print:border-gray-400">
                 <tr className="text-xs uppercase font-bold text-slate-700 dark:text-slate-200 print:text-black">
                   <th className="py-3 px-3 w-12 text-center">#</th>
@@ -318,15 +318,15 @@ export function TaxInvoiceModal({ isOpen, onClose, sale }: TaxInvoiceModalProps)
         </div>
 
         {/* Modal Action Buttons (Hidden when Printing) */}
-        <div className="flex justify-between items-center pt-2 print:hidden">
-          <p className="text-xs text-gray-500">
+        <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 print:hidden">
+          <p className="text-xs text-gray-500 text-center sm:text-left">
             Click Print to export to PDF or print directly via browser print dialog.
           </p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={onClose}>
+          <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-initial">
               Close
             </Button>
-            <Button onClick={handlePrint} className="gap-2">
+            <Button onClick={handlePrint} className="gap-2 flex-1 sm:flex-initial">
               <Printer className="h-4 w-4" /> Print Tax Invoice
             </Button>
           </div>

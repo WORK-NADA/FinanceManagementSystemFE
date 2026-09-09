@@ -3,8 +3,8 @@ import { cn } from '@/lib/cn';
 
 export const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto rounded-2xl border border-gray-200/90 dark:border-[#1E293B] bg-white dark:bg-[#121824] shadow-xs">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
+    <div className="relative w-full overflow-x-auto rounded-2xl border border-gray-200/90 dark:border-[#1E293B] bg-white dark:bg-[#121824] shadow-xs touch-pan-x">
+      <table ref={ref} className={cn("w-full min-w-[600px] caption-bottom text-sm", className)} {...props} />
     </div>
   )
 );
@@ -33,14 +33,14 @@ TableRow.displayName = "TableRow";
 
 export const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <th ref={ref} className={cn("h-12 px-4 text-left align-middle font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 [&:has([role=checkbox])]:pr-0", className)} {...props} />
+    <th ref={ref} className={cn("h-11 sm:h-12 px-3 sm:px-4 text-left align-middle font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 [&:has([role=checkbox])]:pr-0 whitespace-nowrap", className)} {...props} />
   )
 );
 TableHead.displayName = "TableHead";
 
 export const TableCell = forwardRef<HTMLTableCellElement, TdHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <td ref={ref} className={cn("p-4 align-middle text-slate-700 dark:text-slate-300 [&:has([role=checkbox])]:pr-0", className)} {...props} />
+    <td ref={ref} className={cn("p-3 sm:p-4 align-middle text-slate-700 dark:text-slate-300 [&:has([role=checkbox])]:pr-0", className)} {...props} />
   )
 );
 TableCell.displayName = "TableCell";

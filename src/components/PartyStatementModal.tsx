@@ -185,48 +185,50 @@ export function PartyStatementModal({
         )}
 
         {/* Date Filter & Quick Actions (Hidden in Print) */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 print:hidden">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5 shrink-0">
               <Calendar className="h-4 w-4 text-gray-500 dark:text-slate-400" />
               <span className="text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase tracking-wider">Period:</span>
             </div>
-            <Input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="w-36 text-sm"
-              placeholder="From Date"
-              aria-label="From Date"
-            />
-            <span className="text-gray-400 dark:text-slate-500 text-sm">to</span>
-            <Input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="w-36 text-sm"
-              placeholder="To Date"
-              aria-label="To Date"
-            />
+            <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+              <Input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="w-full sm:w-36 text-sm"
+                placeholder="From Date"
+                aria-label="From Date"
+              />
+              <span className="text-gray-400 dark:text-slate-500 text-xs sm:text-sm shrink-0">to</span>
+              <Input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="w-full sm:w-36 text-sm"
+                placeholder="To Date"
+                aria-label="To Date"
+              />
+            </div>
             {(fromDate || toDate) && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleResetFilters}
-                className="text-xs gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                className="text-xs gap-1 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 shrink-0"
               >
                 <RotateCcw className="h-3.5 w-3.5" /> Clear
               </Button>
             )}
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <Button
               variant="outline"
               size="sm"
               onClick={handleExportCSV}
               disabled={!statement || statement.entries.length === 0}
-              className="gap-1.5 text-xs"
+              className="gap-1.5 text-xs flex-1 sm:flex-initial"
             >
               <Download className="h-3.5 w-3.5" /> Export CSV
             </Button>
@@ -235,7 +237,7 @@ export function PartyStatementModal({
               size="sm"
               onClick={handlePrint}
               disabled={!statement}
-              className="gap-1.5 text-xs"
+              className="gap-1.5 text-xs flex-1 sm:flex-initial"
             >
               <Printer className="h-3.5 w-3.5" /> Print Statement
             </Button>
@@ -244,46 +246,46 @@ export function PartyStatementModal({
 
         {/* Summary KPI Ribbon */}
         {statement && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-white dark:bg-[#141A24] p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="bg-white dark:bg-[#141A24] p-3 sm:p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <span className="text-xs font-medium text-gray-500 dark:text-slate-400">Opening Balance</span>
-              <p className="text-lg font-serif font-bold text-gray-800 dark:text-slate-100 mt-1">
+              <p className="text-base sm:text-lg font-serif font-bold text-gray-800 dark:text-slate-100 mt-1 break-words tabular-nums">
                 {formatCurrency(statement.openingBalance)}
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#141A24] p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
+            <div className="bg-white dark:bg-[#141A24] p-3 sm:p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-500 dark:text-slate-400">
+                <span className="text-xs font-medium text-gray-500 dark:text-slate-400 truncate pr-1">
                   {isCustomer ? 'Total Sales Invoiced' : 'Total Purchases Billed'}
                 </span>
-                <TrendingUp className="h-4 w-4 text-blue-500 dark:text-sky-400" />
+                <TrendingUp className="h-4 w-4 text-blue-500 dark:text-sky-400 shrink-0" />
               </div>
-              <p className="text-lg font-serif font-bold text-blue-700 dark:text-sky-400 mt-1">
+              <p className="text-base sm:text-lg font-serif font-bold text-blue-700 dark:text-sky-400 mt-1 break-words tabular-nums">
                 {formatCurrency(statement.totalBilled)}
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#141A24] p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
+            <div className="bg-white dark:bg-[#141A24] p-3 sm:p-4 rounded-xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-500 dark:text-slate-400">
+                <span className="text-xs font-medium text-gray-500 dark:text-slate-400 truncate pr-1">
                   {isCustomer ? 'Total Payments Received' : 'Total Payments Made'}
                 </span>
-                <TrendingDown className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+                <TrendingDown className="h-4 w-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
               </div>
-              <p className="text-lg font-serif font-bold text-emerald-700 dark:text-emerald-400 mt-1">
+              <p className="text-base sm:text-lg font-serif font-bold text-emerald-700 dark:text-emerald-400 mt-1 break-words tabular-nums">
                 {formatCurrency(statement.totalPaid)}
               </p>
             </div>
 
-            <div className="bg-emerald-50/40 dark:bg-emerald-950/40 p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-xs">
+            <div className="bg-emerald-50/40 dark:bg-emerald-950/40 p-3 sm:p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
+                <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300 truncate pr-1">
                   {isCustomer ? 'Remaining to Collect' : 'Remaining to Pay'}
                 </span>
-                <Wallet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <Wallet className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               </div>
-              <p className="text-lg font-serif font-bold text-emerald-900 dark:text-emerald-200 mt-1">
+              <p className="text-base sm:text-lg font-serif font-bold text-emerald-900 dark:text-emerald-200 mt-1 break-words tabular-nums">
                 {formatCurrency(statement.outstandingBalance)}
               </p>
             </div>
@@ -309,7 +311,7 @@ export function PartyStatementModal({
             </p>
           </div>
         ) : (
-          <div className="rounded-xl border border-slate-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm overflow-x-auto">
+          <div className="rounded-xl border border-slate-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm overflow-x-auto touch-pan-x">
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50 dark:bg-[#0E131C]">
@@ -400,11 +402,11 @@ export function PartyStatementModal({
         )}
 
         {/* Footer Actions */}
-        <div className="flex justify-between items-center pt-2 print:hidden">
-          <p className="text-xs text-slate-400">
+        <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 print:hidden">
+          <p className="text-xs text-slate-400 text-center sm:text-left">
             * Progressive ledger reflects all trade invoices and payments registered in the system.
           </p>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Close
           </Button>
         </div>

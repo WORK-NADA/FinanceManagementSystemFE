@@ -96,10 +96,10 @@ function CashFlowHealthBar({
   const isSurplus = netCapital >= 0;
 
   return (
-    <div className="bg-white dark:bg-[#131924] rounded-2xl border border-slate-200/90 dark:border-[#1F2837] dark:ring-1 dark:ring-white/[0.04] shadow-xs p-6 space-y-4">
+    <div className="bg-white dark:bg-[#131924] rounded-2xl border border-slate-200/90 dark:border-[#1F2837] dark:ring-1 dark:ring-white/[0.04] shadow-xs p-4 sm:p-6 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-[var(--color-primary)] dark:text-emerald-400">
+          <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-[var(--color-primary)] dark:text-emerald-400 shrink-0">
             <Wallet className="h-5 w-5" />
           </div>
           <div>
@@ -133,18 +133,18 @@ function CashFlowHealthBar({
       </div>
 
       {/* Grid of numbers */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100/90 dark:border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-gray-100/90 dark:border-slate-800">
         <div>
           <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Money to Collect (From Customers)</p>
-          <p className="text-xl font-serif font-bold tabular-nums text-emerald-700 dark:text-emerald-400 mt-1">{formatCurrency(receivables)}</p>
+          <p className="text-lg sm:text-xl font-serif font-bold tabular-nums break-words text-emerald-700 dark:text-emerald-400 mt-1">{formatCurrency(receivables)}</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Money to Pay (To Suppliers)</p>
-          <p className="text-xl font-serif font-bold tabular-nums text-rose-700 dark:text-rose-400 mt-1">{formatCurrency(payables)}</p>
+          <p className="text-lg sm:text-xl font-serif font-bold tabular-nums break-words text-rose-700 dark:text-rose-400 mt-1">{formatCurrency(payables)}</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Net Available Balance</p>
-          <p className={`text-xl font-serif font-bold tabular-nums mt-1 ${isSurplus ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-400'}`}>
+          <p className={`text-lg sm:text-xl font-serif font-bold tabular-nums break-words mt-1 ${isSurplus ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-400'}`}>
             {isSurplus ? `+${formatCurrency(netCapital)}` : formatCurrency(netCapital)}
           </p>
         </div>
@@ -276,11 +276,11 @@ export default function Dashboard() {
       <QuickActionDock />
 
       {/* Featured: Total Balance Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-[#0d2820] to-[#0a4635] p-6 sm:p-8 text-white shadow-lg border border-emerald-500/20">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-[#0d2820] to-[#0a4635] p-4 sm:p-6 md:p-8 text-white shadow-lg border border-emerald-500/20">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
+              <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 shrink-0">
                 <Landmark className="h-6 w-6" />
               </div>
               <div>
@@ -303,7 +303,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 md:text-right">
             <div>
               <span className="text-xs text-emerald-300/80 font-medium block">Live Available Balance</span>
-              <div className={`text-3xl sm:text-4xl lg:text-5xl font-serif font-extrabold tracking-tight tabular-nums ${totalBalance >= 0 ? 'text-white' : 'text-rose-400'}`}>
+              <div className={`text-2xl sm:text-4xl lg:text-5xl font-serif font-extrabold tracking-tight tabular-nums break-words ${totalBalance >= 0 ? 'text-white' : 'text-rose-400'}`}>
                 {formatCurrency(totalBalance)}
               </div>
             </div>
@@ -311,10 +311,10 @@ export default function Dashboard() {
         </div>
 
         {/* 5-Pill Formula Breakdown */}
-        <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
           <div 
             onClick={handleOpenOpeningBalanceModal}
-            className="group cursor-pointer bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
+            className="group cursor-pointer bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
             title="Click to view or edit Opening Balance"
           >
             <div className="flex items-center justify-between text-[11px] text-gray-300">
@@ -324,7 +324,7 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-lg font-bold text-white tabular-nums">
+              <span className="text-base sm:text-lg font-bold text-white tabular-nums break-words">
                 {formatCurrency(openingBalance)}
               </span>
             </div>
@@ -333,13 +333,13 @@ export default function Dashboard() {
 
           <Link 
             to="/dashboard/sale-payments"
-            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
+            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between text-[11px] text-gray-300">
               <span className="font-semibold uppercase tracking-wider">+ Money Received</span>
-              <ArrowDownRight className="h-3.5 w-3.5 text-emerald-400" />
+              <ArrowDownRight className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
             </div>
-            <div className="mt-1.5 text-lg font-bold text-emerald-300 tabular-nums">
+            <div className="mt-1.5 text-base sm:text-lg font-bold text-emerald-300 tabular-nums break-words">
               +{formatCurrency(totalMoneyReceived)}
             </div>
             <span className="text-[10px] text-gray-400 mt-1">Actual customer collections</span>
@@ -347,13 +347,13 @@ export default function Dashboard() {
 
           <Link 
             to="/dashboard/purchase-payments"
-            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-rose-400/40 transition-all duration-200 flex flex-col justify-between"
+            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-rose-400/40 transition-all duration-200 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between text-[11px] text-gray-300">
               <span className="font-semibold uppercase tracking-wider">− Money Paid</span>
-              <ArrowUpRight className="h-3.5 w-3.5 text-rose-400" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-rose-400 shrink-0" />
             </div>
-            <div className="mt-1.5 text-lg font-bold text-rose-300 tabular-nums">
+            <div className="mt-1.5 text-base sm:text-lg font-bold text-rose-300 tabular-nums break-words">
               −{formatCurrency(totalMoneyPaid)}
             </div>
             <span className="text-[10px] text-gray-400 mt-1">Actual supplier payments</span>
@@ -361,13 +361,13 @@ export default function Dashboard() {
 
           <Link 
             to="/dashboard/expenses"
-            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-amber-400/40 transition-all duration-200 flex flex-col justify-between"
+            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-amber-400/40 transition-all duration-200 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between text-[11px] text-gray-300">
               <span className="font-semibold uppercase tracking-wider">− Total Expenses</span>
-              <Receipt className="h-3.5 w-3.5 text-amber-400" />
+              <Receipt className="h-3.5 w-3.5 text-amber-400 shrink-0" />
             </div>
-            <div className="mt-1.5 text-lg font-bold text-amber-300 tabular-nums">
+            <div className="mt-1.5 text-base sm:text-lg font-bold text-amber-300 tabular-nums break-words">
               −{formatCurrency(totalExpenses)}
             </div>
             <span className="text-[10px] text-gray-400 mt-1">Operational business expenses</span>
@@ -375,13 +375,13 @@ export default function Dashboard() {
 
           <Link 
             to="/dashboard/profit-distribution"
-            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 hover:border-indigo-400/40 transition-all duration-200 flex flex-col justify-between col-span-2 sm:col-span-1"
+            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-indigo-400/40 transition-all duration-200 flex flex-col justify-between col-span-1 sm:col-span-2 lg:col-span-1"
           >
             <div className="flex items-center justify-between text-[11px] text-gray-300">
               <span className="font-semibold uppercase tracking-wider">− Withdrawals</span>
-              <Users className="h-3.5 w-3.5 text-indigo-400" />
+              <Users className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
             </div>
-            <div className="mt-1.5 text-lg font-bold text-indigo-300 tabular-nums">
+            <div className="mt-1.5 text-base sm:text-lg font-bold text-indigo-300 tabular-nums break-words">
               −{formatCurrency(totalWithdrawals)}
             </div>
             <span className="text-[10px] text-gray-400 mt-1">Withdrawn partner profit</span>
@@ -452,7 +452,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={trendData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }} barGap={3}>
+              <BarChart data={trendData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} barGap={3}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#f0f0f0'} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
                 <YAxis tickFormatter={v => `₹${(Number(v) / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
@@ -529,7 +529,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={trendData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <LineChart data={trendData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#f0f0f0'} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />
                 <YAxis tickFormatter={v => `₹${(Number(v) / 1000).toFixed(0)}k`} tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#64748B' }} />

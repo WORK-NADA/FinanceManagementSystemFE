@@ -97,11 +97,11 @@ export default function AdminReports() {
       />
 
       {/* Reports Category Navigation */}
-      <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-[#141A24] rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold w-fit">
+      <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-[#141A24] rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold w-full sm:w-fit overflow-x-auto no-scrollbar touch-pan-x whitespace-nowrap">
         <button
           type="button"
           onClick={() => setActiveReportTab('pnl')}
-          className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
+          className={`px-4 py-2 rounded-lg transition-all cursor-pointer shrink-0 ${
             activeReportTab === 'pnl'
               ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-xs'
               : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
@@ -112,7 +112,7 @@ export default function AdminReports() {
         <button
           type="button"
           onClick={() => setActiveReportTab('leaderboard')}
-          className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
+          className={`px-4 py-2 rounded-lg transition-all cursor-pointer shrink-0 ${
             activeReportTab === 'leaderboard'
               ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-xs'
               : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
@@ -123,7 +123,7 @@ export default function AdminReports() {
         <button
           type="button"
           onClick={() => setActiveReportTab('tax')}
-          className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
+          className={`px-4 py-2 rounded-lg transition-all cursor-pointer shrink-0 ${
             activeReportTab === 'tax'
               ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-xs'
               : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
@@ -136,10 +136,10 @@ export default function AdminReports() {
       {/* Tab: Consolidated P&L */}
       {activeReportTab === 'pnl' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-5 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Gross Platform Turnover</span>
-              <p className="text-2xl font-bold text-gray-900 dark:text-slate-100 mt-1">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-slate-100 mt-1 break-words">
                 {formatCurrency(stats?.totalGrossSales || 0)}
               </p>
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Total invoiced sales</p>
@@ -147,7 +147,7 @@ export default function AdminReports() {
 
             <div className="p-5 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actual Collections (Recv)</span>
-              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+              <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 break-words">
                 {formatCurrency(stats?.totalPaymentsReceived || 0)}
               </p>
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Money realized in accounts</p>
@@ -155,7 +155,7 @@ export default function AdminReports() {
 
             <div className="p-5 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actual Procurement Cost</span>
-              <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">
+              <p className="text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1 break-words">
                 {formatCurrency(stats?.totalPaymentsMade || 0)}
               </p>
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Direct goods disbursements</p>
@@ -163,7 +163,7 @@ export default function AdminReports() {
 
             <div className="p-5 bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs">
               <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Net Platform Margin</span>
-              <p className={`text-2xl font-bold mt-1 ${
+              <p className={`text-xl sm:text-2xl font-bold mt-1 break-words ${
                 netPlatformMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
               }`}>
                 {formatCurrency(netPlatformMargin)}
@@ -178,28 +178,28 @@ export default function AdminReports() {
               <CardTitle className="text-base">Consolidated Financial Statement (Cross-Tenant)</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 divide-y divide-gray-100 dark:divide-slate-800 text-sm">
-                <div className="flex justify-between py-2 font-medium">
+              <div className="space-y-3 divide-y divide-gray-100 dark:divide-slate-800 text-xs sm:text-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 font-medium gap-1">
                   <span className="text-gray-700 dark:text-slate-300">1. Total Sales Payments Received (Revenue Realized)</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatCurrency(stats?.totalPaymentsReceived || 0)}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold sm:text-right shrink-0">{formatCurrency(stats?.totalPaymentsReceived || 0)}</span>
                 </div>
-                <div className="flex justify-between py-2 font-medium">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 font-medium gap-1">
                   <span className="text-gray-700 dark:text-slate-300">2. Less: Total Purchase Payments Made (Direct Procurement)</span>
-                  <span className="text-rose-600 dark:text-rose-400 font-bold">- {formatCurrency(stats?.totalPaymentsMade || 0)}</span>
+                  <span className="text-rose-600 dark:text-rose-400 font-bold sm:text-right shrink-0">- {formatCurrency(stats?.totalPaymentsMade || 0)}</span>
                 </div>
-                <div className="flex justify-between py-2 font-bold bg-gray-50/50 dark:bg-slate-800/30 px-3 rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 font-bold bg-gray-50/50 dark:bg-slate-800/30 px-3 rounded-lg gap-1">
                   <span className="text-gray-900 dark:text-slate-100">= Gross Operating Surplus</span>
-                  <span className="text-gray-900 dark:text-slate-100">
+                  <span className="text-gray-900 dark:text-slate-100 sm:text-right shrink-0">
                     {formatCurrency((stats?.totalPaymentsReceived || 0) - (stats?.totalPaymentsMade || 0))}
                   </span>
                 </div>
-                <div className="flex justify-between py-2 font-medium">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 font-medium gap-1">
                   <span className="text-gray-700 dark:text-slate-300">3. Less: Total Business Operating Expenses (OPEX)</span>
-                  <span className="text-amber-600 dark:text-amber-400 font-bold">- {formatCurrency(stats?.totalExpenses || 0)}</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-bold sm:text-right shrink-0">- {formatCurrency(stats?.totalExpenses || 0)}</span>
                 </div>
-                <div className="flex justify-between py-3 font-bold bg-emerald-50/50 dark:bg-emerald-950/20 px-3 rounded-lg text-base border border-emerald-200/50 dark:border-emerald-800/50">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3 font-bold bg-emerald-50/50 dark:bg-emerald-950/20 px-3 rounded-lg text-sm sm:text-base border border-emerald-200/50 dark:border-emerald-800/50 gap-1">
                   <span className="text-emerald-900 dark:text-emerald-300">= Net Platform Operating Margin</span>
-                  <span className={netPlatformMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
+                  <span className={`sm:text-right shrink-0 ${netPlatformMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                     {formatCurrency(netPlatformMargin)}
                   </span>
                 </div>
@@ -212,7 +212,7 @@ export default function AdminReports() {
       {/* Tab: Client Comparative Rankings */}
       {activeReportTab === 'leaderboard' && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3">
             <div>
               <CardTitle className="text-base">Tenant Performance Rankings</CardTitle>
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
@@ -223,7 +223,7 @@ export default function AdminReports() {
               variant="outline" 
               size="sm" 
               onClick={handleExportClientRankings}
-              className="text-xs"
+              className="text-xs self-start sm:self-auto"
             >
               <Download className="h-3.5 w-3.5 mr-1.5" />
               Export to CSV
@@ -244,35 +244,71 @@ export default function AdminReports() {
                 {stats.topClients.map((client, idx) => (
                   <div 
                     key={client.publicId}
-                    className="p-3.5 rounded-xl border border-gray-100 dark:border-slate-800/80 hover:bg-gray-50/70 dark:hover:bg-slate-800/40 transition-colors grid grid-cols-1 lg:grid-cols-[60px_minmax(140px,2fr)_minmax(120px,1fr)_100px_130px_90px] items-center gap-3 text-sm"
+                    className="rounded-xl border border-gray-100 dark:border-slate-800/80 hover:bg-gray-50/70 dark:hover:bg-slate-800/40 transition-colors overflow-hidden"
                   >
-                    <div className="font-bold text-gray-500 dark:text-slate-400">
-                      #{idx + 1}
+                    {/* Desktop Row */}
+                    <div className="hidden lg:grid lg:grid-cols-[60px_minmax(140px,2fr)_minmax(120px,1fr)_100px_130px_90px] items-center gap-3 p-3.5 text-sm">
+                      <div className="font-bold text-gray-500 dark:text-slate-400">
+                        #{idx + 1}
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 dark:text-slate-100 truncate">{client.ownerName || client.username}</p>
+                        <p className="text-xs text-gray-400 font-mono">@{client.username}</p>
+                      </div>
+
+                      <div className="text-xs text-gray-600 dark:text-slate-400 truncate">
+                        <p>{client.email}</p>
+                        <p>{client.mobileNumber}</p>
+                      </div>
+
+                      <div className="text-xs text-gray-700 dark:text-slate-300 font-medium">
+                        {client.customerCount} Parties
+                      </div>
+
+                      <div className="text-right font-bold text-emerald-600 dark:text-emerald-400">
+                        {formatCurrency(client.totalSalesVolume || 0)}
+                        <p className="text-[10px] text-gray-400 font-normal">{client.totalSalesCount} bills</p>
+                      </div>
+
+                      <div className="text-right pr-2">
+                        <Badge variant={client.enabled ? 'success' : 'default'} className="text-[10px]">
+                          {client.enabled ? 'Active' : 'Disabled'}
+                        </Badge>
+                      </div>
                     </div>
 
-                    <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-slate-100 truncate">{client.ownerName || client.username}</p>
-                      <p className="text-xs text-gray-400 font-mono">@{client.username}</p>
-                    </div>
+                    {/* Mobile Card */}
+                    <div className="lg:hidden p-3.5 space-y-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-gray-100 dark:bg-slate-800 text-xs font-bold text-gray-700 dark:text-slate-300">
+                            #{idx + 1}
+                          </span>
+                          <div>
+                            <p className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-slate-100">{client.ownerName || client.username}</p>
+                            <p className="text-[10px] text-gray-400 font-mono">@{client.username}</p>
+                          </div>
+                        </div>
+                        <Badge variant={client.enabled ? 'success' : 'default'} className="text-[10px] shrink-0">
+                          {client.enabled ? 'Active' : 'Disabled'}
+                        </Badge>
+                      </div>
 
-                    <div className="text-xs text-gray-600 dark:text-slate-400 truncate">
-                      <p>{client.email}</p>
-                      <p>{client.mobileNumber}</p>
-                    </div>
+                      <div className="text-[11px] text-gray-500 dark:text-slate-400 space-y-0.5 bg-gray-50/60 dark:bg-[#0E131C] p-2 rounded-lg">
+                        <p className="truncate">{client.email}</p>
+                        <p>{client.mobileNumber}</p>
+                      </div>
 
-                    <div className="text-xs text-gray-700 dark:text-slate-300 font-medium">
-                      {client.customerCount} Parties
-                    </div>
-
-                    <div className="text-right font-bold text-emerald-600 dark:text-emerald-400">
-                      {formatCurrency(client.totalSalesVolume || 0)}
-                      <p className="text-[10px] text-gray-400 font-normal">{client.totalSalesCount} bills</p>
-                    </div>
-
-                    <div className="text-right pr-2">
-                      <Badge variant={client.enabled ? 'success' : 'default'} className="text-[10px]">
-                        {client.enabled ? 'Active' : 'Disabled'}
-                      </Badge>
+                      <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-100 dark:border-slate-800/80">
+                        <span className="text-gray-500 dark:text-slate-400">{client.customerCount} Parties</span>
+                        <div className="text-right">
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                            {formatCurrency(client.totalSalesVolume || 0)}
+                          </span>
+                          <span className="text-[10px] text-gray-400 block">{client.totalSalesCount} bills</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -20,18 +20,18 @@ export function KpiCard({ title, value, icon, trend, className }: KpiCardProps) 
 
   return (
     <Card className={cn("overflow-hidden", className)}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-[var(--color-text-sub)] truncate">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm font-medium text-[var(--color-text-sub)] truncate">
               {title}
             </p>
-            <p className="mt-2 text-3xl font-serif font-semibold text-[var(--color-text-main)] tabular-nums">
+            <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-serif font-semibold text-[var(--color-text-main)] tabular-nums break-words">
               {displayValue}
             </p>
           </div>
           {icon && (
-            <div className="p-3 bg-gray-50 dark:bg-slate-800/80 rounded-xl text-[var(--color-primary)] dark:text-emerald-400">
+            <div className="p-2.5 sm:p-3 bg-gray-50 dark:bg-slate-800/80 rounded-xl text-[var(--color-primary)] dark:text-emerald-400 shrink-0">
               {icon}
             </div>
           )}

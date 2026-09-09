@@ -177,11 +177,13 @@ export default function StockTransactions() {
             return (
               <div
                 key={t.publicId}
-                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 md:grid-cols-[100px_minmax(150px,1.2fr)_minmax(120px,1.5fr)_110px_minmax(90px,1fr)_minmax(100px,1.3fr)] items-center gap-3 px-5 py-3.5 w-full"
+                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all w-full overflow-hidden"
               >
-                <div className="min-w-0 text-sm font-medium text-gray-600 dark:text-slate-300 whitespace-nowrap">
-                  {formatDate(t.transactionDate)}
-                </div>
+                {/* Desktop View (md:grid) */}
+                <div className="hidden md:grid grid-cols-[100px_minmax(150px,1.2fr)_minmax(120px,1.5fr)_110px_minmax(90px,1fr)_minmax(100px,1.3fr)] items-center gap-3 px-5 py-3.5 w-full">
+                  <div className="min-w-0 text-sm font-medium text-gray-600 dark:text-slate-300 whitespace-nowrap">
+                    {formatDate(t.transactionDate)}
+                  </div>
                   <div className="min-w-0">
                     <CopyableSequence value={t.referenceNumber}>
                       <span className="inline-flex items-center gap-1.5 dark:text-slate-300">
@@ -209,6 +211,44 @@ export default function StockTransactions() {
                     {t.remarks || '—'}
                   </div>
                 </div>
+
+                {/* Mobile View (md:hidden) */}
+                <div className="md:hidden p-3.5 space-y-2.5 w-full">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+                        {formatDate(t.transactionDate)}
+                      </span>
+                      <Badge variant={meta.variant} className="text-[10px]">
+                        {meta.label}
+                      </Badge>
+                    </div>
+                    <div className={`text-sm font-bold tabular-nums shrink-0 ${isIn ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
+                      {isIn ? '+' : '-'}{formatNumber(t.quantity)} <span className="text-xs font-normal text-gray-500 dark:text-slate-400">{t.unit}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={t.rawMaterial}>
+                      {t.rawMaterial}
+                    </p>
+                    <div className="text-right shrink-0">
+                      <CopyableSequence value={t.referenceNumber}>
+                        <span className="inline-flex items-center gap-1 font-mono text-xs text-gray-600 dark:text-slate-400">
+                          {t.referenceNumber}
+                          {isAuto && <Info className="h-3 w-3 text-blue-500 dark:text-sky-400" />}
+                        </span>
+                      </CopyableSequence>
+                    </div>
+                  </div>
+
+                  {t.remarks && (
+                    <p className="text-xs text-gray-500 dark:text-slate-400 italic bg-gray-50/70 dark:bg-[#0E141E] p-2 rounded-lg border border-gray-100 dark:border-[#1E293B]">
+                      {t.remarks}
+                    </p>
+                  )}
+                </div>
+              </div>
               );
             })}
 

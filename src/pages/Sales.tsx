@@ -288,8 +288,8 @@ function SalePaymentsDrawerSection({
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200/90 dark:border-[#1E293B] shadow-2xs bg-white dark:bg-[#0E141E] w-full">
-          <table className="w-full text-left border-collapse text-xs">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200/90 dark:border-[#1E293B] shadow-2xs bg-white dark:bg-[#0E141E] w-full">
+          <table className="w-full text-left border-collapse text-xs min-w-[700px]">
             <thead>
               <tr className="bg-gray-50 dark:bg-[#161F2E] border-b border-gray-200 dark:border-[#1E293B] text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 select-none">
                 <th className="px-3.5 py-2.5 whitespace-nowrap min-w-[140px]">Payment #</th>
@@ -853,9 +853,9 @@ export default function Sales() {
                     : 'border-gray-200/90 dark:border-[#1E293B] hover:border-gray-300 dark:hover:border-slate-700'
                 }`}
               >
-                {/* Card Main Row */}
+                {/* Desktop View: 10-column spreadsheet grid (hidden below lg) */}
                 <div
-                  className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[90px_minmax(130px,1.2fr)_minmax(110px,1.3fr)_minmax(70px,0.8fr)_minmax(75px,0.9fr)_minmax(65px,0.8fr)_minmax(75px,0.9fr)_85px_minmax(175px,1.2fr)_28px] items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3.5 cursor-pointer select-none transition-colors rounded-2xl w-full ${
+                  className={`hidden lg:grid grid-cols-[90px_minmax(130px,1.2fr)_minmax(110px,1.3fr)_minmax(70px,0.8fr)_minmax(75px,0.9fr)_minmax(65px,0.8fr)_minmax(75px,0.9fr)_85px_minmax(175px,1.2fr)_28px] items-center gap-3 px-5 py-3.5 cursor-pointer select-none transition-colors rounded-2xl w-full ${
                     isExpanded ? 'bg-slate-50/50 dark:bg-[#161F2E] rounded-b-none' : 'hover:bg-gray-50/70 dark:hover:bg-[#182232]'
                   }`}
                   onClick={() => setExpandedRow(isExpanded ? null : s.publicId)}
@@ -884,17 +884,17 @@ export default function Sales() {
                   </div>
 
                   {/* Amount */}
-                  <div className="min-w-0 text-left lg:text-right text-sm tabular-nums text-blue-700 dark:text-sky-400 font-semibold">
+                  <div className="min-w-0 text-right text-sm tabular-nums text-blue-700 dark:text-sky-400 font-semibold">
                     {formatCurrency(s.amount)}
                   </div>
 
                   {/* GST */}
-                  <div className="min-w-0 text-left lg:text-right text-sm tabular-nums text-amber-700 dark:text-amber-400 font-medium">
+                  <div className="min-w-0 text-right text-sm tabular-nums text-amber-700 dark:text-amber-400 font-medium">
                     {formatCurrency(s.gstAmount)}
                   </div>
 
                   {/* Total */}
-                  <div className="min-w-0 text-left lg:text-right text-sm tabular-nums font-bold text-gray-900 dark:text-slate-100">
+                  <div className="min-w-0 text-right text-sm tabular-nums font-bold text-gray-900 dark:text-slate-100">
                     {formatCurrency(s.totalAmount)}
                   </div>
 
@@ -905,86 +905,215 @@ export default function Sales() {
                     </Badge>
                   </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      {!isSaleFullyPaid(s.paymentStatus) ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs px-2.5 py-1 text-emerald-800 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 hover:border-emerald-400 gap-1 font-semibold transition-colors shadow-xs"
-                          onClick={() => handleOpenPaymentModal(s)}
-                          title="Receive Payment"
-                        >
-                          <CreditCard className="h-3.5 w-3.5" /> Receive
-                        </Button>
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    {!isSaleFullyPaid(s.paymentStatus) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs px-2.5 py-1 text-emerald-800 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 hover:border-emerald-400 gap-1 font-semibold transition-colors shadow-xs"
+                        onClick={() => handleOpenPaymentModal(s)}
+                        title="Receive Payment"
+                      >
+                        <CreditCard className="h-3.5 w-3.5" /> Receive
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled
+                        className="h-7 text-xs px-2 py-1 text-emerald-800 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 opacity-90 cursor-not-allowed gap-1 font-medium select-none shadow-xs"
+                        title="This sale invoice has been fully paid. No outstanding balance."
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Fully Paid
+                      </Button>
+                    )}
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-blue-700 hover:text-blue-900 hover:bg-blue-50 dark:text-sky-400 dark:hover:bg-blue-950/40 transition-colors rounded-lg border border-blue-200/60 dark:border-blue-800/40"
+                      onClick={() => setInvoiceSale(s)}
+                      title="Print Invoice / Bill"
+                      aria-label={`Print Invoice for ${s.saleNumber}`}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                    </Button>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/40 transition-colors"
+                      onClick={() => handleOpenModal(s)}
+                      title="Edit Sale Invoice"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </Button>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className={
+                        s.paymentStatus !== 'PENDING'
+                          ? "h-7 w-7 text-gray-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-not-allowed opacity-60"
+                          : "h-7 w-7 text-slate-500 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      }
+                      onClick={() => {
+                        if (s.paymentStatus !== 'PENDING') {
+                          toast.warning(`Cannot delete sale ${s.saleNumber}: A payment has already been received against this invoice.`);
+                        }
+                        handleOpenDeleteModal(s);
+                      }}
+                      title={
+                        s.paymentStatus !== 'PENDING'
+                          ? "Cannot delete: A payment has already been received against this sale invoice"
+                          : "Delete Sale Invoice"
+                      }
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
+                  {/* Expand/Collapse Chevron */}
+                  <div className="flex justify-center">
+                    <div className="p-1 rounded-md text-gray-400 hover:text-gray-700 transition-colors">
+                      {isExpanded ? (
+                        <ChevronUp className="h-4 w-4" />
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled
-                          className="h-7 text-xs px-2 py-1 text-emerald-800 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 opacity-90 cursor-not-allowed gap-1 font-medium select-none shadow-xs"
-                          title="This sale invoice has been fully paid. No outstanding balance."
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Fully Paid
-                        </Button>
+                        <ChevronDown className="h-4 w-4" />
                       )}
-
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 text-blue-700 hover:text-blue-900 hover:bg-blue-50 dark:text-sky-400 dark:hover:bg-blue-950/40 transition-colors rounded-lg border border-blue-200/60 dark:border-blue-800/40"
-                        onClick={() => setInvoiceSale(s)}
-                        title="Print Invoice / Bill"
-                        aria-label={`Print Invoice for ${s.saleNumber}`}
-                      >
-                        <Printer className="h-3.5 w-3.5" />
-                      </Button>
-
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/40 transition-colors"
-                        onClick={() => handleOpenModal(s)}
-                        title="Edit Sale Invoice"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </Button>
-
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className={
-                          s.paymentStatus !== 'PENDING'
-                            ? "h-7 w-7 text-gray-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-not-allowed opacity-60"
-                            : "h-7 w-7 text-slate-500 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                        }
-                        onClick={() => {
-                          if (s.paymentStatus !== 'PENDING') {
-                            toast.warning(`Cannot delete sale ${s.saleNumber}: A payment has already been received against this invoice.`);
-                          }
-                          handleOpenDeleteModal(s);
-                        }}
-                        title={
-                          s.paymentStatus !== 'PENDING'
-                            ? "Cannot delete: A payment has already been received against this sale invoice"
-                            : "Delete Sale Invoice"
-                        }
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
                     </div>
+                  </div>
+                </div>
 
-                    {/* Expand/Collapse Chevron */}
-                    <div className="flex justify-center">
+                {/* Mobile & Tablet Adaptive Card View (lg:hidden) */}
+                <div
+                  className={`lg:hidden p-3.5 sm:p-4 space-y-3 cursor-pointer select-none transition-colors rounded-2xl w-full ${
+                    isExpanded ? 'bg-slate-50/50 dark:bg-[#161F2E] rounded-b-none' : 'hover:bg-gray-50/70 dark:hover:bg-[#182232]'
+                  }`}
+                  onClick={() => setExpandedRow(isExpanded ? null : s.publicId)}
+                >
+                  {/* Top Row: Sale Number, Date, Status, Chevron */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CopyableSequence
+                        value={s.saleNumber}
+                        badgeClassName="font-mono text-xs font-semibold text-blue-700 dark:text-sky-300 bg-blue-50/80 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200/80 dark:border-blue-800/50"
+                      />
+                      <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+                        {formatDate(s.saleDate)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant={PAYMENT_STATUS_VARIANT[s.paymentStatus] ?? 'default'}>
+                        {isSaleFullyPaid(s.paymentStatus) ? 'Fully Paid' : s.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
+                      </Badge>
                       <div className="p-1 rounded-md text-gray-400 hover:text-gray-700 transition-colors">
-                        {isExpanded ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
+                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </div>
                     </div>
                   </div>
+
+                  {/* Middle Row: Customer Name & Customer Invoice Number */}
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">Customer</p>
+                      <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={s.customer?.customerName}>
+                        {s.customer?.customerName || '—'}
+                      </p>
+                    </div>
+                    {s.customerInvoiceNumber && (
+                      <div className="text-right shrink-0">
+                        <p className="text-[11px] font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">Customer Ref #</p>
+                        <p className="text-xs font-mono text-gray-700 dark:text-slate-300">{s.customerInvoiceNumber}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Financial Breakdown: 3-column pill strip */}
+                  <div className="grid grid-cols-3 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Subtotal</span>
+                      <span className="font-semibold text-blue-700 dark:text-sky-400 tabular-nums break-words">{formatCurrency(s.amount)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">GST</span>
+                      <span className="font-medium text-amber-700 dark:text-amber-400 tabular-nums break-words">{formatCurrency(s.gstAmount)}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Net Total</span>
+                      <span className="font-bold text-gray-900 dark:text-slate-100 tabular-nums break-words">{formatCurrency(s.totalAmount)}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons Row */}
+                  <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-gray-100 dark:border-[#1E293B]" onClick={(e) => e.stopPropagation()}>
+                    {!isSaleFullyPaid(s.paymentStatus) ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs px-3 py-1 text-emerald-800 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 hover:border-emerald-400 gap-1 font-semibold transition-colors shadow-xs"
+                        onClick={() => handleOpenPaymentModal(s)}
+                        title="Receive Payment"
+                      >
+                        <CreditCard className="h-3.5 w-3.5" /> Receive
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled
+                        className="h-8 text-xs px-2.5 py-1 text-emerald-800 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 opacity-90 cursor-not-allowed gap-1 font-medium select-none shadow-xs"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Fully Paid
+                      </Button>
+                    )}
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-blue-700 hover:text-blue-900 hover:bg-blue-50 dark:text-sky-400 dark:hover:bg-blue-950/40 transition-colors rounded-lg border border-blue-200/60 dark:border-blue-800/40"
+                      onClick={() => setInvoiceSale(s)}
+                      title="Print Invoice / Bill"
+                      aria-label={`Print Invoice for ${s.saleNumber}`}
+                    >
+                      <Printer className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-950/40 transition-colors"
+                      onClick={() => handleOpenModal(s)}
+                      title="Edit Sale Invoice"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className={
+                        s.paymentStatus !== 'PENDING'
+                          ? "h-8 w-8 text-gray-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-not-allowed opacity-60"
+                          : "h-8 w-8 text-slate-500 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      }
+                      onClick={() => {
+                        if (s.paymentStatus !== 'PENDING') {
+                          toast.warning(`Cannot delete sale ${s.saleNumber}: A payment has already been received against this invoice.`);
+                        }
+                        handleOpenDeleteModal(s);
+                      }}
+                      title={
+                        s.paymentStatus !== 'PENDING'
+                          ? "Cannot delete: A payment has already been received against this sale invoice"
+                          : "Delete Sale Invoice"
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
 
                   {/* Expandable Detail Panel */}
                   {isExpanded && (

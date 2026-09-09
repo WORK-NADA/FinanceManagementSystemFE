@@ -38,14 +38,14 @@ function DateRangePicker({
 }) {
   const inputCls = "h-10 rounded-lg border border-gray-200/90 dark:border-[#222D3D] bg-white dark:bg-[#0E131C] text-gray-900 dark:text-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]";
   return (
-    <div className="flex flex-wrap gap-4 items-center">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 w-full sm:w-auto">
         <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400 whitespace-nowrap">From:</label>
-        <input type="date" className={inputCls} value={startDate} onChange={e => onStartChange(e.target.value)} />
+        <input type="date" className={`${inputCls} flex-1 sm:w-auto`} value={startDate} onChange={e => onStartChange(e.target.value)} />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full sm:w-auto">
         <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400 whitespace-nowrap">To:</label>
-        <input type="date" className={inputCls} value={endDate} onChange={e => onEndChange(e.target.value)} />
+        <input type="date" className={`${inputCls} flex-1 sm:w-auto`} value={endDate} onChange={e => onEndChange(e.target.value)} />
       </div>
     </div>
   );
@@ -303,32 +303,32 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
       </div>
 
       {/* Primary KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'sales' ? 'ring-2 ring-emerald-500/30 border-emerald-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'sales' ? 'ring-2 ring-emerald-500/30 border-emerald-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-4 sm:p-5 flex flex-col justify-between`}>
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Sales Income</p>
               <Badge variant="success" className="text-[10px] tabular-nums">{formatNumber(salesCount)} Invoices</Badge>
             </div>
-            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-emerald-700 dark:text-emerald-400">
+            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-emerald-700 dark:text-emerald-400 break-words">
               {isLoading ? '...' : formatCurrency(totalRevenue)}
             </p>
           </div>
         </div>
 
-        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'purchases' ? 'ring-2 ring-rose-500/30 border-rose-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between`}>
+        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'purchases' ? 'ring-2 ring-rose-500/30 border-rose-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-4 sm:p-5 flex flex-col justify-between`}>
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Purchases Cost</p>
               <Badge variant="danger" className="text-[10px] tabular-nums">{formatNumber(purchasesCount)} Bills</Badge>
             </div>
-            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-rose-700 dark:text-rose-400">
+            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-rose-700 dark:text-rose-400 break-words">
               {isLoading ? '...' : formatCurrency(totalCost)}
             </p>
           </div>
         </div>
 
-        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'profit' ? 'ring-2 ring-blue-500/30 border-blue-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between`}>
+        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'profit' ? 'ring-2 ring-blue-500/30 border-blue-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-4 sm:p-5 flex flex-col justify-between`}>
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Gross Profit</p>
@@ -336,13 +336,13 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
                 {totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : '0.0'}% Margin
               </Badge>
             </div>
-            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-blue-700 dark:text-sky-400">
+            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-blue-700 dark:text-sky-400 break-words">
               {isLoading ? '...' : formatCurrency(grossProfit)}
             </p>
           </div>
         </div>
 
-        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'expenses' || selectedCategory ? 'ring-2 ring-amber-500/30 border-amber-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between`}>
+        <div className={`bg-white dark:bg-[#131924] rounded-2xl border ${metricFocus === 'expenses' || selectedCategory ? 'ring-2 ring-amber-500/30 border-amber-500/50' : 'border-slate-200/90 dark:border-[#1F2837]'} dark:ring-1 dark:ring-white/[0.04] shadow-xs hover:shadow-md transition-all p-4 sm:p-5 flex flex-col justify-between`}>
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">
@@ -352,13 +352,13 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
                 {selectedCategory ? `${formatNumber(filteredCategoryBreakdown.length)} Cat.` : `${formatNumber(expensesCount)} Records`}
               </Badge>
             </div>
-            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-amber-700 dark:text-amber-400">
+            <p className="text-2xl font-serif font-bold tabular-nums mt-2 text-amber-700 dark:text-amber-400 break-words">
               {isLoading ? '...' : formatCurrency(selectedCategory ? selectedCategoryTotal : totalExpenses)}
             </p>
           </div>
         </div>
 
-        <div className={`rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between col-span-2 lg:col-span-1 ${netProfit >= 0 ? 'bg-emerald-50/30 dark:bg-emerald-950/20' : 'bg-rose-50/30 dark:bg-rose-950/20'}`}>
+        <div className={`rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all p-4 sm:p-5 flex flex-col justify-between col-span-1 sm:col-span-2 lg:col-span-1 ${netProfit >= 0 ? 'bg-emerald-50/30 dark:bg-emerald-950/20' : 'bg-rose-50/30 dark:bg-rose-950/20'}`}>
           <div>
             <div className="flex justify-between items-start">
               <p className="text-xs uppercase tracking-wider font-semibold text-gray-700 dark:text-slate-300">Net Profit</p>
@@ -366,7 +366,7 @@ function ProfitLossTab({ startDate, endDate }: { startDate: string; endDate: str
                 {profitMargin >= 0 ? `+${profitMargin.toFixed(1)}%` : `${profitMargin.toFixed(1)}%`}
               </Badge>
             </div>
-            <p className={`text-2xl font-serif font-bold tabular-nums mt-2 ${netProfit >= 0 ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
+            <p className={`text-2xl font-serif font-bold tabular-nums mt-2 break-words ${netProfit >= 0 ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
               {isLoading ? '...' : formatCurrency(netProfit)}
             </p>
           </div>
@@ -646,8 +646,8 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
       ) : filteredSales.length === 0 ? (
         <FilteredEmptyState message="No sales transactions match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Date',
@@ -879,8 +879,8 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
       ) : filteredPurchases.length === 0 ? (
         <FilteredEmptyState message="No purchase bills match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Date',
@@ -1085,8 +1085,8 @@ function ExpensesTab({ startDate, endDate }: { startDate: string; endDate: strin
       ) : filteredExpenses.length === 0 ? (
         <FilteredEmptyState message="No expenses match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Date',
@@ -1340,8 +1340,8 @@ function StockTab() {
       ) : filteredStocks.length === 0 ? (
         <FilteredEmptyState message="No stock items match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[700px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Item / Material Name',
@@ -1622,8 +1622,8 @@ function CustomerOutstandingTab() {
       ) : filteredCustomers.length === 0 ? (
         <FilteredEmptyState message="No customers match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[660px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Customer Name',
@@ -1880,8 +1880,8 @@ function SupplierOutstandingTab() {
       ) : filteredSuppliers.length === 0 ? (
         <FilteredEmptyState message="No suppliers match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[660px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Supplier Name',
@@ -2123,8 +2123,8 @@ function PartnerEquityTab() {
       ) : filteredPartners.length === 0 ? (
         <FilteredEmptyState message="No partners match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Partner Name',
@@ -2208,12 +2208,12 @@ export default function Reports() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-1 bg-gray-100/60 dark:bg-[#0E131C] p-1.5 rounded-xl border border-gray-200/60 dark:border-[#1F2837]">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x bg-gray-100/60 dark:bg-[#0E131C] p-1.5 rounded-xl border border-gray-200/60 dark:border-[#1F2837] whitespace-nowrap">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all shrink-0 ${
               activeTab === tab.id
                 ? 'bg-white dark:bg-[#141A24] text-gray-900 dark:text-slate-100 shadow-sm ring-1 ring-gray-200 dark:ring-[#1F2837] font-semibold'
                 : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-[#141A24]/50'

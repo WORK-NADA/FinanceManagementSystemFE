@@ -119,7 +119,7 @@ export default function ClientForm() {
           <CardHeader>
             <CardTitle>Account Details</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* BE: @NotBlank + @Size(2-100) + @Pattern → REQUIRED */}
             <Input
               label="Owner Name *"
@@ -185,7 +185,7 @@ export default function ClientForm() {
           <CardHeader>
             <CardTitle>Address Details</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* BE: @NotBlank + @Size(max=20) → REQUIRED */}
             <Input
               label="House / Flat No. *"
@@ -240,11 +240,11 @@ export default function ClientForm() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="ghost" onClick={() => navigate('/admin/clients')}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
+          <Button type="button" variant="ghost" onClick={() => navigate('/admin/clients')} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" isLoading={mutation.isPending}>
+          <Button type="submit" isLoading={mutation.isPending} className="w-full sm:w-auto">
             Register Client
           </Button>
         </div>
