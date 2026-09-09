@@ -45,6 +45,7 @@ export interface DashboardSummaryDTO {
   netWorkingCapital?: number;
   cashFlowStatus?: 'SURPLUS' | 'BALANCED' | 'DEFICIT' | string;
   openingBalance?: number;
+  totalInvestment?: number;
   totalMoneyReceived?: number;
   totalMoneyPaid?: number;
   totalExpenses?: number;

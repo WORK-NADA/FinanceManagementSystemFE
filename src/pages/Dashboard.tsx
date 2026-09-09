@@ -1,23 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   ArrowDownRight, ArrowUpRight, PackageMinus, Receipt,
   TrendingUp, AlertTriangle, ChevronRight, PlusCircle,
   ShoppingCart, Truck, Wallet, Activity, FileText,
-  Calculator, CheckCircle2, Landmark, Sliders, Users
+  Calculator, CheckCircle2, Landmark, Users
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, LineChart, Line
 } from 'recharts';
-import { getDashboardSummary, updateOpeningBalance } from '../api/dashboard';
+import { getDashboardSummary } from '../api/dashboard';
 import { getLowStockItems } from '../api/stock';
+import { getPartners } from '../api/partner';
 import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
-import { Badge, CopyableSequence, Button, Modal } from '@/components';
-import { toast } from '../store/toastStore';
+import { Badge, CopyableSequence } from '@/components';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function KpiTile({
@@ -155,16 +155,10 @@ function CashFlowHealthBar({
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const theme = useThemeStore((state) => state.theme);
   const isDark = theme === 'dark';
   const isAdmin = user?.role === 'ADMIN';
-
-  // Opening Balance Modal State
-  const [isOpeningModalOpen, setIsOpeningModalOpen] = useState(false);
-  const [openingInput, setOpeningInput] = useState('');
-  const [openingError, setOpeningError] = useState('');
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboardSummary'],
@@ -177,33 +171,15 @@ export default function Dashboard() {
     queryFn: getLowStockItems,
   });
 
-  const openingMutation = useMutation({
-    mutationFn: updateOpeningBalance,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
-      setIsOpeningModalOpen(false);
-      toast.success('Company opening balance updated successfully!');
-    },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to update opening balance');
-    },
+  // Fetch active partners for Dashboard Investment distribution
+  const { data: partners = [] } = useQuery({
+    queryKey: ['partners'],
+    queryFn: getPartners,
   });
 
-  const handleOpenOpeningBalanceModal = () => {
-    setOpeningInput(data?.openingBalance !== undefined ? String(data.openingBalance) : '0');
-    setOpeningError('');
-    setIsOpeningModalOpen(true);
-  };
-
-  const handleOpeningBalanceSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const val = parseFloat(openingInput);
-    if (isNaN(val) || val < 0) {
-      setOpeningError('Please enter a valid non-negative amount (0 or greater)');
-      return;
-    }
-    openingMutation.mutate(val);
-  };
+  const activePartners = useMemo(() => {
+    return partners.filter((p) => p.isActive);
+  }, [partners]);
 
   // Use the unified 6-month trends from backend, eliminating the 6-query network waterfall!
   const trendData = useMemo(() => {
@@ -242,6 +218,7 @@ export default function Dashboard() {
   const payables = data?.totalOutstanding ?? 0;
   const netCapital = data?.netWorkingCapital ?? (receivables - payables);
   const openingBalance = data?.openingBalance ?? 0;
+  const totalInvestment = data?.totalInvestment ?? 0;
   const totalMoneyReceived = data?.totalMoneyReceived ?? 0;
   const totalMoneyPaid = data?.totalMoneyPaid ?? 0;
   const totalExpenses = data?.totalExpenses ?? 0;
@@ -312,24 +289,62 @@ export default function Dashboard() {
 
         {/* 5-Pill Formula Breakdown */}
         <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
-          <div 
-            onClick={handleOpenOpeningBalanceModal}
-            className="group cursor-pointer bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
-            title="Click to view or edit Opening Balance"
+          {/* 1. Investment Pill Card */}
+          <Link 
+            to="/dashboard/investments"
+            className="group bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/10 hover:border-emerald-400/40 transition-all duration-200 flex flex-col justify-between"
+            title="Click to view Investments"
           >
-            <div className="flex items-center justify-between text-[11px] text-gray-300">
-              <span className="font-semibold uppercase tracking-wider">Opening Balance</span>
-              <span className="text-emerald-400 text-[10px] flex items-center gap-0.5 group-hover:underline font-medium">
-                <Sliders className="h-3 w-3" /> Edit
-              </span>
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-gray-300">
+                <span className="font-semibold uppercase tracking-wider text-emerald-300">Investment</span>
+                <span className="text-emerald-400 text-[10px] flex items-center gap-0.5 group-hover:underline font-medium">
+                  View <ArrowUpRight className="h-3 w-3" />
+                </span>
+              </div>
+              <div className="mt-1.5 flex items-baseline justify-between">
+                <span className="text-base sm:text-lg font-bold text-white tabular-nums break-words">
+                  {formatCurrency(totalInvestment)}
+                </span>
+              </div>
+              <span className="text-[10px] text-gray-400 mt-0.5 block">Total recorded capital</span>
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-base sm:text-lg font-bold text-white tabular-nums break-words">
-                {formatCurrency(openingBalance)}
-              </span>
-            </div>
-            <span className="text-[10px] text-gray-400 mt-1">Starting capital baseline</span>
-          </div>
+
+            {/* Partner-wise Distribution Breakdown */}
+            {activePartners.length > 0 ? (
+              <div className="mt-2.5 pt-2 border-t border-white/10 space-y-1">
+                <div className="text-[9px] uppercase tracking-wider font-semibold text-emerald-300/80 flex items-center justify-between">
+                  <span>Partner (Share)</span>
+                  <span>Share Value</span>
+                </div>
+                <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
+                  {activePartners.map((partner) => {
+                    const partnerShare = (totalInvestment * Number(partner.sharePercentage)) / 100;
+                    return (
+                      <div
+                        key={partner.publicId}
+                        className="flex items-center justify-between text-[11px] text-gray-200 hover:text-white transition-colors"
+                      >
+                        <span className="truncate max-w-[110px]" title={partner.partnerName}>
+                          {partner.partnerName}{' '}
+                          <span className="text-[10px] text-gray-400 font-mono">
+                            ({formatNumber(partner.sharePercentage, { maximumFractionDigits: 2 })}%)
+                          </span>
+                        </span>
+                        <span className="text-[11px] font-semibold text-emerald-300 tabular-nums shrink-0 ml-1">
+                          {formatCurrency(partnerShare)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="mt-2.5 pt-2 border-t border-white/10 text-[10px] text-gray-400 italic">
+                No active partners
+              </div>
+            )}
+          </Link>
 
           <Link 
             to="/dashboard/sale-payments"
@@ -666,78 +681,6 @@ export default function Dashboard() {
           <p className="text-gray-300 text-sm">No profit sharing recorded yet for this account.</p>
         </div>
       )}
-
-      {/* Edit Opening Balance Modal */}
-      <Modal 
-        isOpen={isOpeningModalOpen} 
-        onClose={() => setIsOpeningModalOpen(false)} 
-        title="Manage Company Opening Balance"
-      >
-        <form onSubmit={handleOpeningBalanceSubmit} className="space-y-4">
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-xl p-4 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
-            <p className="font-semibold mb-1 flex items-center gap-1.5 text-sm">
-              <Landmark className="h-4 w-4 text-[var(--color-primary)] shrink-0" />
-              What is Opening Balance?
-            </p>
-            <p>
-              Opening Balance represents the initial starting capital or initial funds invested into the company before ongoing business operations. It acts as the foundational baseline for your <strong>Total Available Balance</strong> calculation.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Opening Balance Amount (₹) *
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-500 font-semibold text-sm">₹</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={openingInput}
-                onChange={(e) => {
-                  setOpeningInput(e.target.value);
-                  if (openingError) setOpeningError('');
-                }}
-                className="w-full pl-8 pr-3 py-2 text-base font-semibold border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-[#0E131C] dark:border-slate-700 dark:text-white"
-                placeholder="0.00"
-                required
-              />
-            </div>
-            {openingError && (
-              <p className="text-xs text-rose-500 mt-1.5 font-medium">{openingError}</p>
-            )}
-          </div>
-
-          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-1">
-            <p className="font-medium text-slate-800 dark:text-slate-200">Formula Breakdown:</p>
-            <p className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400">
-              Total Balance = Opening Balance + Total Received - Total Paid - Total Expenses
-            </p>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
-              Only actual payments and cash receipts affect this balance. Uncollected invoices or unpaid bills do not alter cash balance until settled.
-            </p>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpeningModalOpen(false)}
-              disabled={openingMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={openingMutation.isPending}
-              className="bg-[var(--color-primary)] hover:bg-[#0c624a] text-white"
-            >
-              {openingMutation.isPending ? 'Saving...' : 'Save Opening Balance'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }

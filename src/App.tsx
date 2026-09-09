@@ -17,6 +17,7 @@ import Sales from './pages/Sales';
 import SalePayments from './pages/SalePayments';
 import Expenses from './pages/Expenses';
 import Partners from './pages/Partners';
+import Investments from './pages/Investments';
 import ProfitDistribution from './pages/ProfitDistribution';
 import Reports from './pages/Reports';
 import StockTransactions from './pages/StockTransactions';
@@ -154,6 +155,7 @@ function App() {
               <Route path="/dashboard/sale-payments" element={<ProtectedRoute allowedRoles={ALL_ROLES}><SalePayments /></ProtectedRoute>} />
               <Route path="/dashboard/expenses" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Expenses /></ProtectedRoute>} />
               <Route path="/dashboard/partners" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Partners /></ProtectedRoute>} />
+              <Route path="/dashboard/investments" element={<ProtectedRoute allowedRoles={ALL_ROLES}><Investments /></ProtectedRoute>} />
               <Route path="/dashboard/profit-distribution" element={<ProtectedRoute allowedRoles={ALL_ROLES}><ProfitDistribution /></ProtectedRoute>} />
               <Route path="/dashboard/profit-sharing" element={<Navigate to="/dashboard/profit-distribution" replace />} />
               <Route path="/dashboard/profit sharing" element={<Navigate to="/dashboard/profit-distribution" replace />} />
