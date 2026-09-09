@@ -23,8 +23,8 @@ function PartnerHistoryRow({ partnerPublicId, lifetimeEarnings }: { partnerPubli
   });
 
   return (
-    <div className="bg-gradient-to-b from-slate-50/90 to-slate-50/40 dark:from-[#18212F] dark:to-[#141A24] border-t border-gray-100 dark:border-[#1F2837] px-6 py-4 rounded-b-xl">
-      <div className="flex justify-between items-center mb-3">
+    <div className="bg-gradient-to-b from-slate-50/90 to-slate-50/40 dark:from-[#18212F] dark:to-[#141A24] border-t border-gray-100 dark:border-[#1F2837] px-3.5 sm:px-6 py-4 rounded-b-xl">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
         <p className="text-xs font-semibold uppercase text-gray-400 dark:text-slate-400 tracking-wider">Profit Sharing History</p>
         <div className="bg-white dark:bg-[#0E131C] px-3 py-1 rounded-lg border border-gray-200/80 dark:border-[#1F2837] shadow-xs flex items-center gap-2">
           <span className="text-xs text-gray-500 dark:text-slate-400">Total Profit Earned:</span>
@@ -39,22 +39,24 @@ function PartnerHistoryRow({ partnerPublicId, lifetimeEarnings }: { partnerPubli
           No profit payouts recorded for this partner yet.
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#0E131C] rounded-lg border border-gray-200/80 dark:border-[#1F2837] overflow-hidden shadow-xs w-full">
-          <div className="hidden sm:grid sm:grid-cols-[110px_minmax(130px,1.5fr)_85px_minmax(100px,1fr)] gap-3 px-4 py-2 header-bar-offwhite border-b text-xs font-bold uppercase tracking-wider select-none">
-            <div>Payout Date</div>
-            <div>Period</div>
-            <div>Profit Share %</div>
-            <div className="text-right">Amount Received</div>
-          </div>
-          <div className="divide-y divide-gray-100 dark:divide-[#1F2837]">
-            {history.map(h => (
-              <div key={h.distributionPublicId ?? String(Math.random())} className="grid grid-cols-1 sm:grid-cols-[110px_minmax(130px,1.5fr)_85px_minmax(100px,1fr)] gap-3 px-4 py-2.5 text-sm items-center">
-                <div className="text-gray-700 dark:text-slate-300 font-medium min-w-0">{h.createdAt ? formatDate(h.createdAt) : '—'}</div>
-                <div className="text-gray-600 dark:text-slate-400 min-w-0 truncate">{h.fromDate && h.toDate ? `${formatDate(h.fromDate)} to ${formatDate(h.toDate)}` : '—'}</div>
-                <div className="font-semibold text-gray-900 dark:text-slate-100 min-w-0">{formatNumber(h.sharePercentageAtDistribution, { maximumFractionDigits: 2 })}%</div>
-                <div className="sm:text-right font-bold text-emerald-700 dark:text-emerald-400 tabular-nums min-w-0">{formatCurrency(h.shareAmount)}</div>
-              </div>
-            ))}
+        <div className="bg-white dark:bg-[#0E131C] rounded-lg border border-gray-200/80 dark:border-[#1F2837] overflow-x-auto touch-pan-x shadow-xs w-full">
+          <div className="min-w-[480px]">
+            <div className="grid grid-cols-[110px_minmax(130px,1.5fr)_85px_minmax(100px,1fr)] gap-3 px-4 py-2 header-bar-offwhite border-b text-xs font-bold uppercase tracking-wider select-none">
+              <div>Payout Date</div>
+              <div>Period</div>
+              <div>Profit Share %</div>
+              <div className="text-right">Amount Received</div>
+            </div>
+            <div className="divide-y divide-gray-100 dark:divide-[#1F2837]">
+              {history.map(h => (
+                <div key={h.distributionPublicId ?? String(Math.random())} className="grid grid-cols-[110px_minmax(130px,1.5fr)_85px_minmax(100px,1fr)] gap-3 px-4 py-2.5 text-sm items-center">
+                  <div className="text-gray-700 dark:text-slate-300 font-medium min-w-0">{h.createdAt ? formatDate(h.createdAt) : '—'}</div>
+                  <div className="text-gray-600 dark:text-slate-400 min-w-0 truncate">{h.fromDate && h.toDate ? `${formatDate(h.fromDate)} to ${formatDate(h.toDate)}` : '—'}</div>
+                  <div className="font-semibold text-gray-900 dark:text-slate-100 min-w-0">{formatNumber(h.sharePercentageAtDistribution, { maximumFractionDigits: 2 })}%</div>
+                  <div className="text-right font-bold text-emerald-700 dark:text-emerald-400 tabular-nums min-w-0">{formatCurrency(h.shareAmount)}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -323,9 +325,9 @@ export default function Partners() {
                     : 'border-gray-200/90 dark:border-[#1F2837] hover:border-gray-300 dark:hover:border-slate-700'
                 }`}
               >
-                {/* Card Main Row */}
+                {/* Desktop View (lg:grid) */}
                 <div
-                  className={`grid grid-cols-1 lg:grid-cols-[minmax(130px,1.5fr)_minmax(130px,1.2fr)_minmax(75px,0.8fr)_minmax(85px,0.9fr)_minmax(115px,1.2fr)_75px_80px_28px] items-center gap-3 px-5 py-3.5 cursor-pointer select-none transition-colors rounded-2xl ${
+                  className={`hidden lg:grid grid-cols-[minmax(130px,1.5fr)_minmax(130px,1.2fr)_minmax(75px,0.8fr)_minmax(85px,0.9fr)_minmax(115px,1.2fr)_75px_80px_28px] items-center gap-3 px-5 py-3.5 cursor-pointer select-none transition-colors rounded-2xl w-full ${
                     isExpanded ? 'bg-slate-50/50 dark:bg-[#18212F] rounded-b-none' : 'hover:bg-gray-50/70 dark:hover:bg-[#1A2331]'
                   }`}
                   onClick={() => setExpandedRow(isExpanded ? null : p.publicId)}
@@ -337,13 +339,13 @@ export default function Partners() {
                     <div className="text-sm text-gray-700 dark:text-slate-200 font-medium truncate">{p.mobileNumber}</div>
                     {p.email && <div className="text-xs text-gray-500 dark:text-slate-400 truncate" title={p.email}>{p.email}</div>}
                   </div>
-                  <div className="lg:text-right font-semibold tabular-nums text-gray-900 dark:text-slate-100 min-w-0">
+                  <div className="text-right font-semibold tabular-nums text-gray-900 dark:text-slate-100 min-w-0">
                     {formatNumber(p.sharePercentage, { maximumFractionDigits: 2 })}%
                   </div>
                   <div className="text-sm text-gray-600 dark:text-slate-300 whitespace-nowrap min-w-0">
                     {p.joiningDate ? formatDate(p.joiningDate) : '—'}
                   </div>
-                  <div className="lg:text-right font-bold text-emerald-700 dark:text-emerald-400 tabular-nums min-w-0">
+                  <div className="text-right font-bold text-emerald-700 dark:text-emerald-400 tabular-nums min-w-0">
                     {formatCurrency(p.lifetimeEarnings ?? 0)}
                   </div>
                   <div className="min-w-0">
@@ -390,6 +392,82 @@ export default function Partners() {
                       ) : (
                         <ChevronDown className="h-4 w-4" />
                       )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile View (lg:hidden) */}
+                <div
+                  className={`lg:hidden p-3.5 space-y-2.5 cursor-pointer select-none transition-colors rounded-2xl w-full ${
+                    isExpanded ? 'bg-slate-50/50 dark:bg-[#18212F] rounded-b-none' : 'hover:bg-gray-50/70 dark:hover:bg-[#1A2331]'
+                  }`}
+                  onClick={() => setExpandedRow(isExpanded ? null : p.publicId)}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={p.partnerName}>{p.partnerName}</p>
+                      <Badge variant={p.isActive ? 'success' : 'default'} className="shrink-0">
+                        {p.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="p-1 rounded-md text-gray-400 dark:text-slate-400">
+                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-gray-600 dark:text-slate-300">
+                    <span>{p.mobileNumber}</span>
+                    {p.email && <span className="ml-2 text-gray-400 dark:text-slate-500">• {p.email}</span>}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Profit Share</span>
+                      <span className="text-base font-bold tabular-nums text-gray-900 dark:text-slate-100">{formatNumber(p.sharePercentage, { maximumFractionDigits: 2 })}%</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Lifetime Earnings</span>
+                      <span className="text-base font-bold tabular-nums text-emerald-700 dark:text-emerald-400">{formatCurrency(p.lifetimeEarnings ?? 0)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-[#1E293B] text-xs" onClick={(e) => e.stopPropagation()}>
+                    <span className="text-gray-500 dark:text-slate-400">
+                      Joined: {p.joiningDate ? formatDate(p.joiningDate) : '—'}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-blue-50 dark:hover:bg-sky-950/30 transition-colors"
+                        onClick={() => handleOpenModal(p)}
+                        title="Edit Partner"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-8 w-8 transition-colors ${
+                          p.isActive 
+                            ? "text-gray-400 dark:text-slate-400 hover:text-red-600 dark:hover:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-950/30" 
+                            : p.sharePercentage > availableShare
+                              ? "text-gray-300 dark:text-slate-600 cursor-not-allowed opacity-50"
+                              : "text-gray-400 dark:text-slate-400 hover:text-green-600 dark:hover:text-emerald-400 hover:bg-green-50 dark:hover:bg-emerald-950/30"
+                        }`}
+                        onClick={() => handleOpenConfirmModal(p, p.isActive ? 'deactivate' : 'reactivate')}
+                        title={
+                          p.isActive 
+                            ? 'Deactivate' 
+                            : p.sharePercentage > availableShare
+                              ? `Cannot reactivate: ${p.sharePercentage}% exceeds available share (${availableShare}%)`
+                              : 'Reactivate'
+                        }
+                      >
+                        {p.isActive ? <Ban className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                      </Button>
                     </div>
                   </div>
                 </div>

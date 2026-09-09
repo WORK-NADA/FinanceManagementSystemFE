@@ -246,22 +246,24 @@ export default function Suppliers() {
           {filteredSuppliers.map((s) => (
             <div
               key={s.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 md:grid-cols-[minmax(140px,1.5fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_minmax(90px,0.8fr)_80px_100px] items-center gap-3 px-5 py-3.5 w-full"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all w-full overflow-hidden"
             >
-              <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={s.supplierName}>{s.supplierName}</div>
-              <div className="min-w-0">
-                <div className="text-sm text-gray-700 dark:text-slate-300 font-medium truncate">{s.mobileNumber}</div>
-                <div className="text-xs text-gray-500 dark:text-slate-400 truncate" title={s.email}>{s.email || '—'}</div>
-              </div>
-              <div className="min-w-0 font-mono text-xs text-gray-600 dark:text-slate-400 truncate">{s.gstNumber || '—'}</div>
-              <div className="min-w-0 text-left md:text-right text-sm tabular-nums font-semibold text-gray-900 dark:text-slate-100">
-                {formatCurrency(s.openingBalance)}
-              </div>
-              <div className="min-w-0">
-                <Badge variant={s.isActive ? 'success' : 'default'}>
-                  {s.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
+              {/* Desktop View (md:grid) */}
+              <div className="hidden md:grid grid-cols-[minmax(140px,1.5fr)_minmax(130px,1.2fr)_minmax(110px,1fr)_minmax(90px,0.8fr)_80px_100px] items-center gap-3 px-5 py-3.5 w-full">
+                <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={s.supplierName}>{s.supplierName}</div>
+                <div className="min-w-0">
+                  <div className="text-sm text-gray-700 dark:text-slate-300 font-medium truncate">{s.mobileNumber}</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 truncate" title={s.email}>{s.email || '—'}</div>
+                </div>
+                <div className="min-w-0 font-mono text-xs text-gray-600 dark:text-slate-400 truncate">{s.gstNumber || '—'}</div>
+                <div className="min-w-0 text-right text-sm tabular-nums font-semibold text-gray-900 dark:text-slate-100">
+                  {formatCurrency(s.openingBalance)}
+                </div>
+                <div className="min-w-0">
+                  <Badge variant={s.isActive ? 'success' : 'default'}>
+                    {s.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
                 <div className="flex items-center justify-end gap-1.5">
                   <Button 
                     variant="ghost" 
@@ -276,7 +278,7 @@ export default function Suppliers() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-7 w-7 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="h-7 w-7 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
                     onClick={() => handleOpenModal(s)} 
                     title="Edit Supplier"
                     aria-label={`Edit ${s.supplierName}`}
@@ -286,7 +288,7 @@ export default function Suppliers() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={`h-7 w-7 transition-colors ${s.isActive ? "text-gray-400 hover:text-red-600 hover:bg-red-50" : "text-gray-400 hover:text-green-600 hover:bg-green-50"}`}
+                    className={`h-7 w-7 transition-colors ${s.isActive ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40" : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/40"}`}
                     onClick={() => {
                       if (window.confirm(`Are you sure you want to ${s.isActive ? 'deactivate' : 'reactivate'} this supplier?`)) {
                         toggleStatusMutation.mutate({ id: s.publicId, isActive: s.isActive });
@@ -298,9 +300,65 @@ export default function Suppliers() {
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+
+              {/* Mobile View (md:hidden) */}
+              <div className="md:hidden p-3.5 space-y-2.5 w-full">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate" title={s.supplierName}>{s.supplierName}</p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span className="text-xs text-gray-700 dark:text-slate-300 font-medium">{s.mobileNumber}</span>
+                      {s.gstNumber && <span className="font-mono text-[11px] text-gray-500 dark:text-slate-400">GST: {s.gstNumber}</span>}
+                    </div>
+                  </div>
+                  <Badge variant={s.isActive ? 'success' : 'default'} className="shrink-0">
+                    {s.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                  <span className="text-gray-500 dark:text-slate-400">Opening Balance</span>
+                  <span className="font-semibold tabular-nums text-gray-900 dark:text-slate-100">{formatCurrency(s.openingBalance)}</span>
+                </div>
+
+                <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-gray-100 dark:border-[#1E293B]">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 text-xs text-blue-700 dark:text-sky-400 hover:text-blue-900 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/50 rounded-lg gap-1 font-medium"
+                    onClick={() => setStatementSupplier(s)} 
+                    title="View Statement Ledger"
+                  >
+                    <FileText className="h-3.5 w-3.5" /> Statement
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                    onClick={() => handleOpenModal(s)} 
+                    title="Edit Supplier"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={`h-8 w-8 transition-colors ${s.isActive ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40" : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/40"}`}
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to ${s.isActive ? 'deactivate' : 'reactivate'} this supplier?`)) {
+                        toggleStatusMutation.mutate({ id: s.publicId, isActive: s.isActive });
+                      }
+                    }}
+                    title={s.isActive ? 'Deactivate' : 'Activate'}
+                  >
+                    {s.isActive ? <Ban className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
@@ -309,7 +367,7 @@ export default function Suppliers() {
         className="max-w-3xl"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label="Supplier Name *" placeholder="e.g. Mohan Polymers" maxLength={150} {...register('supplierName')} error={errors.supplierName?.message} />
             <Input label="Contact Person (Optional)" placeholder="e.g. Harsh Nada" maxLength={100} {...register('contactPerson')} error={errors.contactPerson?.message} />
             <Input label="Mobile Number *" placeholder="10-digit mobile" maxLength={10} {...register('mobileNumber')} error={errors.mobileNumber?.message} />
@@ -331,12 +389,12 @@ export default function Suppliers() {
             <Input label="Payment Terms (Days)" type="number" min={0} max={365} {...register('paymentTerms', { valueAsNumber: true })} error={errors.paymentTerms?.message} />
           </div>
 
-          <div className="border-t border-gray-100 pt-5 mt-2">
-            <div className="flex items-center justify-between pb-2 mb-4 border-b border-gray-100">
-              <h4 className="font-serif font-bold text-base text-gray-900">Billing Address</h4>
-              <span className="text-xs text-gray-400 font-normal">Optional</span>
+          <div className="border-t border-gray-100 dark:border-[#1F2837] pt-5 mt-2">
+            <div className="flex items-center justify-between pb-2 mb-4 border-b border-gray-100 dark:border-[#1F2837]">
+              <h4 className="font-serif font-bold text-base text-gray-900 dark:text-slate-100">Billing Address</h4>
+              <span className="text-xs text-gray-400 dark:text-slate-500 font-normal">Optional</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input label="Address Line 1 (Optional)" placeholder="Street address or building" maxLength={150} {...register('address.addressLine1')} error={errors.address?.addressLine1?.message} />
               <Input label="Address Line 2 (Optional)" placeholder="Area, landmark or floor" maxLength={150} {...register('address.addressLine2')} error={errors.address?.addressLine2?.message} />
               <Input label="City (Optional)" placeholder="City" maxLength={100} {...register('address.city')} error={errors.address?.city?.message} />
@@ -346,9 +404,9 @@ export default function Suppliers() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <Button type="button" variant="outline" onClick={handleCloseModal}>Cancel</Button>
-            <Button type="submit" isLoading={mutation.isPending}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
+            <Button type="button" variant="outline" onClick={handleCloseModal} className="w-full sm:w-auto">Cancel</Button>
+            <Button type="submit" isLoading={mutation.isPending} className="w-full sm:w-auto">
               {editingSupplier ? 'Update Supplier' : 'Save Supplier'}
             </Button>
           </div>

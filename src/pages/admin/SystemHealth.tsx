@@ -193,17 +193,17 @@ export default function SystemHealth() {
           {clients.filter(c => c.role === 'CLIENT').length > 0 ? (
             <div className="divide-y divide-gray-100 dark:divide-slate-800">
               {clients.filter(c => c.role === 'CLIENT').map((client) => (
-                <div key={client.publicId} className="py-3 flex items-center justify-between gap-4 text-sm">
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-slate-100">
+                <div key={client.publicId} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 dark:text-slate-100 truncate">
                       {client.ownerName || client.username}
                     </p>
-                    <p className="text-xs text-gray-400 font-mono">
+                    <p className="text-xs text-gray-400 font-mono truncate">
                       @{client.username} • {client.email}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                     <Badge variant={client.enabled ? 'success' : 'default'} className="text-xs">
                       {client.enabled ? 'Enabled' : 'Disabled'}
                     </Badge>

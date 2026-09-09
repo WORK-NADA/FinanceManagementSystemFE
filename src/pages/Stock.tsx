@@ -216,16 +216,18 @@ export default function Stock() {
           {filteredStocks.map((s) => (
             <div
               key={s.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all grid grid-cols-1 md:grid-cols-[minmax(140px,2fr)_minmax(120px,1.2fr)_minmax(100px,1fr)_80px] items-center gap-3 px-5 py-3.5 w-full"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 transition-all w-full overflow-hidden"
             >
-              <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 flex items-center gap-2 truncate">
-                <span className="truncate">{s.rawMaterial}</span>
-                {s.isLowStock && (
-                  <Badge variant="danger" className="gap-1 text-[10px] shrink-0">
-                    <AlertTriangle className="h-3 w-3" /> Low Stock
-                  </Badge>
-                )}
-              </div>
+              {/* Desktop View (md:grid) */}
+              <div className="hidden md:grid grid-cols-[minmax(140px,2fr)_minmax(120px,1.2fr)_minmax(100px,1fr)_80px] items-center gap-3 px-5 py-3.5 w-full">
+                <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 flex items-center gap-2 truncate">
+                  <span className="truncate">{s.rawMaterial}</span>
+                  {s.isLowStock && (
+                    <Badge variant="danger" className="gap-1 text-[10px] shrink-0">
+                      <AlertTriangle className="h-3 w-3" /> Low Stock
+                    </Badge>
+                  )}
+                </div>
                 <div className="text-sm">
                   <span className={`font-bold tabular-nums ${s.isLowStock ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatNumber(s.currentQuantity)}</span>{' '}
                   <span className="text-gray-500 dark:text-slate-400 text-xs">{s.unit}</span>
@@ -245,7 +247,46 @@ export default function Stock() {
                   </Button>
                 </div>
               </div>
-            ))}
+
+              {/* Mobile View (md:hidden) */}
+              <div className="md:hidden p-3.5 space-y-2.5 w-full">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 flex items-center gap-2">
+                    <span className="truncate">{s.rawMaterial}</span>
+                    {s.isLowStock && (
+                      <Badge variant="danger" className="gap-1 text-[10px] shrink-0">
+                        <AlertTriangle className="h-3 w-3" /> Low Stock
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors shrink-0"
+                    onClick={() => handleOpenModal(s)}
+                    title="Edit Item"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Current Stock</span>
+                    <span className={`font-bold tabular-nums break-words ${s.isLowStock ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
+                      {formatNumber(s.currentQuantity)} <span className="text-gray-500 dark:text-slate-400 font-normal">{s.unit}</span>
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Min Safe Level</span>
+                    <span className="tabular-nums font-semibold text-gray-700 dark:text-slate-300 break-words">
+                      {formatNumber(s.minimumStockLevel)} <span className="text-gray-500 dark:text-slate-400 font-normal">{s.unit}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
           </div>
         )}
 

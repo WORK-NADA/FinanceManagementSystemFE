@@ -66,9 +66,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-bg)] flex">
+    <div className="min-h-[100dvh] bg-[var(--color-surface-bg)] flex">
       {/* Left side - Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:w-1/2 xl:w-5/12">
+      <div className="flex-1 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:flex-none lg:w-1/2 xl:w-5/12">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
             <VyaparLogo
@@ -78,8 +78,8 @@ export default function Login() {
               showSubtitle
               className="mb-2"
             />
-            <h2 className="mt-6 text-3xl font-serif text-gray-900 dark:text-slate-100">Sign in to your account</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
+            <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl font-serif text-gray-900 dark:text-slate-100">Sign in to your account</h2>
+            <p className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-slate-400">
               Official व्यापार enterprise business, finance &amp; ERP management platform.
             </p>
           </div>

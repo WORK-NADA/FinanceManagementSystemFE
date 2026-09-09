@@ -141,7 +141,7 @@ export default function DashboardLayout() {
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="mt-8 flex flex-col gap-2 h-[calc(100vh-120px)] overflow-y-auto pb-8">
+          <nav className="mt-6 flex flex-col gap-1.5 h-[calc(100vh-120px)] overflow-y-auto pb-safe">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -150,18 +150,19 @@ export default function DashboardLayout() {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "group flex items-center rounded-md px-3 py-2 text-sm font-medium",
-                    isActive ? "bg-[var(--color-primary)] text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    "group flex items-center min-h-[44px] rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all active:scale-[0.98]",
+                    isActive ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40" : "text-gray-300 hover:bg-gray-800 hover:text-white"
                   )}
                 >
                   <item.icon className={cn("mr-3 h-5 w-5 flex-shrink-0", isActive ? "text-white" : "text-gray-400 group-hover:text-white")} />
-                  {item.name}
+                  <span className="truncate">{item.name}</span>
                 </NavLink>
               );
             })}
           </nav>
         </div>
       </div>
+
 
       {/* Desktop sidebar */}
       <aside
@@ -369,14 +370,44 @@ export default function DashboardLayout() {
             >
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <VyaparLogo
                 size="xs"
                 variant={theme === 'dark' ? 'on-dark' : 'on-light'}
                 showText
-                className="lg:hidden"
+                className="lg:hidden shrink-0"
                 onClick={() => navigate(defaultHome)}
               />
+              <div className="flex items-center gap-1.5 min-w-0 max-w-[130px] sm:max-w-[240px] md:max-w-md lg:hidden">
+                <span className="text-gray-300 dark:text-slate-600 text-xs shrink-0">/</span>
+                <span className="font-semibold text-xs sm:text-sm text-gray-700 dark:text-slate-200 truncate">
+                  {location.pathname === '/profile' 
+                    ? 'My Profile' 
+                    : location.pathname === '/admin/dashboard'
+                    ? 'Admin'
+                    : location.pathname === '/admin/clients'
+                    ? 'Clients'
+                    : location.pathname === '/admin/clients/new'
+                    ? 'New Client'
+                    : location.pathname.startsWith('/admin/clients/')
+                    ? 'Client 360°'
+                    : location.pathname === '/admin/sales'
+                    ? 'Global Sales'
+                    : location.pathname === '/admin/purchases'
+                    ? 'Global Purchases'
+                    : location.pathname === '/admin/payments'
+                    ? 'Global Payments'
+                    : location.pathname === '/admin/inventory'
+                    ? 'Global Inventory'
+                    : location.pathname === '/admin/expenses'
+                    ? 'Global Expenses'
+                    : location.pathname === '/admin/reports'
+                    ? 'Admin Reports'
+                    : location.pathname === '/admin/system'
+                    ? 'System Health'
+                    : location.pathname.replace('/dashboard/', '').replace('/dashboard', 'Dashboard').replace('-', ' ') || 'Overview'}
+                </span>
+              </div>
               <div className="hidden lg:flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
                 <button
                   type="button"
@@ -431,6 +462,7 @@ export default function DashboardLayout() {
             </div>
           </div>
 
+
           {/* Right section: Theme Toggle & User Profile Picture & Popover Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Top-Right Light/Dark Mode Theme Switcher */}
@@ -480,7 +512,7 @@ export default function DashboardLayout() {
               {profileMenuOpen && (
                 <div 
                   id="top-profile-dropdown"
-                  className="absolute right-0 mt-2 w-72 origin-top-right rounded-2xl bg-white dark:bg-[#161F2C] p-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5 focus:outline-hidden z-50 animate-in fade-in zoom-in-95 duration-150 border border-gray-100 dark:border-[#243245]"
+                  className="absolute right-0 mt-2 w-[calc(100vw-1.5rem)] max-w-xs sm:w-72 origin-top-right rounded-2xl bg-white dark:bg-[#161F2C] p-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5 focus:outline-hidden z-50 animate-in fade-in zoom-in-95 duration-150 border border-gray-100 dark:border-[#243245]"
                 >
                   <div className="p-3 bg-gradient-to-br from-emerald-50/70 via-gray-50 to-white dark:from-emerald-950/40 dark:via-[#161F2E] dark:to-[#121824] rounded-xl mb-1 border border-emerald-100/60 dark:border-emerald-900/30">
                     <div className="flex items-center gap-3">
@@ -558,10 +590,11 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-3.5 sm:p-5 lg:p-8">
           <Outlet />
         </main>
       </div>
     </div>
+
   );
 }

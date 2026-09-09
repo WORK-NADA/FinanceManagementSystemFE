@@ -177,63 +177,132 @@ export default function GlobalPurchases() {
           {filteredPurchases.map((purchase) => (
             <div
               key={purchase.publicId}
-              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all grid grid-cols-1 lg:grid-cols-[130px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_100px_110px_90px_60px] items-center gap-3 px-5 py-3.5"
+              className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all overflow-hidden"
             >
-              <div className="min-w-0">
-                <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-700">
-                  {purchase.purchaseNumber}
-                </span>
-                <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">{formatDate(purchase.purchaseDate)}</p>
+              {/* Desktop view (hidden on < lg) */}
+              <div className="hidden lg:grid lg:grid-cols-[130px_minmax(140px,1.5fr)_minmax(120px,1fr)_100px_100px_110px_90px_60px] items-center gap-3 px-5 py-3.5">
+                <div className="min-w-0">
+                  <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-700">
+                    {purchase.purchaseNumber}
+                  </span>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">{formatDate(purchase.purchaseDate)}</p>
+                </div>
+
+                <div className="truncate min-w-0">
+                  <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">
+                    {purchase.supplier?.supplierName || 'Supplier'}
+                  </p>
+                  {purchase.supplier?.mobileNumber && (
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{purchase.supplier.mobileNumber}</p>
+                  )}
+                </div>
+
+                <div className="text-sm text-gray-700 dark:text-slate-300 truncate min-w-0">
+                  {purchase.rawMaterial || '—'}
+                </div>
+
+                <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
+                  <span className="font-medium text-gray-800 dark:text-slate-200">{purchase.weight} {purchase.unit}</span>
+                  <p className="text-[10px] text-gray-400">@{formatCurrency(purchase.ratePerUnit || 0)}</p>
+                </div>
+
+                <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
+                  <p>{formatCurrency(purchase.amount || 0)}</p>
+                  <p className="text-[10px] text-gray-400">+GST {formatCurrency(purchase.gstAmount || 0)}</p>
+                </div>
+
+                <div className="min-w-0">
+                  <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                    {formatCurrency(purchase.totalAmount)}
+                  </span>
+                </div>
+
+                <div className="min-w-0">
+                  <Badge 
+                    variant={purchase.paymentStatus === 'PAID' ? 'success' : purchase.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'default'}
+                    className="text-[10px]"
+                  >
+                    {purchase.paymentStatus}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-end min-w-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400"
+                    onClick={() => setSelectedPurchase(purchase)}
+                    title="View Bill Details"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
 
-              <div className="truncate min-w-0">
-                <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">
-                  {purchase.supplier?.supplierName || 'Supplier'}
-                </p>
-                {purchase.supplier?.mobileNumber && (
-                  <p className="text-xs text-gray-400 dark:text-slate-500">{purchase.supplier.mobileNumber}</p>
-                )}
-              </div>
+              {/* Mobile & Tablet Card View (hidden on lg+) */}
+              <div className="lg:hidden p-3.5 sm:p-4 space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-gray-200 dark:border-slate-700">
+                      {purchase.purchaseNumber}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-slate-500">
+                      {formatDate(purchase.purchaseDate)}
+                    </span>
+                  </div>
+                  <Badge 
+                    variant={purchase.paymentStatus === 'PAID' ? 'success' : purchase.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'default'}
+                    className="text-[10px]"
+                  >
+                    {purchase.paymentStatus}
+                  </Badge>
+                </div>
 
-              <div className="text-sm text-gray-700 dark:text-slate-300 truncate min-w-0">
-                {purchase.rawMaterial || '—'}
-              </div>
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-slate-100">
+                    {purchase.supplier?.supplierName || 'Supplier'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
+                    {purchase.rawMaterial ? `Material: ${purchase.rawMaterial}` : ''}
+                    {purchase.supplier?.mobileNumber ? ` • ${purchase.supplier.mobileNumber}` : ''}
+                  </p>
+                </div>
 
-              <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
-                <span className="font-medium text-gray-800 dark:text-slate-200">{purchase.weight} {purchase.unit}</span>
-                <p className="text-[10px] text-gray-400">@{formatCurrency(purchase.ratePerUnit || 0)}</p>
-              </div>
+                {/* 3-Col metric strip */}
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg text-center">
+                    <span className="text-[10px] text-gray-400 block">Qty & Rate</span>
+                    <span className="text-xs font-semibold text-gray-800 dark:text-slate-200 tabular-nums">
+                      {purchase.weight} {purchase.unit}
+                    </span>
+                    <span className="text-[10px] text-gray-400 block">@{formatCurrency(purchase.ratePerUnit || 0)}</span>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg text-center">
+                    <span className="text-[10px] text-gray-400 block">Taxable</span>
+                    <span className="text-xs font-semibold text-gray-800 dark:text-slate-200 tabular-nums">
+                      {formatCurrency(purchase.amount || 0)}
+                    </span>
+                    <span className="text-[10px] text-gray-400 block">+GST {formatCurrency(purchase.gstAmount || 0)}</span>
+                  </div>
+                  <div className="bg-purple-50/60 dark:bg-purple-950/30 p-2 rounded-lg text-center border border-purple-100 dark:border-purple-900/30">
+                    <span className="text-[10px] text-purple-700 dark:text-purple-400 block font-medium">Total Billed</span>
+                    <span className="text-xs font-bold text-purple-700 dark:text-purple-400 tabular-nums">
+                      {formatCurrency(purchase.totalAmount)}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="text-xs text-gray-600 dark:text-slate-400 min-w-0">
-                <p>{formatCurrency(purchase.amount || 0)}</p>
-                <p className="text-[10px] text-gray-400">+GST {formatCurrency(purchase.gstAmount || 0)}</p>
-              </div>
-
-              <div className="min-w-0">
-                <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
-                  {formatCurrency(purchase.totalAmount)}
-                </span>
-              </div>
-
-              <div className="min-w-0">
-                <Badge 
-                  variant={purchase.paymentStatus === 'PAID' ? 'success' : purchase.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'default'}
-                  className="text-[10px]"
-                >
-                  {purchase.paymentStatus}
-                </Badge>
-              </div>
-
-              <div className="flex items-center justify-end min-w-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400"
-                  onClick={() => setSelectedPurchase(purchase)}
-                  title="View Bill Details"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                </Button>
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5 h-8 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900/50"
+                    onClick={() => setSelectedPurchase(purchase)}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    View Details
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

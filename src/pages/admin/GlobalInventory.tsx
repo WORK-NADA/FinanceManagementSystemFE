@@ -137,34 +137,68 @@ export default function GlobalInventory() {
             return (
               <div
                 key={stock.publicId}
-                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all grid grid-cols-1 lg:grid-cols-[minmax(180px,2fr)_120px_130px_130px_110px] items-center gap-3 px-5 py-3.5 text-sm"
+                className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs hover:shadow-md transition-all overflow-hidden"
               >
-                <div className="font-semibold text-gray-900 dark:text-slate-100 flex items-center gap-2">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${isDepleted ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                  <span className="truncate">{stock.rawMaterial}</span>
+                {/* Desktop view (hidden on < lg) */}
+                <div className="hidden lg:grid lg:grid-cols-[minmax(180px,2fr)_120px_130px_130px_110px] items-center gap-3 px-5 py-3.5 text-sm">
+                  <div className="font-semibold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full shrink-0 ${isDepleted ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                    <span className="truncate">{stock.rawMaterial}</span>
+                  </div>
+
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
+                    <Badge variant="info" className="text-[10px]">
+                      {stock.unit}
+                    </Badge>
+                  </div>
+
+                  <div className="font-bold text-gray-900 dark:text-slate-100">
+                    {Number(stock.currentQuantity).toLocaleString()} {stock.unit}
+                  </div>
+
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
+                    Min: {Number(stock.minimumStockLevel || 0).toLocaleString()} {stock.unit}
+                  </div>
+
+                  <div className="text-right pr-2">
+                    <Badge 
+                      variant={isDepleted ? 'danger' : isLow ? 'warning' : 'success'}
+                      className="text-[10px]"
+                    >
+                      {isDepleted ? 'Depleted' : isLow ? 'Low Stock' : 'Optimal'}
+                    </Badge>
+                  </div>
                 </div>
 
-                <div className="text-xs text-gray-500 dark:text-slate-400">
-                  <Badge variant="info" className="text-[10px]">
-                    {stock.unit}
-                  </Badge>
-                </div>
+                {/* Mobile & Tablet Card View (hidden on lg+) */}
+                <div className="lg:hidden p-3.5 sm:p-4 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`h-2 w-2 rounded-full shrink-0 ${isDepleted ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                      <span className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{stock.rawMaterial}</span>
+                    </div>
+                    <Badge 
+                      variant={isDepleted ? 'danger' : isLow ? 'warning' : 'success'}
+                      className="text-[10px] shrink-0"
+                    >
+                      {isDepleted ? 'Depleted' : isLow ? 'Low Stock' : 'Optimal'}
+                    </Badge>
+                  </div>
 
-                <div className="font-bold text-gray-900 dark:text-slate-100">
-                  {Number(stock.currentQuantity).toLocaleString()} {stock.unit}
-                </div>
-
-                <div className="text-xs text-gray-500 dark:text-slate-400">
-                  Min: {Number(stock.minimumStockLevel || 0).toLocaleString()} {stock.unit}
-                </div>
-
-                <div className="text-right pr-2">
-                  <Badge 
-                    variant={isDepleted ? 'danger' : isLow ? 'warning' : 'success'}
-                    className="text-[10px]"
-                  >
-                    {isDepleted ? 'Depleted' : isLow ? 'Low Stock' : 'Optimal'}
-                  </Badge>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg">
+                      <span className="text-[10px] text-gray-400 block">Current Stock</span>
+                      <span className="text-xs font-bold text-gray-900 dark:text-slate-100 tabular-nums">
+                        {Number(stock.currentQuantity).toLocaleString()} {stock.unit}
+                      </span>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg">
+                      <span className="text-[10px] text-gray-400 block">Min Threshold</span>
+                      <span className="text-xs font-medium text-gray-600 dark:text-slate-300 tabular-nums">
+                        {Number(stock.minimumStockLevel || 0).toLocaleString()} {stock.unit}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             );

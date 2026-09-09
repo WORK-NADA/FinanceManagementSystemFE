@@ -643,8 +643,8 @@ export default function ProfitDistribution() {
           />
         ) : (
           <div className="bg-white dark:bg-[#141A24] rounded-2xl border border-gray-200/90 dark:border-[#1F2837] overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto touch-pan-x">
+              <table className="w-full min-w-[680px] text-left text-xs">
                 <thead className="bg-gray-50/75 dark:bg-[#0E131C] text-gray-500 dark:text-slate-400 font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-[#1F2837]">
                   <tr>
                     <th className="px-5 py-3">Date</th>
@@ -711,9 +711,9 @@ export default function ProfitDistribution() {
 
       {/* ── Section 3: Completed Period Profit Distributions ──────────────── */}
       <div className="space-y-4 pt-6 border-t-2 border-dashed border-gray-200 dark:border-gray-800">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 shrink-0">
               <Calculator className="h-5 w-5" />
             </div>
             <div>
@@ -733,7 +733,7 @@ export default function ProfitDistribution() {
 
           <Button 
             onClick={() => setIsDistributeModalOpen(true)} 
-            className="gap-2 text-xs sm:text-sm bg-[var(--color-primary)] hover:opacity-90 shadow-xs"
+            className="gap-2 text-xs sm:text-sm bg-[var(--color-primary)] hover:opacity-90 shadow-xs w-full sm:w-auto"
           >
             <Calculator className="h-4 w-4" /> Calculate Period Profit
           </Button>
@@ -780,40 +780,97 @@ export default function ProfitDistribution() {
                   }`}
                 >
                   <div
-                    className={`grid grid-cols-1 lg:grid-cols-[28px_minmax(115px,1.1fr)_minmax(130px,1.3fr)_minmax(95px,0.9fr)_minmax(95px,0.9fr)_minmax(95px,0.9fr)_minmax(100px,1fr)] items-center gap-3 px-5 py-3.5 cursor-pointer select-none rounded-2xl ${
+                    className={`cursor-pointer select-none rounded-2xl ${
                       isExpanded ? 'bg-slate-50/50 dark:bg-[#18212F] rounded-b-none' : 'hover:bg-gray-50/70 dark:hover:bg-[#1A2331]'
                     }`}
                     onClick={() => toggleRow(d.publicId)}
                   >
-                    <div className="flex justify-center text-gray-400 min-w-0">
-                      {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-[var(--color-primary)]" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
+                    {/* Desktop row view (hidden on < lg) */}
+                    <div className="hidden lg:grid lg:grid-cols-[28px_minmax(115px,1.1fr)_minmax(130px,1.3fr)_minmax(95px,0.9fr)_minmax(95px,0.9fr)_minmax(95px,0.9fr)_minmax(100px,1fr)] items-center gap-3 px-5 py-3.5">
+                      <div className="flex justify-center text-gray-400 min-w-0">
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4 text-[var(--color-primary)]" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="whitespace-nowrap font-medium text-xs text-gray-900 dark:text-slate-100 flex flex-wrap items-center gap-1.5">
+                        <span>{formatDate(d.updatedAt || d.createdAt)}</span>
+                        {isRecalculated && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
+                            Recalculated
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-slate-400 truncate">
+                        {formatDate(d.fromDate)} to {formatDate(d.toDate)}
+                      </div>
+                      <div className="text-right text-xs tabular-nums text-gray-900 dark:text-slate-100 font-medium">
+                        {formatCurrency(d.totalRevenue)}
+                      </div>
+                      <div className="text-right text-xs tabular-nums text-rose-700 dark:text-rose-400 font-medium">
+                        -{formatCurrency(d.totalPurchaseCost)}
+                      </div>
+                      <div className="text-right text-xs tabular-nums text-rose-700 dark:text-rose-400 font-medium">
+                        -{formatCurrency(d.totalExpenses)}
+                      </div>
+                      <div className="text-right text-xs tabular-nums font-bold text-emerald-700 dark:text-emerald-400 text-sm">
+                        {formatCurrency(d.netProfit)}
+                      </div>
                     </div>
-                    <div className="whitespace-nowrap font-medium text-xs text-gray-900 dark:text-slate-100 flex flex-wrap items-center gap-1.5">
-                      <span>{formatDate(d.updatedAt || d.createdAt)}</span>
-                      {isRecalculated && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
-                          Recalculated
+
+                    {/* Mobile & Tablet Card Layout (hidden on lg+) */}
+                    <div className="lg:hidden p-3.5 sm:p-4 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex justify-center text-gray-400">
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 text-[var(--color-primary)]" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                          <span className="font-semibold text-xs text-gray-900 dark:text-slate-100">
+                            {formatDate(d.updatedAt || d.createdAt)}
+                          </span>
+                          {isRecalculated && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
+                              Recalculated
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-medium text-gray-500 dark:text-slate-400">
+                          {formatDate(d.fromDate)} – {formatDate(d.toDate)}
                         </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-slate-400 truncate">
-                      {formatDate(d.fromDate)} to {formatDate(d.toDate)}
-                    </div>
-                    <div className="lg:text-right text-xs tabular-nums text-gray-900 dark:text-slate-100 font-medium">
-                      {formatCurrency(d.totalRevenue)}
-                    </div>
-                    <div className="lg:text-right text-xs tabular-nums text-rose-700 dark:text-rose-400 font-medium">
-                      -{formatCurrency(d.totalPurchaseCost)}
-                    </div>
-                    <div className="lg:text-right text-xs tabular-nums text-rose-700 dark:text-rose-400 font-medium">
-                      -{formatCurrency(d.totalExpenses)}
-                    </div>
-                    <div className="lg:text-right text-xs tabular-nums font-bold text-emerald-700 dark:text-emerald-400 text-sm">
-                      {formatCurrency(d.netProfit)}
+                      </div>
+
+                      {/* 4-column metric strip */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                        <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg">
+                          <span className="text-[10px] text-gray-500 dark:text-slate-400 block">Received</span>
+                          <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
+                            {formatCurrency(d.totalRevenue)}
+                          </span>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg">
+                          <span className="text-[10px] text-gray-500 dark:text-slate-400 block">Paid</span>
+                          <span className="text-xs font-semibold tabular-nums text-rose-600 dark:text-rose-400">
+                            -{formatCurrency(d.totalPurchaseCost)}
+                          </span>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-[#101622] p-2 rounded-lg">
+                          <span className="text-[10px] text-gray-500 dark:text-slate-400 block">Expenses</span>
+                          <span className="text-xs font-semibold tabular-nums text-rose-600 dark:text-rose-400">
+                            -{formatCurrency(d.totalExpenses)}
+                          </span>
+                        </div>
+                        <div className="bg-emerald-50/70 dark:bg-emerald-950/30 p-2 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
+                          <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-medium">Net Profit</span>
+                          <span className="text-xs font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
+                            {formatCurrency(d.netProfit)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -968,7 +1025,7 @@ export default function ProfitDistribution() {
           </div>
 
           {/* Action buttons */}
-          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
             <Button
               type="button"
               variant="outline"
@@ -977,13 +1034,14 @@ export default function ProfitDistribution() {
                 setSelectedPartner(null);
                 resetWithdrawal();
               }}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               isLoading={withdrawalMutation.isPending}
-              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto"
             >
               <CheckCircle2 className="h-4 w-4" />
               Confirm Withdrawal
@@ -1017,14 +1075,14 @@ export default function ProfitDistribution() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input label="From Date *" type="date" {...registerDist('fromDate')} error={distErrors.fromDate?.message} />
               <Input label="To Date *" type="date" {...registerDist('toDate')} error={distErrors.toDate?.message} />
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
-              <Button type="button" variant="outline" onClick={handleCloseDistributeModal}>Cancel</Button>
-              <Button type="submit" isLoading={previewMutation.isPending} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
+              <Button type="button" variant="outline" onClick={handleCloseDistributeModal} className="w-full sm:w-auto">Cancel</Button>
+              <Button type="submit" isLoading={previewMutation.isPending} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto">
                 <span>Preview Partner Shares</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -1091,15 +1149,15 @@ export default function ProfitDistribution() {
               </div>
             )}
 
-            <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-[#1F2837]">
-              <Button type="button" variant="outline" onClick={() => setWizardStep('INPUT')} className="gap-1">
+            <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-2 pt-4 border-t border-gray-100 dark:border-[#1F2837]">
+              <Button type="button" variant="outline" onClick={() => setWizardStep('INPUT')} className="gap-1 w-full sm:w-auto justify-center">
                 <RotateCcw className="h-4 w-4" /> Edit Dates
               </Button>
               <Button 
                 type="button" 
                 onClick={() => distributeMutation.mutate(getDistValues())} 
                 isLoading={distributeMutation.isPending} 
-                className={`gap-1.5 ${previewData?.isRecalculation ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                className={`gap-1.5 w-full sm:w-auto justify-center ${previewData?.isRecalculation ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
               >
                 {previewData?.isRecalculation ? (
                   <>

@@ -14,7 +14,39 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
   if (totalPages <= 1) return null;
 
   return (
-    <div className={cn("flex items-center justify-between px-4 py-3 sm:px-6", className)}>
+    <div className={cn("flex items-center justify-between px-3 py-2.5 sm:px-6 sm:py-3 w-full", className)}>
+      {/* Mobile view (< sm) */}
+      <div className="flex sm:hidden items-center justify-between w-full gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1 min-h-[38px] px-3 text-xs"
+          disabled={currentPage === 0}
+          onClick={() => onPageChange(currentPage - 1)}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span>Prev</span>
+        </Button>
+
+        <p className="text-xs text-gray-700 dark:text-slate-300 font-medium">
+          <span className="font-semibold text-gray-900 dark:text-white tabular-nums">{formatNumber(currentPage + 1)}</span>
+          <span className="mx-1 text-gray-400">/</span>
+          <span className="font-semibold text-gray-900 dark:text-white tabular-nums">{formatNumber(totalPages)}</span>
+        </p>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1 min-h-[38px] px-3 text-xs"
+          disabled={currentPage >= totalPages - 1}
+          onClick={() => onPageChange(currentPage + 1)}
+        >
+          <span>Next</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Desktop view (sm+) */}
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700 dark:text-slate-300">
@@ -27,7 +59,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
             <Button
               variant="outline"
               size="icon"
-              className="rounded-r-none"
+              className="rounded-r-none min-h-[36px] min-w-[36px]"
               disabled={currentPage === 0}
               onClick={() => onPageChange(currentPage - 1)}
             >
@@ -37,7 +69,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
             <Button
               variant="outline"
               size="icon"
-              className="rounded-l-none"
+              className="rounded-l-none min-h-[36px] min-w-[36px]"
               disabled={currentPage >= totalPages - 1}
               onClick={() => onPageChange(currentPage + 1)}
             >

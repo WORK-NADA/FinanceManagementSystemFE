@@ -216,28 +216,28 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-4">
           <div className="p-3 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-100 dark:border-slate-800">
             <span className="text-xs font-medium text-gray-500 dark:text-slate-400">Collections Received</span>
-            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 break-words">
               {formatCurrency(stats?.totalPaymentsReceived || 0)}
             </p>
           </div>
           <div className="p-3 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-100 dark:border-slate-800">
             <span className="text-xs font-medium text-gray-500 dark:text-slate-400">Disbursements Paid</span>
-            <p className="text-lg font-bold text-rose-600 dark:text-rose-400 mt-0.5">
+            <p className="text-lg font-bold text-rose-600 dark:text-rose-400 mt-0.5 break-words">
               {formatCurrency(stats?.totalPaymentsMade || 0)}
             </p>
           </div>
           <div className="p-3 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-100 dark:border-slate-800">
             <span className="text-xs font-medium text-gray-500 dark:text-slate-400">Total Receivables (Dues)</span>
-            <p className="text-lg font-bold text-blue-600 dark:text-sky-400 mt-0.5">
+            <p className="text-lg font-bold text-blue-600 dark:text-sky-400 mt-0.5 break-words">
               {formatCurrency(stats?.totalReceivables || 0)}
             </p>
           </div>
           <div className="p-3 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-100 dark:border-slate-800">
             <span className="text-xs font-medium text-gray-500 dark:text-slate-400">Total Payables (Liabilities)</span>
-            <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+            <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5 break-words">
               {formatCurrency(stats?.totalPayables || 0)}
             </p>
           </div>
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Top Clients Leaderboard (2 Cols) */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 className="text-base font-bold text-gray-900 dark:text-slate-100">
                 Top Performing Business Accounts
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
               variant="outline" 
               size="sm" 
               onClick={() => navigate('/admin/clients')}
-              className="text-xs"
+              className="text-xs self-start sm:self-auto"
             >
               View All Clients
               <ChevronRight className="h-3.5 w-3.5 ml-1" />
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                   {stats.topClients.map((client, idx) => (
                     <div 
                       key={client.publicId}
-                      className="p-4 flex items-center justify-between hover:bg-gray-50/70 dark:hover:bg-slate-800/40 transition-colors gap-4"
+                      className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50/70 dark:hover:bg-slate-800/40 transition-colors gap-3 sm:gap-4"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
                           <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
                             {client.ownerName || client.username}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400 flex-wrap">
                             <span className="truncate">@{client.username}</span>
                             <span>•</span>
                             <span>{client.mobileNumber}</span>
@@ -298,8 +298,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 shrink-0">
-                        <div className="text-right">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-gray-100 dark:border-slate-800/80">
+                        <div className="text-left sm:text-right">
                           <p className="text-sm font-bold text-gray-900 dark:text-slate-100">
                             {formatCurrency(client.totalSalesVolume || 0)}
                           </p>

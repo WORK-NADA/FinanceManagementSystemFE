@@ -352,7 +352,7 @@ export default function Profile() {
             </div>
 
             {/* Action Bar */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
               {profilePicture && (
                 <Button
                   type="button"
@@ -711,17 +711,19 @@ export default function Profile() {
           </Card>
 
           {/* Form Action Controls */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               isLoading={updateMutation.isPending}
+              className="w-full sm:w-auto"
             >
               <Save className="h-4 w-4 mr-1.5" />
               Save Changes
