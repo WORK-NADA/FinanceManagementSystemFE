@@ -564,6 +564,7 @@ export default function Sales() {
   });
   const selectedCustomerPublicId = useWatch({ control, name: 'customerPublicId' });
   const watchRawMaterial = useWatch({ control, name: 'rawMaterial' });
+  const watchUnit = useWatch({ control, name: 'unit' });
   
   const { field: rawMaterialField } = useController({ control, name: 'rawMaterial' });
 
@@ -1279,7 +1280,7 @@ export default function Sales() {
                   ))}
                   {rawMaterialField.value && !activeStocks.some(s => s.rawMaterial.toLowerCase() === rawMaterialField.value.trim().toLowerCase()) && (
                     <option value={rawMaterialField.value}>
-                      {rawMaterialField.value} ({useWatch({ control, name: 'unit' }) || 'KG'})
+                      {rawMaterialField.value} ({watchUnit || 'KG'})
                     </option>
                   )}
                   {!isSalePaid && (
