@@ -27,7 +27,8 @@ import {
   Sparkles,
   Info,
   HeartHandshake,
-  UserCheck
+  UserCheck,
+  Code2
 } from 'lucide-react';
 import { getCurrentUserProfile, updateCurrentUserProfile } from '../api/user';
 import { profileEditSchema, type ProfileEditDTO } from '../types/user';
@@ -950,6 +951,41 @@ export default function Profile() {
                     <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-[#141A24] border border-emerald-200/80 dark:border-emerald-800/60 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-xs">
                       <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       Direct Owner Assistance
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Platform Engineering & Stewardship Card (Distinct from global footer) */}
+              <div className="rounded-2xl bg-gradient-to-r from-slate-50/90 via-slate-50/50 to-emerald-50/30 dark:from-[#0d1624] dark:via-[#0e1c26] dark:to-[#0c1f1b] border border-slate-200/80 dark:border-slate-800/80 p-5 sm:p-6 transition-all shadow-xs">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-2xl bg-white dark:bg-[#141A24] text-emerald-600 dark:text-emerald-400 shadow-xs border border-slate-200/80 dark:border-slate-800 shrink-0 mt-0.5">
+                      <Code2 className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h4 className="text-base font-semibold text-gray-900 dark:text-slate-100">
+                          Platform Engineering &amp; Ownership
+                        </h4>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100/70 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Continuous Stewardship
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                        Designed, engineered, and maintained by <strong>Urvi Gondaliya</strong> and <strong>Harsh Nada</strong> with a disciplined focus on performance, data security, and enterprise financial accuracy.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start md:self-center">
+                    <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#141A24] border border-slate-200/80 dark:border-slate-800/80 text-xs shadow-2xs">
+                      <span className="font-semibold text-gray-900 dark:text-slate-100">Urvi Gondaliya</span>
+                      <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/60">Owner</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#141A24] border border-slate-200/80 dark:border-slate-800/80 text-xs shadow-2xs">
+                      <span className="font-semibold text-gray-900 dark:text-slate-100">Harsh Nada</span>
+                      <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/60">Owner</span>
                     </div>
                   </div>
                 </div>

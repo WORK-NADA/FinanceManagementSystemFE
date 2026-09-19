@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { Eye, EyeOff } from 'lucide-react';
 import type { RequestLoginDTO } from '../types/auth';
 import { loginSchema } from '../types/auth';
 import { login } from '../api/auth';
@@ -13,6 +14,7 @@ import { typewriterAudio } from '../lib/typewriterAudio';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { VyaparLogo } from '../components/VyaparLogo';
+import { DeveloperSignature } from '../components/DeveloperSignature';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,6 +22,14 @@ export default function Login() {
   const theme = useThemeStore((state) => state.theme);
   const triggerWelcome = useWelcomeStore((state) => state.triggerWelcome);
   const [serverError, setServerError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordInputRef = useRef<HTMLInputElement | null>(null);
+  const selectionRef = useRef<{
+    start: number;
+    end: number;
+    direction?: 'forward' | 'backward' | 'none';
+    hadFocus: boolean;
+  } | null>(null);
 
   const {
     register,
@@ -29,6 +39,47 @@ export default function Login() {
   } = useForm<RequestLoginDTO>({
     resolver: zodResolver(loginSchema),
   });
+
+  const { ref: rhfPasswordRef, ...passwordRegister } = register('password');
+
+  const saveCursorPosition = () => {
+    const el = passwordInputRef.current;
+    if (el) {
+      selectionRef.current = {
+        start: el.selectionStart ?? el.value.length,
+        end: el.selectionEnd ?? el.value.length,
+        direction: el.selectionDirection || undefined,
+        hadFocus: document.activeElement === el,
+      };
+    }
+  };
+
+  const handleTogglePassword = () => {
+    saveCursorPosition();
+    setShowPassword((prev) => !prev);
+  };
+
+  useLayoutEffect(() => {
+    if (!selectionRef.current || !passwordInputRef.current) return;
+    const { start, end, direction, hadFocus } = selectionRef.current;
+    selectionRef.current = null;
+    const el = passwordInputRef.current;
+
+    const restore = () => {
+      if (hadFocus && document.activeElement !== el) {
+        el.focus();
+      }
+      try {
+        el.setSelectionRange(start, end, direction);
+      } catch {
+        // Ignore any browser-specific restriction
+      }
+    };
+
+    restore();
+    const rafId = requestAnimationFrame(restore);
+    return () => cancelAnimationFrame(rafId);
+  }, [showPassword]);
 
   const mutation = useMutation({
     mutationFn: login,
@@ -97,11 +148,35 @@ export default function Login() {
 
               <Input
                 label="Password"
-                type="password"
-                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
+                {...passwordRegister}
+                ref={(el) => {
+                  rhfPasswordRef(el);
+                  passwordInputRef.current = el;
+                }}
                 error={errors.password?.message}
                 autoComplete="current-password"
                 placeholder="••••••••"
+                rightIcon={
+                  <button
+                    type="button"
+                    onClick={handleTogglePassword}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      saveCursorPosition();
+                    }}
+                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors focus:outline-none pointer-events-auto cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                }
               />
 
               {serverError && (
@@ -120,6 +195,11 @@ export default function Login() {
               </Button>
             </form>
           </div>
+
+          {/* Form / Mobile Attribution Signature */}
+          <div className="mt-8 pt-5 border-t border-gray-200/70 dark:border-slate-800/80 flex justify-center">
+            <DeveloperSignature />
+          </div>
         </div>
       </div>
 
@@ -129,8 +209,17 @@ export default function Login() {
         <div className="absolute top-1/4 -right-20 w-96 h-96 rounded-full bg-[var(--color-primary)]/15 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 -left-20 w-96 h-96 rounded-full bg-[#C9A227]/10 blur-3xl pointer-events-none" />
 
-        <div className="absolute inset-0 flex items-center justify-center p-12">
-          <div className="max-w-2xl text-center space-y-8">
+        <div className="absolute inset-0 flex flex-col justify-between p-12">
+          {/* Top Status */}
+          <div className="flex justify-end">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300 backdrop-blur-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Enterprise Systems Active</span>
+            </div>
+          </div>
+
+          {/* Center Stage */}
+          <div className="max-w-2xl text-center space-y-8 mx-auto my-auto">
             <div className="flex justify-center mb-2">
               <VyaparLogo size="xl" variant="on-dark" showText showSubtitle />
             </div>
@@ -140,6 +229,11 @@ export default function Login() {
             <p className="text-xl text-gray-300 max-w-xl mx-auto font-light leading-relaxed">
               Complete control over your finances, partners, inventory, sales, and expenses in one unified, secure platform.
             </p>
+          </div>
+
+          {/* Bottom Attribution Badge */}
+          <div className="flex justify-center">
+            <DeveloperSignature className="bg-white/10 dark:bg-white/10 border-white/15 text-white shadow-md" />
           </div>
         </div>
       </div>

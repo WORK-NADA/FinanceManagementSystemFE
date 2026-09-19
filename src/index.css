@@ -158,6 +158,14 @@
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
+
+  /* Suppress native browser password reveal & clear buttons (e.g. Microsoft Edge) */
+  input::-ms-reveal {
+    display: none;
+  }
+  input::-ms-clear {
+    display: none;
+  }
 }
 
 @layer components {
@@ -216,6 +224,16 @@
   .form-control option {
     background-color: var(--color-surface-card);
     color: var(--color-text-main);
+  }
+  .form-control::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .form-control::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   /* Card base */

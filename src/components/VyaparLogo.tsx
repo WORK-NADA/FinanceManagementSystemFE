@@ -1,5 +1,14 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { cn } from '@/lib/cn';
+
+export interface VyaparIconProps {
+  /** Size in pixels */
+  size?: number;
+  /** Theme adaptation */
+  variant?: 'on-dark' | 'on-light' | 'monochrome';
+  /** Additional CSS classes */
+  className?: string;
+}
 
 export interface VyaparLogoProps {
   /** Logo size presets */
@@ -64,10 +73,16 @@ const sizeConfig = {
  * - Dynamic ascending trade vector (financial momentum and compounding growth)
  * - Golden prosperity seal (wealth generation, liquidity, enterprise trust)
  */
-export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
+export const VyaparIcon: React.FC<VyaparIconProps> = ({
   size = 38,
+  variant = 'on-dark',
   className,
 }) => {
+  const rawId = useId();
+  // Sanitize useId() string to create valid SVG identifiers
+  const id = 'vlogo_' + rawId.replace(/[^a-zA-Z0-9_-]/g, '');
+  const isLight = variant === 'on-light';
+
   return (
     <svg
       width={size}
@@ -83,22 +98,40 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
     >
       <defs>
         {/* Emerald Base Foundation Gradients */}
-        <linearGradient id="vyaparBgGrad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#05241B" />
-          <stop offset="35%" stopColor="#0D644B" />
-          <stop offset="70%" stopColor="#12956F" />
-          <stop offset="100%" stopColor="#074433" />
-        </linearGradient>
+        {isLight ? (
+          <linearGradient id={`${id}-bgGrad`} x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#044E3B" />
+            <stop offset="35%" stopColor="#065F46" />
+            <stop offset="70%" stopColor="#059669" />
+            <stop offset="100%" stopColor="#047857" />
+          </linearGradient>
+        ) : (
+          <linearGradient id={`${id}-bgGrad`} x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#05241B" />
+            <stop offset="35%" stopColor="#0D644B" />
+            <stop offset="70%" stopColor="#12956F" />
+            <stop offset="100%" stopColor="#074433" />
+          </linearGradient>
+        )}
 
-        <linearGradient id="vyaparBorderGrad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#6EE7B7" stopOpacity="0.65" />
-          <stop offset="30%" stopColor="#34D399" stopOpacity="0.4" />
-          <stop offset="70%" stopColor="#FFFFFF" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="#042017" stopOpacity="0.8" />
-        </linearGradient>
+        {isLight ? (
+          <linearGradient id={`${id}-borderGrad`} x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#6EE7B7" stopOpacity="0.9" />
+            <stop offset="30%" stopColor="#34D399" stopOpacity="0.75" />
+            <stop offset="70%" stopColor="#059669" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#064E3B" stopOpacity="0.95" />
+          </linearGradient>
+        ) : (
+          <linearGradient id={`${id}-borderGrad`} x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#6EE7B7" stopOpacity="0.65" />
+            <stop offset="30%" stopColor="#34D399" stopOpacity="0.4" />
+            <stop offset="70%" stopColor="#FFFFFF" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#042017" stopOpacity="0.8" />
+          </linearGradient>
+        )}
 
         {/* Warm Gold Prosperity Gradients */}
-        <linearGradient id="vyaparGoldGrad" x1="31" y1="10" x2="39" y2="19" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-goldGrad`} x1="31" y1="10" x2="39" y2="19" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FEF08A" />
           <stop offset="30%" stopColor="#F59E0B" />
           <stop offset="75%" stopColor="#D97706" />
@@ -106,41 +139,45 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
         </linearGradient>
 
         {/* Dynamic Growth Trajectory Gradient */}
-        <linearGradient id="vyaparArrowGrad" x1="27" y1="28" x2="36" y2="19" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${id}-arrowGrad`} x1="27" y1="28" x2="36" y2="19" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FDE68A" />
           <stop offset="60%" stopColor="#F59E0B" />
           <stop offset="100%" stopColor="#D97706" />
         </linearGradient>
 
         {/* Subtle Specular Top Highlight */}
-        <linearGradient id="vyaparShine" x1="12" y1="4" x2="36" y2="24" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.25" />
+        <linearGradient id={`${id}-shine`} x1="12" y1="4" x2="36" y2="24" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity={isLight ? 0.4 : 0.25} />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
         </linearGradient>
 
         {/* Outer Shadow Filter */}
-        <filter id="vyaparShadow" x="0" y="2" width="48" height="48" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.28" />
+        <filter id={`${id}-shadow`} x="0" y="2" width="48" height="48" filterUnits="userSpaceOnUse">
+          {isLight ? (
+            <feDropShadow dx="0" dy="1.5" stdDeviation="2" floodColor="#064E3B" floodOpacity="0.3" />
+          ) : (
+            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.35" />
+          )}
         </filter>
       </defs>
 
-      {/* ── 1. Squircle Shield / Foundation ── */}
+      {/* ── 1. Squircle Shield / Foundation (with solid fallback fill) ── */}
       <rect
         x="3"
         y="3"
         width="42"
         height="42"
         rx="11"
-        fill="url(#vyaparBgGrad)"
-        stroke="url(#vyaparBorderGrad)"
+        fill={`url(#${id}-bgGrad)`}
+        stroke={`url(#${id}-borderGrad)`}
         strokeWidth="1.5"
-        filter="url(#vyaparShadow)"
+        filter={`url(#${id}-shadow)`}
       />
 
       {/* Specular Bevel Highlight Arc */}
       <path
         d="M 13 4.5 Q 24 3.5 35 4.5 Q 43.5 13 44.5 24"
-        stroke="url(#vyaparShine)"
+        stroke={`url(#${id}-shine)`}
         strokeWidth="1.2"
         strokeLinecap="round"
         fill="none"
@@ -171,7 +208,7 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
         cy="24.5"
         r="4.2"
         fill="#34D399"
-        fillOpacity="0.2"
+        fillOpacity="0.25"
       />
 
       {/* ── 4. Main Vertical Ledger Stem (Audit Trail & Structural Governance) ── */}
@@ -185,7 +222,7 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
       {/* ── 5. Dynamic Ascending Trade Vector (Surging upward growth) ── */}
       <path
         d="M 27 28.5 L 34.8 20.2"
-        stroke="url(#vyaparArrowGrad)"
+        stroke={`url(#${id}-arrowGrad)`}
         strokeWidth="2.6"
         strokeLinecap="round"
       />
@@ -196,7 +233,7 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
         stroke="#FDE68A"
         strokeWidth="1.8"
         strokeLinecap="round"
-        strokeOpacity="0.85"
+        strokeOpacity="0.9"
       />
 
       {/* ── 6. The Golden Prosperity Coin / Seal (Wealth, Capital, Liquidity) ── */}
@@ -207,14 +244,14 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
           cy="14.5"
           r="5.5"
           fill="#F59E0B"
-          fillOpacity="0.28"
+          fillOpacity="0.32"
         />
         {/* Main Gold Coin */}
         <circle
           cx="35.5"
           cy="14.5"
           r="4.2"
-          fill="url(#vyaparGoldGrad)"
+          fill={`url(#${id}-goldGrad)`}
           stroke="#FFFBEB"
           strokeWidth="0.8"
         />
@@ -224,7 +261,7 @@ export const VyaparIcon: React.FC<{ size?: number; className?: string }> = ({
           cy="14.5"
           r="1.8"
           fill="#FFFFFF"
-          fillOpacity="0.5"
+          fillOpacity="0.6"
         />
       </g>
     </svg>
@@ -244,14 +281,14 @@ export const VyaparLogo: React.FC<VyaparLogoProps> = ({
 
   const textColorClass = {
     'on-dark': 'text-white tracking-wide group-hover:text-emerald-50 transition-colors',
-    'on-light': 'text-gray-900 tracking-wide group-hover:text-emerald-900 transition-colors',
-    'monochrome': 'text-gray-900 tracking-wide',
+    'on-light': 'text-slate-900 tracking-wide group-hover:text-emerald-950 transition-colors font-bold',
+    'monochrome': 'text-slate-900 tracking-wide',
   }[variant];
 
   const subtitleColorClass = {
     'on-dark': 'text-emerald-400 font-semibold',
-    'on-light': 'text-[#0F7B5C] font-semibold',
-    'monochrome': 'text-gray-500 font-medium',
+    'on-light': 'text-emerald-700 font-semibold',
+    'monochrome': 'text-slate-600 font-medium',
   }[variant];
 
   const content = (
@@ -277,7 +314,7 @@ export const VyaparLogo: React.FC<VyaparLogoProps> = ({
       }
       aria-label="व्यापार Enterprise ERP"
     >
-      <VyaparIcon size={cfg.iconSize} />
+      <VyaparIcon size={cfg.iconSize} variant={variant} />
 
       {showText && (
         <div className="flex flex-col justify-center leading-none">
