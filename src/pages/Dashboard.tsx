@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { getDashboardSummary } from '../api/dashboard';
 import { getLowStockItems } from '../api/stock';
-import { getPartners } from '../api/partner';
+import { getPartners, getLiveProfitOverview } from '../api/partner';
 import { formatCurrency, formatDate, formatNumber } from '@/lib';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -177,6 +177,12 @@ export default function Dashboard() {
     queryFn: getPartners,
   });
 
+  const { data: liveProfitOverview } = useQuery({
+    queryKey: ['live-profit-overview'],
+    queryFn: getLiveProfitOverview,
+    refetchInterval: 20000, // Background sync every 20s
+  });
+
   const activePartners = useMemo(() => {
     return partners.filter((p) => p.isActive);
   }, [partners]);
@@ -212,7 +218,8 @@ export default function Dashboard() {
     );
   }
 
-  const lpd = data?.latestProfitDistribution;
+  const lpd = liveProfitOverview?.latestDistribution ?? data?.latestProfitDistribution;
+  const hasLivePartners = Boolean(liveProfitOverview?.partners && liveProfitOverview.partners.length > 0);
   const recentActivities = data?.recentActivities ?? [];
   const receivables = data?.totalReceivable ?? 0;
   const payables = data?.totalOutstanding ?? 0;
@@ -629,8 +636,122 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Latest Profit Distribution Banner */}
-      {lpd ? (
+      {/* Live / Latest Profit Sharing Banner */}
+      {hasLivePartners && liveProfitOverview ? (
+        <div className="bg-gradient-to-r from-slate-900 via-[#0a2720] to-[#0F7B5C] rounded-2xl shadow-xs border border-white/10 p-6 sm:p-7 text-white">
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <TrendingUp className="h-5 w-5 text-emerald-400" />
+                <h3 className="text-xl font-serif font-bold">Live Profit Sharing</h3>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  Continuous Cash Basis
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-300 mt-1">
+                Real-time profit distribution based on configured partner equity shares and cash flow collections.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {lpd && (
+                <span className="hidden md:inline text-[11px] text-gray-300">
+                  Last settled: {formatDate(lpd.fromDate)} – {formatDate(lpd.toDate)}
+                </span>
+              )}
+              <Link
+                to="/dashboard/profit-distribution"
+                className="text-xs text-amber-300 font-semibold hover:underline flex items-center gap-1 shrink-0"
+              >
+                Manage profit sharing →
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 pt-4 border-t border-white/10">
+            {[
+              { label: 'Total Collections', value: liveProfitOverview.totalMoneyReceived, color: 'text-emerald-300' },
+              { label: 'Total Purchases Paid', value: liveProfitOverview.totalMoneyPaid, color: 'text-rose-300' },
+              { label: 'Total Expenses', value: liveProfitOverview.totalExpenses, color: 'text-amber-300' },
+              {
+                label: 'Net Operating Profit',
+                value: liveProfitOverview.netProfit,
+                color: liveProfitOverview.netProfit >= 0 ? 'text-amber-400 font-serif' : 'text-rose-400 font-serif'
+              },
+            ].map(item => (
+              <div key={item.label}>
+                <p className="text-xs text-gray-300 uppercase tracking-wider">{item.label}</p>
+                <p className={`text-xl sm:text-2xl font-bold tabular-nums mt-1 ${item.color}`}>
+                  {formatCurrency(item.value)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {liveProfitOverview.partners.length > 0 && (
+            <div className="mt-5 pt-4 border-t border-white/10">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs uppercase tracking-wider text-gray-300 font-semibold flex items-center gap-2">
+                  <span>Partner Profit Shares (Live Allocation)</span>
+                  <span className="text-[10px] text-emerald-300/80 font-normal">
+                    ({liveProfitOverview.partners.filter(p => p.active).length} active)
+                  </span>
+                </p>
+                <Link
+                  to="/dashboard/partners"
+                  className="text-[11px] text-emerald-300/90 hover:text-emerald-200 hover:underline"
+                >
+                  Configure partner shares →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {liveProfitOverview.partners.map(p => (
+                  <div
+                    key={p.partnerPublicId}
+                    className="bg-white/10 backdrop-blur-xs rounded-xl p-3.5 border border-white/15 hover:border-emerald-400/30 transition-all flex flex-col justify-between"
+                  >
+                    <div className="flex items-start justify-between gap-1 mb-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-white truncate" title={p.partnerName}>
+                          {p.partnerName}
+                        </p>
+                        <p className="text-[10px] text-gray-300 font-mono">
+                          Share: {formatNumber(p.sharePercentage, { maximumFractionDigits: 2 })}%
+                        </p>
+                      </div>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${p.active ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'}`}>
+                        {p.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 pt-2 border-t border-white/10 text-xs">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-gray-300 text-[11px]">Earned Profit:</span>
+                        <span className={`font-bold tabular-nums ${p.totalEarnedProfit >= 0 ? 'text-amber-300' : 'text-rose-400'}`}>
+                          {formatCurrency(p.totalEarnedProfit)}
+                        </span>
+                      </div>
+                      {p.totalWithdrawnProfit > 0 && (
+                        <div className="flex justify-between items-baseline text-[11px]">
+                          <span className="text-gray-400">Withdrawn:</span>
+                          <span className="text-amber-400 tabular-nums">
+                            -{formatCurrency(p.totalWithdrawnProfit)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-baseline pt-1 border-t border-white/5">
+                        <span className="text-emerald-200/90 text-[11px] font-medium">Available:</span>
+                        <span className={`font-semibold tabular-nums ${p.remainingProfitAvailable >= 0 ? 'text-emerald-300' : 'text-rose-400'}`}>
+                          {formatCurrency(p.remainingProfitAvailable)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : lpd ? (
         <div className="bg-gradient-to-r from-slate-900 via-[#0a2720] to-[#0F7B5C] rounded-2xl shadow-xs border border-white/10 p-6 sm:p-7 text-white">
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -677,8 +798,19 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="bg-gradient-to-r from-slate-900 via-[#0a2720] to-[#0F7B5C] rounded-2xl shadow-xs border border-white/10 p-8 text-white flex flex-col items-center justify-center text-center">
+          <div className="p-3 rounded-2xl bg-white/10 mb-3 text-emerald-400">
+            <Calculator className="h-6 w-6" />
+          </div>
           <h3 className="text-xl font-serif font-bold mb-1.5">Latest Profit Sharing</h3>
-          <p className="text-gray-300 text-sm">No profit sharing recorded yet for this account.</p>
+          <p className="text-gray-300 text-sm max-w-md">
+            No partner profit sharing configured yet for this account. Configure partners and their profit share percentages to view live profit distribution.
+          </p>
+          <Link
+            to="/dashboard/partners"
+            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold border border-emerald-400/30 transition-colors shadow-2xs"
+          >
+            Configure Partners & Profit Shares →
+          </Link>
         </div>
       )}
     </div>
