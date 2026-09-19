@@ -22,3 +22,4 @@ export * from './ThemeToggle';
 export * from './WelcomeOverlay';
 export * from './CreateSupplierModal';
 export * from './CreateCustomerModal';
+export * from './DeveloperSignature';

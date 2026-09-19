@@ -23,12 +23,63 @@ import {
   Pin,
   ShieldCheck,
   TrendingUp,
+  GripVertical,
+  RotateCcw,
+  Lock,
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { cn } from '@/lib/cn';
-import { VyaparLogo } from '../components/VyaparLogo';
+import { VyaparLogo, VyaparIcon } from '../components/VyaparLogo';
+import { DeveloperSignature } from '../components/DeveloperSignature';
 import { ThemeToggle } from '../components/ThemeToggle';
+
+export interface NavItemConfig {
+  name: string;
+  href: string;
+  icon: any;
+}
+
+const CLIENT_FIXED_TOP: NavItemConfig[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+];
+
+const CLIENT_MOVEABLE_DEFAULT: NavItemConfig[] = [
+  { name: 'Sales', href: '/dashboard/sales', icon: Receipt },
+  { name: 'Customer Payments', href: '/dashboard/sale-payments', icon: Wallet },
+  { name: 'Customers', href: '/dashboard/customers', icon: Users },
+  { name: 'Purchases', href: '/dashboard/purchases', icon: ShoppingCart },
+  { name: 'Supplier Payments', href: '/dashboard/purchase-payments', icon: CreditCard },
+  { name: 'Suppliers', href: '/dashboard/suppliers', icon: UserSquare2 },
+  { name: 'Inventory & Stock', href: '/dashboard/stock', icon: Package },
+  { name: 'Stock History', href: '/dashboard/stock-transactions', icon: ArrowRightLeft },
+  { name: 'Expenses', href: '/dashboard/expenses', icon: Landmark },
+];
+
+const CLIENT_FIXED_BOTTOM: NavItemConfig[] = [
+  { name: 'Reports', href: '/dashboard/reports', icon: PieChart },
+  { name: 'Partners', href: '/dashboard/partners', icon: UserPlus },
+  { name: 'Investments', href: '/dashboard/investments', icon: TrendingUp },
+  { name: 'Profit Sharing', href: '/dashboard/profit-distribution', icon: Wallet },
+];
+
+const ADMIN_FIXED_TOP: NavItemConfig[] = [
+  { name: 'Platform Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+];
+
+const ADMIN_MOVEABLE_DEFAULT: NavItemConfig[] = [
+  { name: 'Client Management', href: '/admin/clients', icon: Users },
+  { name: 'Global Sales', href: '/admin/sales', icon: Receipt },
+  { name: 'Global Purchases', href: '/admin/purchases', icon: ShoppingCart },
+  { name: 'Global Payments', href: '/admin/payments', icon: Wallet },
+  { name: 'Global Inventory', href: '/admin/inventory', icon: Package },
+  { name: 'Global Expenses', href: '/admin/expenses', icon: Landmark },
+];
+
+const ADMIN_FIXED_BOTTOM: NavItemConfig[] = [
+  { name: 'Platform Reports', href: '/admin/reports', icon: PieChart },
+  { name: 'System Health', href: '/admin/system', icon: ShieldCheck },
+];
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -86,37 +137,129 @@ export default function DashboardLayout() {
     navigate('/login');
   };
 
-  const clientNavigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Customers', href: '/dashboard/customers', icon: Users },
-    { name: 'Suppliers', href: '/dashboard/suppliers', icon: UserSquare2 },
-    { name: 'Inventory & Stock', href: '/dashboard/stock', icon: Package },
-    { name: 'Stock History', href: '/dashboard/stock-transactions', icon: ArrowRightLeft },
-    { name: 'Purchases', href: '/dashboard/purchases', icon: ShoppingCart },
-    { name: 'Supplier Payments', href: '/dashboard/purchase-payments', icon: CreditCard },
-    { name: 'Sales', href: '/dashboard/sales', icon: Receipt },
-    { name: 'Customer Payments', href: '/dashboard/sale-payments', icon: Wallet },
-    { name: 'Expenses', href: '/dashboard/expenses', icon: Landmark },
-    { name: 'Reports', href: '/dashboard/reports', icon: PieChart },
-    { name: 'Partners', href: '/dashboard/partners', icon: UserPlus },
-    { name: 'Investments', href: '/dashboard/investments', icon: TrendingUp },
-    { name: 'Profit Sharing', href: '/dashboard/profit-distribution', icon: Wallet },
-  ];
+  const userIdentifier = user?.publicId || user?.email || user?.userName || 'user';
+  const role = user?.role || 'CLIENT';
+  const storageKey = `vyapar_sidebar_priority_tabs_${role}_${userIdentifier}`;
 
-  const adminNavigation = [
-    { name: 'Platform Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Client Management', href: '/admin/clients', icon: Users },
-    { name: 'Global Sales', href: '/admin/sales', icon: Receipt },
-    { name: 'Global Purchases', href: '/admin/purchases', icon: ShoppingCart },
-    { name: 'Global Payments', href: '/admin/payments', icon: Wallet },
-    { name: 'Global Inventory', href: '/admin/inventory', icon: Package },
-    { name: 'Global Expenses', href: '/admin/expenses', icon: Landmark },
-    { name: 'Platform Reports', href: '/admin/reports', icon: PieChart },
-    { name: 'System Health', href: '/admin/system', icon: ShieldCheck },
-  ];
+  const defaultMoveable = role === 'ADMIN' ? ADMIN_MOVEABLE_DEFAULT : CLIENT_MOVEABLE_DEFAULT;
+  const fixedTop = role === 'ADMIN' ? ADMIN_FIXED_TOP : CLIENT_FIXED_TOP;
+  const fixedBottom = role === 'ADMIN' ? ADMIN_FIXED_BOTTOM : CLIENT_FIXED_BOTTOM;
 
-  const navigation = user?.role === 'ADMIN' ? adminNavigation : clientNavigation;
-  const defaultHome = user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
+  const loadSavedMoveable = (): NavItemConfig[] => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const savedHrefs: string[] = JSON.parse(saved);
+        if (Array.isArray(savedHrefs)) {
+          const ordered: NavItemConfig[] = [];
+          savedHrefs.forEach((href) => {
+            const item = defaultMoveable.find((m) => m.href === href);
+            if (item) ordered.push(item);
+          });
+          defaultMoveable.forEach((item) => {
+            if (!ordered.some((o) => o.href === item.href)) {
+              ordered.push(item);
+            }
+          });
+          if (ordered.length === defaultMoveable.length) {
+            return ordered;
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return defaultMoveable;
+  };
+
+  const [moveableTabs, setMoveableTabs] = useState<NavItemConfig[]>(loadSavedMoveable);
+
+  useEffect(() => {
+    setMoveableTabs(loadSavedMoveable());
+  }, [storageKey, role]);
+
+  const resetMoveableTabs = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    setMoveableTabs(defaultMoveable);
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      // ignore
+    }
+  };
+
+  const isCustomized = moveableTabs.some((t, i) => t.href !== defaultMoveable[i]?.href);
+
+  // Drag and drop state
+  const isDraggingRef = useRef(false);
+  const draggedIndexRef = useRef<number | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    isDraggingRef.current = true;
+    draggedIndexRef.current = index;
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const sourceIndex = draggedIndexRef.current ?? draggedIndex;
+    if (sourceIndex === null || sourceIndex === targetIndex) {
+      draggedIndexRef.current = null;
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const next = [...moveableTabs];
+    const [moved] = next.splice(sourceIndex, 1);
+    next.splice(targetIndex, 0, moved);
+
+    setMoveableTabs(next);
+    draggedIndexRef.current = null;
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next.map((t) => t.href)));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleDragEnd = () => {
+    draggedIndexRef.current = null;
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 150);
+  };
+
+  const handleTabClick = (e: React.MouseEvent, href: string) => {
+    if (isDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    navigate(href);
+  };
+
+  const defaultHome = role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
 
   return (
     <div className="min-h-screen bg-[var(--color-surface-bg)]">
@@ -143,8 +286,9 @@ export default function DashboardLayout() {
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="mt-6 flex flex-col gap-1.5 h-[calc(100vh-120px)] overflow-y-auto pb-safe">
-            {navigation.map((item) => {
+          <nav className="mt-6 flex flex-col gap-1 h-[calc(100vh-120px)] overflow-y-auto pb-safe">
+            {/* ── Section 1: Dashboard (Fixed Top) ── */}
+            {fixedTop.map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <NavLink
@@ -152,7 +296,116 @@ export default function DashboardLayout() {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "group flex items-center min-h-[44px] rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all active:scale-[0.98]",
+                    "group flex items-center min-h-[40px] rounded-xl px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]",
+                    isActive ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40" : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  )}
+                >
+                  <item.icon className={cn("mr-3 h-5 w-5 flex-shrink-0", isActive ? "text-white" : "text-gray-400 group-hover:text-white")} />
+                  <span className="truncate">{item.name}</span>
+                </NavLink>
+              );
+            })}
+
+            {/* ── Section Divider: Dashboard -> Priority Tabs ── */}
+            <div className="my-2 border-t border-slate-700/80 mx-1" />
+
+            {/* ── Section 2: Priority Tabs Header ── */}
+            <div className="flex items-center justify-between px-3 pt-1 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span>Priority Tabs</span>
+              </div>
+              {isCustomized && (
+                <button
+                  type="button"
+                  onClick={resetMoveableTabs}
+                  className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-emerald-400 transition-colors py-0.5 px-1.5 rounded hover:bg-slate-800"
+                  title="Reset priority tabs"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
+
+            {/* ── Section 2: Priority Tabs List (with Six-Dot Drag Handle) ── */}
+            <div
+              className="flex flex-col gap-1"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+              }}
+              onDrop={(e) => {
+                if (e.target === e.currentTarget && draggedIndexRef.current !== null) {
+                  handleDrop(e, moveableTabs.length - 1);
+                }
+              }}
+            >
+              {moveableTabs.map((item, index) => {
+                const isActive = location.pathname === item.href;
+                const isBeingDragged = draggedIndex === index;
+                const isDragOver = dragOverIndex === index && draggedIndex !== index;
+                const isOverAbove = isDragOver && index < (draggedIndex ?? 0);
+                const isOverBelow = isDragOver && index > (draggedIndex ?? 0);
+
+                return (
+                  <div
+                    key={item.name}
+                    role="button"
+                    tabIndex={0}
+                    draggable={true}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onClick={(e) => {
+                      handleTabClick(e, item.href);
+                      if (!isDraggingRef.current) setSidebarOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSidebarOpen(false);
+                        navigate(item.href);
+                      }
+                    }}
+                    className={cn(
+                      "group flex items-center min-h-[40px] rounded-xl px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] select-none cursor-grab active:cursor-grabbing",
+                      isActive ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40" : "text-gray-300 hover:bg-gray-800 hover:text-white",
+                      isBeingDragged && "opacity-40 scale-[0.98] ring-1 ring-dashed ring-emerald-400",
+                      isOverAbove && "border-t-2 border-emerald-400 bg-emerald-950/30",
+                      isOverBelow && "border-b-2 border-emerald-400 bg-emerald-950/30"
+                    )}
+                  >
+                    <item.icon className={cn("mr-2.5 h-5 w-5 flex-shrink-0 pointer-events-none", isActive ? "text-white" : "text-gray-400 group-hover:text-white")} />
+                    <GripVertical className="mr-1.5 h-4 w-4 text-slate-400 group-hover:text-emerald-300 shrink-0 pointer-events-none" aria-hidden="true" />
+                    <span className="truncate pointer-events-none">{item.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Section Divider: Priority Tabs -> Fixed Tabs ── */}
+            <div className="my-2 border-t border-slate-700/80 mx-1" />
+
+            {/* ── Section 3: Fixed Tabs Header ── */}
+            <div className="flex items-center justify-between px-3 pt-1 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              <div className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 text-slate-500" />
+                <span>Fixed Tabs</span>
+              </div>
+            </div>
+
+            {/* ── Section 3: Fixed Tabs List (No Drag Handle) ── */}
+            {fixedBottom.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={cn(
+                    "group flex items-center min-h-[40px] rounded-xl px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]",
                     isActive ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40" : "text-gray-300 hover:bg-gray-800 hover:text-white"
                   )}
                 >
@@ -221,63 +474,235 @@ export default function DashboardLayout() {
         </div>
 
         {/* Navigation items */}
-        <div className="mt-5 flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+        <div className="mt-3 flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           <nav
             className={cn(
-              "flex-1 space-y-1 pb-8 transition-all duration-300",
+              "flex-1 space-y-0.5 pb-6 transition-all duration-300",
               isEffectiveExpanded ? "px-3" : "px-2"
             )}
           >
-            {navigation.map((item) => {
+            {/* ── Fixed Top Tabs ── */}
+            {fixedTop.map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <NavLink
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "group relative flex items-center rounded-xl text-sm font-medium transition-all duration-200 mb-1",
-                    isEffectiveExpanded ? "px-3.5 py-2.5" : "px-0 py-2.5 justify-center",
+                    "group relative flex items-center rounded-xl text-sm font-medium transition-all duration-200 my-0.5",
+                    isEffectiveExpanded ? "px-3 py-2" : "px-0 py-2 justify-center",
                     isActive
                       ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40"
                       : "text-slate-300 hover:bg-slate-800/90 hover:text-white"
                   )}
                   title={!isEffectiveExpanded ? item.name : undefined}
                 >
-                  {/* Distinct active indicator pill */}
                   {isActive && (
                     <span
                       className={cn(
                         "absolute rounded-full bg-emerald-400 transition-all duration-300",
                         isEffectiveExpanded
-                          ? "left-0 top-2 bottom-2 w-1 rounded-r-full"
-                          : "left-1 top-2 bottom-2 w-1 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                          ? "left-0 top-1.5 bottom-1.5 w-1 rounded-r-full"
+                          : "left-1 top-1.5 bottom-1.5 w-1 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
                       )}
                     />
                   )}
-
-                  {/* Icon with hover micro-scale */}
                   <item.icon
                     className={cn(
                       "h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110",
-                      isActive
-                        ? "text-white"
-                        : "text-slate-400 group-hover:text-emerald-300"
+                      isActive ? "text-white" : "text-slate-400 group-hover:text-emerald-300"
                     )}
                   />
-
-                  {/* Tab label smoothly revealed on expansion */}
                   <span
                     className={cn(
                       "whitespace-nowrap overflow-hidden transition-all duration-300 ease-out font-medium",
                       isEffectiveExpanded
-                        ? "ml-3.5 opacity-100 max-w-xs"
+                        ? "ml-3 opacity-100 max-w-xs"
                         : "ml-0 opacity-0 max-w-0 pointer-events-none"
                     )}
                   >
                     {item.name}
                   </span>
+                  {isEffectiveExpanded && !isActive && (
+                    <span className="ml-auto opacity-0 group-hover:opacity-100 text-emerald-400 text-xs transition-opacity duration-150 pr-1">
+                      →
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })}
 
-                  {/* Subtle right indicator on hover when expanded */}
+            {/* ── Section Divider: Dashboard -> Priority Tabs ── */}
+            <div className="my-2 border-t border-slate-700/80 mx-1" />
+
+            {/* ── Section 2: Priority Tabs Header ── */}
+            {isEffectiveExpanded ? (
+              <div className="flex items-center justify-between px-2.5 pt-1 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span>Priority Tabs</span>
+                </div>
+                {isCustomized && (
+                  <button
+                    type="button"
+                    onClick={resetMoveableTabs}
+                    className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer py-0.5 px-1.5 rounded hover:bg-slate-800"
+                    title="Reset priority tabs to default order"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    <span>Reset</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="my-1.5 border-t border-slate-700/80 mx-2" />
+            )}
+
+            {/* ── Section 2: Priority Tabs List (Drag-and-Drop Only) ── */}
+            <div
+              className="space-y-0.5"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+              }}
+              onDrop={(e) => {
+                if (e.target === e.currentTarget && draggedIndexRef.current !== null) {
+                  handleDrop(e, moveableTabs.length - 1);
+                }
+              }}
+            >
+              {moveableTabs.map((item, index) => {
+                const isActive = location.pathname === item.href;
+                const isBeingDragged = draggedIndex === index;
+                const isDragOver = dragOverIndex === index && draggedIndex !== index;
+                const isOverAbove = isDragOver && index < (draggedIndex ?? 0);
+                const isOverBelow = isDragOver && index > (draggedIndex ?? 0);
+
+                return (
+                  <div
+                    key={item.name}
+                    role="button"
+                    tabIndex={0}
+                    draggable={true}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onClick={(e) => handleTabClick(e, item.href)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(item.href);
+                      }
+                    }}
+                    className={cn(
+                      "group relative flex items-center rounded-xl text-sm font-medium transition-all duration-200 my-0.5 select-none cursor-grab active:cursor-grabbing",
+                      isEffectiveExpanded ? "px-3 py-2" : "px-0 py-2 justify-center",
+                      isActive
+                        ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40"
+                        : "text-slate-300 hover:bg-slate-800/90 hover:text-white",
+                      isBeingDragged && "opacity-40 scale-[0.98] ring-1 ring-dashed ring-emerald-400",
+                      isOverAbove && "border-t-2 border-emerald-400 bg-emerald-950/30",
+                      isOverBelow && "border-b-2 border-emerald-400 bg-emerald-950/30"
+                    )}
+                    title={!isEffectiveExpanded ? item.name : undefined}
+                  >
+                    {isActive && (
+                      <span
+                        className={cn(
+                          "absolute rounded-full bg-emerald-400 transition-all duration-300 pointer-events-none",
+                          isEffectiveExpanded
+                            ? "left-0 top-1.5 bottom-1.5 w-1 rounded-r-full"
+                            : "left-1 top-1.5 bottom-1.5 w-1 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                        )}
+                      />
+                    )}
+
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 pointer-events-none",
+                        isActive ? "text-white" : "text-slate-400 group-hover:text-emerald-300"
+                      )}
+                    />
+
+                    {isEffectiveExpanded && (
+                      <div className="flex items-center gap-2 ml-2.5 min-w-0 flex-1 pointer-events-none">
+                        {/* Drag Handle Indicator beside tab name */}
+                        <span title="Click and drag to reorder priority tab" className="inline-flex items-center">
+                          <GripVertical
+                            className="h-4 w-4 text-slate-400 group-hover:text-emerald-300 shrink-0 transition-colors"
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <span className="truncate font-medium">{item.name}</span>
+                      </div>
+                    )}
+
+                    {isEffectiveExpanded && !isActive && (
+                      <span className="ml-auto opacity-0 group-hover:opacity-100 text-emerald-400 text-xs transition-opacity duration-150 pr-1 pointer-events-none">
+                        →
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Section Divider: Priority Tabs -> Fixed Tabs ── */}
+            <div className="my-2 border-t border-slate-700/80 mx-1" />
+
+            {/* ── Section 3: Fixed Tabs Header ── */}
+            {isEffectiveExpanded && (
+              <div className="flex items-center justify-between px-2.5 pt-1 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                <div className="flex items-center gap-1.5">
+                  <Lock className="h-3 w-3 text-slate-500" />
+                  <span>Fixed Tabs</span>
+                </div>
+              </div>
+            )}
+
+            {/* ── Section 3: Fixed Tabs List (No Drag Handle, Non-Movable) ── */}
+            {fixedBottom.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  className={cn(
+                    "group relative flex items-center rounded-xl text-sm font-medium transition-all duration-200 my-0.5",
+                    isEffectiveExpanded ? "px-3 py-2" : "px-0 py-2 justify-center",
+                    isActive
+                      ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40"
+                      : "text-slate-300 hover:bg-slate-800/90 hover:text-white"
+                  )}
+                  title={!isEffectiveExpanded ? item.name : undefined}
+                >
+                  {isActive && (
+                    <span
+                      className={cn(
+                        "absolute rounded-full bg-emerald-400 transition-all duration-300",
+                        isEffectiveExpanded
+                          ? "left-0 top-1.5 bottom-1.5 w-1 rounded-r-full"
+                          : "left-1 top-1.5 bottom-1.5 w-1 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                      )}
+                    />
+                  )}
+                  <item.icon
+                    className={cn(
+                      "h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110",
+                      isActive ? "text-white" : "text-slate-400 group-hover:text-emerald-300"
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "whitespace-nowrap overflow-hidden transition-all duration-300 ease-out font-medium",
+                      isEffectiveExpanded
+                        ? "ml-3 opacity-100 max-w-xs"
+                        : "ml-0 opacity-0 max-w-0 pointer-events-none"
+                    )}
+                  >
+                    {item.name}
+                  </span>
                   {isEffectiveExpanded && !isActive && (
                     <span className="ml-auto opacity-0 group-hover:opacity-100 text-emerald-400 text-xs transition-opacity duration-150 pr-1">
                       →
@@ -427,10 +852,11 @@ export default function DashboardLayout() {
                 <button
                   type="button"
                   onClick={() => navigate(defaultHome)}
-                  className="font-devanagari font-bold text-gray-900 dark:text-slate-100 text-lg tracking-wide hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 font-devanagari font-bold text-gray-900 dark:text-slate-100 text-lg tracking-wide hover:text-[var(--color-primary)] transition-colors cursor-pointer group"
                   title="व्यापार Dashboard"
                 >
-                  व्यापार
+                  <VyaparIcon size={24} variant={theme === 'dark' ? 'on-dark' : 'on-light'} className="shrink-0" />
+                  <span>व्यापार</span>
                 </button>
                 <span className="text-gray-300 dark:text-slate-600">/</span>
                 <span className="font-medium text-gray-600 dark:text-slate-300 capitalize">
@@ -595,6 +1021,22 @@ export default function DashboardLayout() {
         <main className="flex-1 p-3.5 sm:p-5 lg:p-8">
           <Outlet />
         </main>
+
+        {/* Enterprise System Footer */}
+        <footer className="mt-auto border-t border-gray-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-[#0c121e]/60 backdrop-blur-xs px-4 sm:px-6 lg:px-8 py-3 transition-colors">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+              <span className="font-semibold text-gray-700 dark:text-slate-200">व्यापार</span>
+              <span className="text-gray-300 dark:text-slate-700">•</span>
+              <span>Enterprise ERP &amp; Finance Management</span>
+              <span className="hidden md:inline text-gray-300 dark:text-slate-700">•</span>
+              <span className="hidden md:inline text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Production Architecture</span>
+            </div>
+            <div className="shrink-0">
+              <DeveloperSignature />
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
 

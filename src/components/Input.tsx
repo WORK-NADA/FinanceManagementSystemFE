@@ -66,7 +66,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <span className="pointer-events-none absolute right-3 text-[var(--color-text-muted)]">
+            <span className="pointer-events-none [&_button]:pointer-events-auto [&_button]:cursor-pointer [&_a]:pointer-events-auto absolute right-3 text-[var(--color-text-muted)] flex items-center">
               {rightIcon}
             </span>
           )}
