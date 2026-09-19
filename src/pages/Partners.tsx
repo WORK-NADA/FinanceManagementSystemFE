@@ -126,6 +126,7 @@ export default function Partners() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partners'] });
       queryClient.invalidateQueries({ queryKey: ['live-profit-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
       handleCloseModal();
       toast.success(editingPartner ? 'Partner updated successfully.' : 'Partner added successfully.');
     },
@@ -138,6 +139,7 @@ export default function Partners() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['partners'] });
       queryClient.invalidateQueries({ queryKey: ['live-profit-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
       handleCloseConfirmModal();
       toast.success(variables.action === 'deactivate' ? 'Partner deactivated.' : 'Partner reactivated.');
     },
