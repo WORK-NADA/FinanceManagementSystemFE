@@ -650,8 +650,41 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
       ) : filteredSales.length === 0 ? (
         <FilteredEmptyState message="No sales transactions match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full min-w-[640px] text-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredSales.map(s => (
+              <div key={s.publicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-semibold text-blue-700 dark:text-sky-300 bg-blue-50/80 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200/80 dark:border-blue-800/50">
+                    {s.saleNumber || '—'}
+                  </span>
+                  <Badge variant={(s.paymentStatus === 'PAID' || s.paymentStatus === 'COMPLETED') ? 'success' : s.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
+                    {(s.paymentStatus === 'PAID' || s.paymentStatus === 'COMPLETED') ? 'Fully Paid' : s.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{s.customerName}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    <span>{formatDate(s.saleDate)}</span>
+                    {s.rawMaterial && <span className="font-medium text-gray-700 dark:text-slate-300 truncate max-w-[140px]">{s.rawMaterial}</span>}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-[#1E293B]">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Total Amount</span>
+                  <span className="text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-400">{formatCurrency(s.totalAmount)}</span>
+                </div>
+              </div>
+            ))}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total ({formatNumber(filteredSales.length)} sales):</span>
+              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">{formatCurrency(totalFilteredValue)}</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+            <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Date',
@@ -693,6 +726,7 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -887,7 +921,40 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
       ) : filteredPurchases.length === 0 ? (
         <FilteredEmptyState message="No purchase bills match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredPurchases.map(p => (
+              <div key={p.publicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-semibold text-blue-700 dark:text-sky-300 bg-blue-50/80 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200/80 dark:border-blue-800/50">
+                    {p.purchaseNumber || '—'}
+                  </span>
+                  <Badge variant={(p.paymentStatus === 'PAID' || p.paymentStatus === 'COMPLETED') ? 'success' : p.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
+                    {(p.paymentStatus === 'PAID' || p.paymentStatus === 'COMPLETED') ? 'Fully Paid' : p.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{p.supplierName}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    <span>{formatDate(p.purchaseDate)}</span>
+                    {p.rawMaterial && <span className="font-medium text-gray-700 dark:text-slate-300 truncate max-w-[140px]">{p.rawMaterial}</span>}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-[#1E293B]">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Total Purchases Cost</span>
+                  <span className="text-sm font-bold tabular-nums text-rose-700 dark:text-rose-400">{formatCurrency(p.totalAmount)}</span>
+                </div>
+              </div>
+            ))}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total ({formatNumber(filteredPurchases.length)} bills):</span>
+              <span className="text-sm font-bold text-rose-700 dark:text-rose-400 tabular-nums">{formatCurrency(totalFilteredCost)}</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
@@ -930,6 +997,7 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -1093,7 +1161,38 @@ function ExpensesTab({ startDate, endDate }: { startDate: string; endDate: strin
       ) : filteredExpenses.length === 0 ? (
         <FilteredEmptyState message="No expenses match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredExpenses.map(e => (
+              <div key={e.publicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-semibold text-blue-700 dark:text-sky-300 bg-blue-50/80 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200/80 dark:border-blue-800/50">
+                    {e.expenseNumber || '—'}
+                  </span>
+                  <Badge variant="default" className="text-[10px]">{e.category ? e.category.replace(/_/g, ' ') : 'OTHER'}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
+                  <span>{formatDate(e.expenseDate)}</span>
+                  <span className="font-mono">{e.paymentMode ? e.paymentMode.replace(/_/g, ' ') : '—'}</span>
+                </div>
+                {e.description && (
+                  <p className="text-xs text-gray-600 dark:text-slate-300 pt-1 border-t border-gray-100 dark:border-[#1E293B] truncate">{e.description}</p>
+                )}
+                <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-[#1E293B]">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Expense Amount</span>
+                  <span className="text-sm font-bold tabular-nums text-rose-700 dark:text-rose-400">{formatCurrency(e.amount)}</span>
+                </div>
+              </div>
+            ))}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total ({formatNumber(filteredExpenses.length)} records):</span>
+              <span className="text-sm font-bold text-rose-700 dark:text-rose-400 tabular-nums">{formatCurrency(totalFilteredAmount)}</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
@@ -1138,6 +1237,7 @@ function ExpensesTab({ startDate, endDate }: { startDate: string; endDate: strin
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -1348,8 +1448,63 @@ function StockTab() {
       ) : filteredStocks.length === 0 ? (
         <FilteredEmptyState message="No stock items match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full min-w-[700px] text-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredStocks.map(s => {
+              const status = s.stockStatus ?? (s.currentQuantity <= s.minimumStockLevel ? 'LOW_STOCK' : 'HEALTHY');
+              return (
+                <div key={s.publicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{s.rawMaterial}</span>
+                    {status === 'HEALTHY' && (
+                      <Badge variant="success" className="gap-1 text-[10px]">
+                        <CheckCircle2 className="h-3 w-3" /> In Stock
+                      </Badge>
+                    )}
+                    {status === 'LOW_STOCK' && (
+                      <Badge variant="warning" className="gap-1 text-[10px]">
+                        <AlertTriangle className="h-3 w-3" /> Low Stock
+                      </Badge>
+                    )}
+                    {status === 'OUT_OF_STOCK' && (
+                      <Badge variant="danger" className="gap-1 text-[10px]">
+                        <ShieldAlert className="h-3 w-3" /> Out of Stock
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Current Stock</span>
+                      <span className="font-bold tabular-nums text-gray-900 dark:text-slate-100">
+                        {formatNumber(s.currentQuantity)} <span className="text-gray-500 font-normal">{s.unit}</span>
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Min Safe Level</span>
+                      <span className="tabular-nums font-semibold text-gray-700 dark:text-slate-300">
+                        {formatNumber(s.minimumStockLevel)} <span className="text-gray-500 font-normal">{s.unit}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-1 text-xs">
+                    <span className="text-gray-500 dark:text-slate-400">Total Value</span>
+                    <span className="font-bold tabular-nums text-blue-700 dark:text-sky-400 text-sm">
+                      {formatCurrency(s.totalValuation ?? 0)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total Portfolio Value:</span>
+              <span className="text-sm font-bold text-blue-800 dark:text-sky-400 tabular-nums">{formatCurrency(totalPortfolioValuation)}</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+            <table className="w-full min-w-[700px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Item / Material Name',
@@ -1416,6 +1571,7 @@ function StockTab() {
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -1630,8 +1786,49 @@ function CustomerOutstandingTab() {
       ) : filteredCustomers.length === 0 ? (
         <FilteredEmptyState message="No customers match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full min-w-[660px] text-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredCustomers.map(c => (
+              <div key={c.customerPublicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{c.customerName}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                      {c.mobileNumber || '—'}{c.city ? ` • ${c.city}` : ''}
+                    </p>
+                  </div>
+                  {c.lastTransactionDate && (
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 shrink-0 font-mono">
+                      {formatDate(c.lastTransactionDate)}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Total Invoiced</span>
+                    <span className="font-semibold text-gray-700 dark:text-slate-300 tabular-nums">{formatCurrency(c.totalInvoiced ?? 0)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Collected</span>
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums">{formatCurrency(c.totalReceived ?? 0)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-[#1E293B]">
+                  <span className="text-xs font-semibold text-rose-800 dark:text-rose-400">Remaining to Collect</span>
+                  <span className="text-base font-bold tabular-nums text-rose-700 dark:text-rose-400">{formatCurrency(c.outstandingAmount)}</span>
+                </div>
+              </div>
+            ))}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total Unpaid ({formatNumber(filteredCustomers.length)} customers):</span>
+              <span className="text-sm font-bold text-rose-700 dark:text-rose-400 tabular-nums">{formatCurrency(totalOutstanding)}</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+            <table className="w-full min-w-[660px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Customer Name',
@@ -1674,6 +1871,7 @@ function CustomerOutstandingTab() {
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -1888,7 +2086,48 @@ function SupplierOutstandingTab() {
       ) : filteredSuppliers.length === 0 ? (
         <FilteredEmptyState message="No suppliers match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredSuppliers.map(s => (
+              <div key={s.supplierPublicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{s.supplierName}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                      {s.mobileNumber || '—'}{s.city ? ` • ${s.city}` : ''}
+                    </p>
+                  </div>
+                  {s.lastTransactionDate && (
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 shrink-0 font-mono">
+                      {formatDate(s.lastTransactionDate)}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-2 bg-gray-50/80 dark:bg-[#0E141E] p-2.5 rounded-xl border border-gray-100 dark:border-[#1E293B] text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Total Billed</span>
+                    <span className="font-semibold text-gray-700 dark:text-slate-300 tabular-nums">{formatCurrency(s.totalBilled ?? 0)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 block">Paid</span>
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums">{formatCurrency(s.totalPaid ?? 0)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-[#1E293B]">
+                  <span className="text-xs font-semibold text-rose-800 dark:text-rose-400">Remaining to Pay</span>
+                  <span className="text-base font-bold tabular-nums text-rose-700 dark:text-rose-400">{formatCurrency(s.outstandingAmount)}</span>
+                </div>
+              </div>
+            ))}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total Unpaid ({formatNumber(filteredSuppliers.length)} suppliers):</span>
+              <span className="text-sm font-bold text-rose-700 dark:text-rose-400 tabular-nums">{formatCurrency(totalOutstanding)}</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
           <table className="w-full min-w-[660px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
@@ -1932,6 +2171,7 @@ function SupplierOutstandingTab() {
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );
@@ -2131,8 +2371,48 @@ function PartnerEquityTab() {
       ) : filteredPartners.length === 0 ? (
         <FilteredEmptyState message="No partners match the selected secondary filters." onClear={handleResetFilters} />
       ) : (
-        <div className="overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
-          <table className="w-full min-w-[640px] text-sm">
+        <>
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredPartners.map(p => (
+              <div key={p.publicId} className="bg-white dark:bg-[#141A24] p-3.5 rounded-2xl border border-gray-200/90 dark:border-[#1F2837] shadow-xs space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{p.partnerName}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                      {p.mobileNumber}{p.email ? ` • ${p.email}` : ''}
+                    </p>
+                  </div>
+                  <Badge variant={p.isActive ? 'success' : 'default'} className="shrink-0 text-[10px]">
+                    {p.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+                <div className="space-y-1 pt-1">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-500 dark:text-slate-400">Profit Share:</span>
+                    <span className="font-bold text-blue-700 dark:text-sky-400 tabular-nums">{p.sharePercentage.toFixed(2)}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-gray-100 dark:bg-[#222D3D] rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${p.isActive ? 'bg-blue-600' : 'bg-gray-300'} rounded-full`} 
+                      style={{ width: `${Math.min(100, p.sharePercentage)}%` }} 
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-[#1E293B] text-[11px] text-gray-400">
+                  <span>Joined {formatDate(p.joiningDate)}</span>
+                </div>
+              </div>
+            ))}
+            <div className="p-3.5 bg-gray-50 dark:bg-[#0E131C] rounded-xl border border-gray-200 dark:border-[#1F2837] flex justify-between items-center text-xs font-semibold">
+              <span className="text-gray-700 dark:text-slate-300">Total Allocated ({formatNumber(filteredPartners.length)} partners):</span>
+              <span className={`text-sm font-bold tabular-nums ${isFullyAllocated ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}`}>{totalAllocatedPercentage.toFixed(2)}%</span>
+            </div>
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#1F2837] bg-white dark:bg-[#141A24] shadow-sm">
+            <table className="w-full min-w-[640px] text-sm">
             <thead className="header-bar-offwhite border-b border-gray-200 dark:border-[#1F2837]">
               <tr>{[
                 'Partner Name',
@@ -2188,6 +2468,7 @@ function PartnerEquityTab() {
             </tfoot>
           </table>
         </div>
+        </>
       )}
     </div>
   );

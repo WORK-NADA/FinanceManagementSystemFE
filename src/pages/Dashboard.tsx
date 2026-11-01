@@ -70,12 +70,12 @@ function QuickActionDock() {
           <Link
             key={act.label}
             to={act.to}
-            className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200/80 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/50 text-xs font-medium text-gray-700 dark:text-slate-300 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 hover:text-emerald-950 dark:hover:text-emerald-300 transition-all duration-200 hover:shadow-xs hover:-translate-y-0.5"
+            className="group flex items-center gap-2 px-2.5 sm:px-3 py-2.5 min-h-[44px] rounded-xl border border-gray-200/80 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/50 text-xs font-medium text-gray-700 dark:text-slate-300 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 hover:text-emerald-950 dark:hover:text-emerald-300 transition-all duration-200 hover:shadow-xs hover:-translate-y-0.5 active:scale-[0.98]"
           >
             <span className="transition-transform duration-200 group-hover:scale-110 shrink-0">
               {act.icon}
             </span>
-            <span className="truncate">{act.label}</span>
+            <span className="truncate text-[11px] sm:text-xs leading-tight font-medium">{act.label}</span>
           </Link>
         ))}
       </div>
