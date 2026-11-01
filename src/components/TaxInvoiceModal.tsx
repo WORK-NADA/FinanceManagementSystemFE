@@ -168,7 +168,7 @@ export function TaxInvoiceModal({ isOpen, onClose, sale }: TaxInvoiceModalProps)
                 <span className="font-semibold text-slate-700 dark:text-slate-300 print:text-gray-800">Payment Status:</span>
                 <Badge
                   variant={
-                    sale.paymentStatus === 'PAID'
+                    sale.paymentStatus === 'PAID' || sale.paymentStatus === 'COMPLETED'
                       ? 'success'
                       : sale.paymentStatus === 'PARTIALLY_PAID'
                       ? 'warning'

@@ -53,11 +53,11 @@ export const getAdminDashboardStats = async (): Promise<AdminDashboardStats> => 
 
     // Approximate collected / paid from statuses
     const totalPaymentsReceived = sales
-      .filter((s) => s.paymentStatus === 'PAID')
+      .filter((s) => s.paymentStatus === 'PAID' || s.paymentStatus === 'COMPLETED')
       .reduce((acc, s) => acc + (Number(s.totalAmount) || 0), 0);
 
     const totalPaymentsMade = purchases
-      .filter((p) => p.paymentStatus === 'PAID')
+      .filter((p) => p.paymentStatus === 'PAID' || p.paymentStatus === 'COMPLETED')
       .reduce((acc, p) => acc + (Number(p.totalAmount) || 0), 0);
 
     const totalReceivables = sales

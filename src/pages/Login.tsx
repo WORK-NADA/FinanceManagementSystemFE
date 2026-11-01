@@ -233,7 +233,7 @@ export default function Login() {
 
           {/* Bottom Attribution Badge */}
           <div className="flex justify-center">
-            <DeveloperSignature className="bg-white/10 dark:bg-white/10 border-white/15 text-white shadow-md" />
+            <DeveloperSignature onDark />
           </div>
         </div>
       </div>

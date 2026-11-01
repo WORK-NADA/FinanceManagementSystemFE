@@ -624,8 +624,8 @@ export default function Dashboard() {
                       <span className={`text-xs font-bold tabular-nums ${isSale ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-slate-200'}`}>
                         {isSale ? `+${formatCurrency(act.amount)}` : `-${formatCurrency(act.amount)}`}
                       </span>
-                      <Badge variant={act.status === 'PAID' ? 'success' : act.status === 'PARTIALLY_PAID' ? 'warning' : 'default'} className="text-[9px] py-0 px-1.5">
-                        {act.status === 'PAID' ? 'Fully Paid' : act.status === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
+                      <Badge variant={(act.status === 'PAID' || act.status === 'COMPLETED') ? 'success' : act.status === 'PARTIALLY_PAID' ? 'warning' : 'default'} className="text-[9px] py-0 px-1.5">
+                        {(act.status === 'PAID' || act.status === 'COMPLETED') ? 'Fully Paid' : act.status === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
                       </Badge>
                     </div>
                   </div>
