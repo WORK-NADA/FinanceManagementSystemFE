@@ -127,10 +127,23 @@ export default function DashboardLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close menu on route changes
+  // Close menus and drawer on route changes
   useEffect(() => {
     setProfileMenuOpen(false);
+    setSidebarOpen(false);
   }, [location.pathname]);
+
+  // Lock body scroll when mobile sidebar drawer is open to prevent background bleed scrolling
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [sidebarOpen]);
 
   const handleLogout = () => {
     logout();
@@ -265,8 +278,8 @@ export default function DashboardLayout() {
     <div className="min-h-screen bg-[var(--color-surface-bg)]">
       {/* Mobile sidebar */}
       <div className={cn("fixed inset-0 z-50 lg:hidden", sidebarOpen ? "block" : "hidden")}>
-        <div className="fixed inset-0 bg-gray-900/80" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 w-72 bg-[var(--color-sidebar-bg)] p-6 transition-transform">
+        <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-xs transition-opacity" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-[var(--color-sidebar-bg)] p-5 sm:p-6 transition-transform shadow-2xl">
           <div className="flex items-center justify-between pb-4 border-b border-slate-800/70">
             <VyaparLogo
               size="sm"
@@ -280,13 +293,13 @@ export default function DashboardLayout() {
             />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors"
+              className="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-gray-800 transition-colors"
               aria-label="Close sidebar"
             >
               <X className="h-6 w-6" />
             </button>
           </div>
-          <nav className="mt-6 flex flex-col gap-1 h-[calc(100vh-120px)] overflow-y-auto pb-safe">
+          <nav className="mt-5 sm:mt-6 flex flex-col gap-1 h-[calc(100dvh-120px)] overflow-y-auto pb-safe touch-pan-y">
             {/* ── Section 1: Dashboard (Fixed Top) ── */}
             {fixedTop.map((item) => {
               const isActive = location.pathname === item.href;
@@ -328,59 +341,23 @@ export default function DashboardLayout() {
               )}
             </div>
 
-            {/* ── Section 2: Priority Tabs List (with Six-Dot Drag Handle) ── */}
-            <div
-              className="flex flex-col gap-1"
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-              }}
-              onDrop={(e) => {
-                if (e.target === e.currentTarget && draggedIndexRef.current !== null) {
-                  handleDrop(e, moveableTabs.length - 1);
-                }
-              }}
-            >
-              {moveableTabs.map((item, index) => {
+            {/* ── Section 2: Priority Tabs List (Mobile Touch-Optimized Navigation) ── */}
+            <div className="flex flex-col gap-1">
+              {moveableTabs.map((item) => {
                 const isActive = location.pathname === item.href;
-                const isBeingDragged = draggedIndex === index;
-                const isDragOver = dragOverIndex === index && draggedIndex !== index;
-                const isOverAbove = isDragOver && index < (draggedIndex ?? 0);
-                const isOverBelow = isDragOver && index > (draggedIndex ?? 0);
-
                 return (
-                  <div
+                  <NavLink
                     key={item.name}
-                    role="button"
-                    tabIndex={0}
-                    draggable={true}
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDrop={(e) => handleDrop(e, index)}
-                    onDragEnd={handleDragEnd}
-                    onClick={(e) => {
-                      handleTabClick(e, item.href);
-                      if (!isDraggingRef.current) setSidebarOpen(false);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSidebarOpen(false);
-                        navigate(item.href);
-                      }
-                    }}
+                    to={item.href}
+                    onClick={() => setSidebarOpen(false)}
                     className={cn(
-                      "group flex items-center min-h-[40px] rounded-xl px-3 py-2 text-sm font-medium transition-all active:scale-[0.98] select-none cursor-grab active:cursor-grabbing",
-                      isActive ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40" : "text-gray-300 hover:bg-gray-800 hover:text-white",
-                      isBeingDragged && "opacity-40 scale-[0.98] ring-1 ring-dashed ring-emerald-400",
-                      isOverAbove && "border-t-2 border-emerald-400 bg-emerald-950/30",
-                      isOverBelow && "border-b-2 border-emerald-400 bg-emerald-950/30"
+                      "group flex items-center min-h-[40px] rounded-xl px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]",
+                      isActive ? "bg-[var(--color-primary)] text-white shadow-md shadow-emerald-950/40" : "text-gray-300 hover:bg-gray-800 hover:text-white"
                     )}
                   >
-                    <item.icon className={cn("mr-2.5 h-5 w-5 flex-shrink-0 pointer-events-none", isActive ? "text-white" : "text-gray-400 group-hover:text-white")} />
-                    <GripVertical className="mr-1.5 h-4 w-4 text-slate-400 group-hover:text-emerald-300 shrink-0 pointer-events-none" aria-hidden="true" />
-                    <span className="truncate pointer-events-none">{item.name}</span>
-                  </div>
+                    <item.icon className={cn("mr-3 h-5 w-5 flex-shrink-0", isActive ? "text-white" : "text-gray-400 group-hover:text-white")} />
+                    <span className="truncate">{item.name}</span>
+                  </NavLink>
                 );
               })}
             </div>
@@ -805,7 +782,7 @@ export default function DashboardLayout() {
                 className="lg:hidden shrink-0"
                 onClick={() => navigate(defaultHome)}
               />
-              <div className="flex items-center gap-1.5 min-w-0 max-w-[130px] sm:max-w-[240px] md:max-w-md lg:hidden">
+              <div className="flex items-center gap-1.5 min-w-0 max-w-[105px] min-[360px]:max-w-[130px] sm:max-w-[240px] md:max-w-md lg:hidden">
                 <span className="text-gray-300 dark:text-slate-600 text-xs shrink-0">/</span>
                 <span className="font-semibold text-xs sm:text-sm text-gray-700 dark:text-slate-200 truncate">
                   {location.pathname === '/profile' 
