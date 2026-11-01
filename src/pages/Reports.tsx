@@ -487,7 +487,11 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
   const filteredSales = useMemo(() => {
     return sales.filter(s => {
       if (selectedCustomer && s.customerName !== selectedCustomer) return false;
-      if (selectedStatus && s.paymentStatus !== selectedStatus) return false;
+      if (selectedStatus) {
+        const isSelectedPaid = selectedStatus === 'COMPLETED' || selectedStatus === 'PAID';
+        const isItemPaid = s.paymentStatus === 'COMPLETED' || s.paymentStatus === 'PAID';
+        if (isSelectedPaid ? !isItemPaid : s.paymentStatus !== selectedStatus) return false;
+      }
       if (selectedMaterial && s.rawMaterial !== selectedMaterial) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -610,7 +614,7 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
             value={selectedStatus}
             onChange={setSelectedStatus}
             options={[
-              { value: 'PAID', label: 'Fully Paid' },
+              { value: 'COMPLETED', label: 'Fully Paid' },
               { value: 'PARTIALLY_PAID', label: 'Partially Paid' },
               { value: 'PENDING', label: 'Unpaid' },
             ]}
@@ -669,8 +673,8 @@ function SalesTab({ startDate, endDate }: { startDate: string; endDate: string }
                   <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{s.rawMaterial || '—'}</td>
                   <td className="px-4 py-3 tabular-nums font-semibold text-emerald-700 dark:text-emerald-400">{formatCurrency(s.totalAmount)}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={s.paymentStatus === 'PAID' ? 'success' : s.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
-                      {s.paymentStatus === 'PAID' ? 'Fully Paid' : s.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
+                    <Badge variant={(s.paymentStatus === 'PAID' || s.paymentStatus === 'COMPLETED') ? 'success' : s.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
+                      {(s.paymentStatus === 'PAID' || s.paymentStatus === 'COMPLETED') ? 'Fully Paid' : s.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
                     </Badge>
                   </td>
                 </tr>
@@ -720,7 +724,11 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
   const filteredPurchases = useMemo(() => {
     return purchases.filter(p => {
       if (selectedSupplier && p.supplierName !== selectedSupplier) return false;
-      if (selectedStatus && p.paymentStatus !== selectedStatus) return false;
+      if (selectedStatus) {
+        const isSelectedPaid = selectedStatus === 'COMPLETED' || selectedStatus === 'PAID';
+        const isItemPaid = p.paymentStatus === 'COMPLETED' || p.paymentStatus === 'PAID';
+        if (isSelectedPaid ? !isItemPaid : p.paymentStatus !== selectedStatus) return false;
+      }
       if (selectedMaterial && p.rawMaterial !== selectedMaterial) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -843,7 +851,7 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
             value={selectedStatus}
             onChange={setSelectedStatus}
             options={[
-              { value: 'PAID', label: 'Fully Paid' },
+              { value: 'COMPLETED', label: 'Fully Paid' },
               { value: 'PARTIALLY_PAID', label: 'Partially Paid' },
               { value: 'PENDING', label: 'Unpaid' },
             ]}
@@ -902,8 +910,8 @@ function PurchasesTab({ startDate, endDate }: { startDate: string; endDate: stri
                   <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-400">{p.rawMaterial || '—'}</td>
                   <td className="px-4 py-3 tabular-nums font-semibold text-rose-700 dark:text-rose-400">{formatCurrency(p.totalAmount)}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={p.paymentStatus === 'PAID' ? 'success' : p.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
-                      {p.paymentStatus === 'PAID' ? 'Fully Paid' : p.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
+                    <Badge variant={(p.paymentStatus === 'PAID' || p.paymentStatus === 'COMPLETED') ? 'success' : p.paymentStatus === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
+                      {(p.paymentStatus === 'PAID' || p.paymentStatus === 'COMPLETED') ? 'Fully Paid' : p.paymentStatus === 'PARTIALLY_PAID' ? 'Partially Paid' : 'Unpaid'}
                     </Badge>
                   </td>
                 </tr>
